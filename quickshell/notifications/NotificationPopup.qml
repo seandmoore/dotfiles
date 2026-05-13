@@ -42,7 +42,7 @@ FloatingWindow {
         color: Colors.surface0
         border.color: Colors.surface1
         border.width: 1
-        radius: 10
+        radius: 14
 
         ColumnLayout {
             id: contentCol

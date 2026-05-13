@@ -16,7 +16,7 @@ Item {
         id: bg
         anchors.fill: parent
         color: ma.containsMouse ? Colors.accentDim : "transparent"
-        radius: 10
+        radius: 12
         Behavior on color { ColorAnimation { duration: 120 } }
     }
 

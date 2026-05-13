@@ -47,7 +47,7 @@ FloatingWindow {
         color: Colors.base
         border.color: Colors.surface1
         border.width: 1
-        radius: 14
+        radius: 18
 
         ColumnLayout {
             anchors {
@@ -63,7 +63,7 @@ FloatingWindow {
                 color: Colors.surface0
                 border.color: searchField.activeFocus ? Colors.mauve : Colors.surface1
                 border.width: 1
-                radius: 10
+                radius: 12
 
                 Behavior on border.color { ColorAnimation { duration: 150 } }
 

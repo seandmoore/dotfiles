@@ -61,7 +61,7 @@ PanelWindow {
 
             Item { Layout.fillWidth: true }
 
-            // Right section — stats + media
+            // Right section — stats + media + theme toggle
             RowLayout {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: 16
@@ -72,6 +72,18 @@ PanelWindow {
                 }
 
                 SystemStats {
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                // Separator
+                Rectangle {
+                    width: 1
+                    height: 18
+                    color: Colors.surface1
+                    Layout.alignment: Qt.AlignVCenter
+                }
+
+                ThemeToggle {
                     Layout.alignment: Qt.AlignVCenter
                 }
             }
