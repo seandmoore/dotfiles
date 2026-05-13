@@ -15,9 +15,11 @@ else
 fi
 
 # ── Hyprland — update colors live ─────────────────────────────────────────────
+# Border colors (path unchanged between hyprlang and Lua configs)
 hyprctl keyword general:col.active_border   "$ACTIVE_BORDER"   2>/dev/null
 hyprctl keyword general:col.inactive_border "$INACTIVE_BORDER" 2>/dev/null
-hyprctl keyword decoration:col.shadow       "$SHADOW_COLOR"    2>/dev/null
+# Shadow color path changed in 0.55+ Lua config: decoration.shadow.color
+hyprctl keyword decoration:shadow:color     "$SHADOW_COLOR"    2>/dev/null
 
 # ── Kitty — write active color file and reload all instances ──────────────────
 KITTY_COLORS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"

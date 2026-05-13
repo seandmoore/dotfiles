@@ -6,7 +6,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin Mocha](https://github.
 
 | Component | Description |
 |-----------|-------------|
-| **Hyprland** | Dynamic tiling Wayland compositor — animations, borders, keybinds |
+| **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds |
 | **Quickshell** | Status bar, notifications, OSD overlays, app launcher |
 | **Hyprlock** | Lock screen with blurred background |
 | **Hypridle** | Idle daemon — dim → lock → suspend |
@@ -40,7 +40,7 @@ cd ~/.dotfiles
 
 # Hyprland
 mkdir -p ~/.config/hypr
-ln -sf ~/.dotfiles/hypr/hyprland.conf ~/.config/hypr/hyprland.conf
+ln -sf ~/.dotfiles/hypr/hyprland.lua  ~/.config/hypr/hyprland.lua
 ln -sf ~/.dotfiles/hypr/hyprpaper.conf ~/.config/hypr/hyprpaper.conf
 ln -sf ~/.dotfiles/hypr/hyprlock.conf  ~/.config/hypr/hyprlock.conf
 ln -sf ~/.dotfiles/hypr/hypridle.conf  ~/.config/hypr/hypridle.conf
