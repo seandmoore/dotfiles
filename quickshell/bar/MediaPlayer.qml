@@ -1,0 +1,69 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Services.Mpris
+import "../theme"
+
+RowLayout {
+    spacing: 6
+
+    property bool hasMedia: MprisController.players.length > 0
+    property var player: hasMedia ? MprisController.players[0] : null
+
+    // Prev
+    Text {
+        text: "󰒮"
+        color: Colors.subtext0
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 14
+        visible: parent.hasMedia
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: if (player) player.previous()
+        }
+    }
+
+    // Play/Pause
+    Text {
+        text: (player && player.playbackStatus === MprisPlaybackStatus.Playing) ? "󰏤" : "󰐊"
+        color: Colors.mauve
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 14
+        visible: parent.hasMedia
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: if (player) player.togglePlaying()
+        }
+    }
+
+    // Next
+    Text {
+        text: "󰒭"
+        color: Colors.subtext0
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 14
+        visible: parent.hasMedia
+
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: if (player) player.next()
+        }
+    }
+
+    // Track title
+    Text {
+        text: player ? (player.trackTitle || "Unknown Track") : ""
+        color: Colors.subtext1
+        font.family: "JetBrainsMono Nerd Font"
+        font.pixelSize: 11
+        visible: parent.hasMedia
+        elide: Text.ElideRight
+        maximumLineCount: 1
+        Layout.maximumWidth: 160
+    }
+}
