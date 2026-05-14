@@ -12,6 +12,34 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+
+-- MSI gaming monitor on DP-1
+-- 240 Hz, HDR (BT.2020 wide gamut + PQ transfer), 10-bit, VRR mode 3
+-- VRR modes: 0 = off | 1 = always | 2 = fullscreen only | 3 = fullscreen (content-type aware)
+-- NOTE: verify the resolution below matches your panel — common MSI QHD: 2560x1440
+--       run `hyprctl monitors` to see what Hyprland detects for DP-1
+hl.monitor({
+    output    = "DP-1",
+    mode      = "2560x1440@240",
+    position  = "0x0",
+    scale     = 1,
+
+    -- 10-bit colour depth is required for HDR
+    bitdepth  = 10,
+
+    -- cm = "hdr"  →  wide colour gamut (BT.2020 primaries) + HDR PQ transfer function
+    cm        = "hdr",
+
+    -- SDR app brightness/saturation inside HDR mode (1.0 = unchanged)
+    -- Raise sdrbrightness toward 1.5-2.0 if SDR content looks too dim on your panel
+    sdrbrightness  = 1.0,
+    sdrsaturation  = 1.0,
+
+    -- VRR mode 3: auto-enables adaptive sync for fullscreen game/video content
+    vrr       = 3,
+})
+
+-- Fallback rule for any other display plugged in
 hl.monitor({
     output   = "",
     mode     = "preferred",
