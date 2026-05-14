@@ -1,0 +1,3 @@
+OsdRoot OsdRoot.qml
+VolumeOsd VolumeOsd.qml
+BrightnessOsd BrightnessOsd.qml
