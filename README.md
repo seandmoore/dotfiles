@@ -1,4 +1,4 @@
-# draftworks
+# dotfiles
 
 A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/catppuccin/catppuccin).
 
