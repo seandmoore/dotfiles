@@ -59,6 +59,21 @@ ln -sf ~/.dotfiles/nvim/init.lua ~/.config/nvim/init.lua
 ln -sf ~/.dotfiles/nvim/lua     ~/.config/nvim/lua
 ```
 
+## Quick Install with Curl
+
+You can quickly install the dotfiles by running the following command, which downloads and executes the setup script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh | sh
+```
+
+This script will:
+- Ensure Git is installed.
+- Clone or update the dotfiles repository at `~/dotfiles`.
+- Provide further instructions for setting up configuration file links.
+
+For customizations, you can edit the `install.sh` script after installation.
+
 ## Keybinds (Hyprland)
 
 | Keys                  | Action                     |
