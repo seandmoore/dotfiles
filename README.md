@@ -4,18 +4,18 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 ## Components
 
-| Component | Description |
-|-----------|-------------|
-| **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds |
-| **Quickshell** | Status bar, notifications, OSD overlays, app launcher |
-| **Hyprlock** | Lock screen with blurred background |
-| **Hypridle** | Idle daemon — dim → lock → suspend |
-| **Kitty** | Terminal emulator with Catppuccin theme |
-| **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine |
+| Component       | Description                                                                 |
+|------------------|-----------------------------------------------------------------------------|
+| **Hyprland**     | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds. |
+| **Quickshell**   | Status bar, notifications, OSD overlays, app launcher.                    |
+| **Hyprlock**     | Lock screen with blurred background.                                       |
+| **Hypridle**     | Idle daemon — dim → lock → suspend.                                        |
+| **Kitty**        | Terminal emulator with Catppuccin theme.                                  |
+| **Neovim**       | Editor with lazy.nvim, Telescope, Treesitter, Lualine.                    |
 
 ## Screenshots
 
-> Coming soon
+> Screenshots coming soon.
 
 ## Prerequisites
 
@@ -24,15 +24,15 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 - [Hyprlock](https://github.com/hyprwm/hyprlock)
 - [Hypridle](https://github.com/hyprwm/hypridle)
 - [Kitty](https://sw.kovidgoyal.net/kitty/)
-- [Neovim](https://neovim.io/) >= 0.9
+- [Neovim](https://neovim.io/) (v0.9 or later)
 - A [Nerd Font](https://www.nerdfonts.com/) — JetBrainsMono Nerd Font recommended
-- `brightnessctl` — for brightness OSD
-- `pipewire` / `wireplumber` + `pactl` — for volume OSD
-- `hyprpaper` — for wallpaper
+- `brightnessctl` — For brightness OSD.
+- `pipewire` / `wireplumber` + `pactl` — For volume OSD.
+- `hyprpaper` — For wallpaper management.
 
 ## Installation
 
-Clone and symlink configs into place using [GNU Stow](https://www.gnu.org/software/stow/) or manually:
+Clone this repository and symlink the configuration files into place using [GNU Stow](https://www.gnu.org/software/stow/) or manually:
 
 ```bash
 git clone https://github.com/seandmoore/dotfiles ~/.dotfiles
@@ -61,19 +61,19 @@ ln -sf ~/.dotfiles/nvim/lua     ~/.config/nvim/lua
 
 ## Keybinds (Hyprland)
 
-| Keys | Action |
-|------|--------|
-| `SUPER + Return` | Open terminal (Kitty) |
-| `SUPER + SPACE` | Toggle app launcher |
-| `SUPER + Q` | Close window |
-| `SUPER + H/J/K/L` | Move focus left/down/up/right |
-| `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right |
-| `SUPER + 1-9` | Switch to workspace |
-| `SUPER + SHIFT + 1-9` | Move window to workspace |
-| `SUPER + F` | Toggle fullscreen |
-| `SUPER + V` | Toggle floating |
-| `SUPER + P` | Toggle pseudotile |
+| Keys                  | Action                     |
+|-----------------------|----------------------------|
+| `SUPER + Return`      | Open terminal (Kitty).     |
+| `SUPER + SPACE`       | Toggle app launcher.       |
+| `SUPER + Q`           | Close window.             |
+| `SUPER + H/J/K/L`     | Move focus left/down/up/right. |
+| `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right. |
+| `SUPER + 1-9`         | Switch to workspace.       |
+| `SUPER + SHIFT + 1-9` | Move window to workspace.  |
+| `SUPER + F`           | Toggle fullscreen mode.    |
+| `SUPER + V`           | Toggle floating mode.      |
+| `SUPER + P`           | Toggle pseudotile.        |
 
 ## License
 
-GPL-3.0 — see [LICENSE](LICENSE)
+Licensed under GPL-3.0. See [LICENSE](LICENSE) for details.
