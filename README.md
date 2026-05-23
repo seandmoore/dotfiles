@@ -35,7 +35,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 Clone and symlink configs into place using [GNU Stow](https://www.gnu.org/software/stow/) or manually:
 
 ```bash
-git clone https://github.com/seandmoore/draftworks ~/.dotfiles
+git clone https://github.com/seandmoore/dotfiles ~/.dotfiles
 cd ~/.dotfiles
 
 # Hyprland
