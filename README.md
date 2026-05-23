@@ -1,6 +1,6 @@
 # draftworks
 
-A stylish Hyprland dotfiles setup themed with [Catppuccin Mocha](https://github.com/catppuccin/catppuccin).
+A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/catppuccin/catppuccin).
 
 ## Components
 
@@ -10,7 +10,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin Mocha](https://github.
 | **Quickshell** | Status bar, notifications, OSD overlays, app launcher |
 | **Hyprlock** | Lock screen with blurred background |
 | **Hypridle** | Idle daemon — dim → lock → suspend |
-| **Kitty** | Terminal emulator with Catppuccin Mocha theme |
+| **Kitty** | Terminal emulator with Catppuccin theme |
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine |
 
 ## Screenshots
