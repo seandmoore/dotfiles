@@ -153,7 +153,6 @@ hl.animation({ leaf = "workspaces",  enabled = true, speed = 5,   bezier = "over
 
 hl.config({
     dwindle = {
-        pseudotile     = true,
         preserve_split = true,
     },
 })
@@ -298,10 +297,10 @@ hl.window_rule({ match = { title = "^Save As"            }, float = true })
 -- Kitty transparency
 hl.window_rule({
     match   = { class = "kitty" },
-    opacity = { active = 0.92, inactive = 0.85 },
+    opacity = "0.92 0.85",
 })
 
 -- Quickshell layer rules
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Blur/
 hl.layer_rule({ match = { namespace = "quickshell" }, blur        = true })
-hl.layer_rule({ match = { namespace = "quickshell" }, ignore_zero = true })
+hl.layer_rule({ match = { namespace = "quickshell" }, ignore_alpha = true })
