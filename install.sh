@@ -53,16 +53,33 @@ PACMAN_PKGS=(
     hyprpaper
     hyprlock
     hypridle
+    hyprpolkitagent
+    xdg-desktop-portal
+    xdg-desktop-portal-hyprland
+    xorg-xwayland
     kitty
     neovim
+    wl-clipboard
+    grim
+    slurp
     brightnessctl
     playerctl
+    pavucontrol
+    networkmanager
+    network-manager-applet
+    bluez
+    bluez-utils
+    blueman
     ranger
     firefox
     pipewire
     wireplumber
     pipewire-pulse
     inotify-tools
+    qt5-wayland
+    qt6-wayland
+    noto-fonts
+    noto-fonts-emoji
     ttf-jetbrains-mono-nerd
 )
 
@@ -166,6 +183,21 @@ else
     ok "active-colors.conf already exists — leaving it untouched"
 fi
 
+# ── Systemd user services ─────────────────────────────────────────────────────
+
+info "Enabling systemd user services ..."
+systemctl --user enable --now pipewire wireplumber pipewire-pulse \
+    || warn "Could not enable PipeWire services (may need an active user session)"
+systemctl --user enable --now xdg-desktop-portal xdg-desktop-portal-hyprland \
+    || warn "Could not enable XDG portal services"
+ok "Systemd user services enabled"
+
+# Enable bluetooth system service
+info "Enabling bluetooth ..."
+sudo systemctl enable --now bluetooth \
+    || warn "Could not enable bluetooth service"
+ok "Bluetooth enabled"
+
 # ── Font cache ────────────────────────────────────────────────────────────────
 
 info "Refreshing font cache ..."
@@ -180,8 +212,6 @@ printf '\n'
 printf '  Next steps:\n'
 printf '  1. Place a wallpaper at ~/.config/hypr/wallpaper.png\n'
 printf '     (hyprpaper.conf references this path)\n'
-printf '  2. Start a PipeWire session if not already running:\n'
-printf '       systemctl --user enable --now pipewire wireplumber\n'
-printf '  3. Run: Hyprland\n'
-printf '  4. Use the theme toggle button in the bar to switch Mocha <-> Latte\n'
+printf '  2. Run: Hyprland\n'
+printf '  3. Use the theme toggle button in the bar to switch Mocha <-> Latte\n'
 printf '\n'
