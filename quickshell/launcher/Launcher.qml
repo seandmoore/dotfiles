@@ -5,10 +5,12 @@ import Quickshell.Wayland
 import Quickshell.Io
 import "../theme"
 
-FloatingWindow {
+PanelWindow {
     id: root
 
-    anchors { fill: true }
+    anchors { top: true; bottom: true; left: true; right: true }
+    aboveWindows: true
+    focusable: true
     color: "transparent"
     visible: false
 

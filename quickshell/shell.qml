@@ -14,11 +14,9 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
-        PanelWindow {
+        Bar {
             required property var modelData
             screen: modelData
-
-            Bar { anchors.fill: parent }
         }
     }
 
