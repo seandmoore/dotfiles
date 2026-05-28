@@ -92,13 +92,18 @@ for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
     [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
 done
 
-# ── Flatpak — libadwaita color scheme ─────────────────────────────────────────
-# Theme colors: the local theme in ~/.local/share/themes/ is accessible to all
-# Flatpak apps via the global xdg-data/themes:ro override. The gsettings gtk-theme
-# change above propagates via the Settings portal and GTK4 reloads the theme live.
-# Color scheme (dark/light): propagates to running libadwaita Flatpak apps via
-# the Settings portal (org.gnome.desktop.interface color-scheme).
-# ADW_DEBUG_COLOR_SCHEME is an env-var fallback for apps launched after the switch.
-ADW_COLOR_SCHEME="$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)"
-flatpak override --user --env=ADW_DEBUG_COLOR_SCHEME="$ADW_COLOR_SCHEME" 2>/dev/null || true
+# ── Flatpak — restart running libadwaita apps ──────────────────────────────────
+# ADW_DEBUG_COLOR_SCHEME permanently overrides the portal for the process lifetime,
+# preventing live dark/light switching. We rely on the portal instead (no env var).
+# The @define-color palette in gtk.css only takes effect at launch, so running
+# libadwaita Flatpak apps must be restarted to pick up the new theme.
+flatpak list --app --columns=application 2>/dev/null | while read -r app; do
+    # Check if any process for this app is running
+    if pgrep -f "$app" > /dev/null 2>&1; then
+        pkill -f "$app" 2>/dev/null || true
+        sleep 0.5
+        flatpak run "$app" &>/dev/null &
+        disown
+    fi
+done
 

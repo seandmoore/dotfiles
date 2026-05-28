@@ -5,14 +5,7 @@ QtObject {
     // ── Theme state ────────────────────────────────────────────────────────────
     property bool darkMode: true
 
-    // Emitted by toggle() so listeners in the same component tree can
-    // run sync-theme.sh via their own Process objects
-    signal syncRequested(bool toMocha)
-
-    function toggle() {
-        darkMode = !darkMode
-        syncRequested(darkMode)
-    }
+    function toggle() { darkMode = !darkMode }
 
     // ── Catppuccin Mocha ───────────────────────────────────────────────────────
     readonly property var _mocha: ({

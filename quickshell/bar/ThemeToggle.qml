@@ -33,33 +33,27 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 150 } }
     }
 
+    // Mirror of AppMenuButton — use confirmed-working quickshell IPC path.
+    // setMocha/setLatte in shell.qml run sync-theme.sh via ipcSyncMocha/ipcSyncLatte.
+    Process {
+        id: ipcSetMocha
+        command: ["quickshell", "-c", "config", "ipc", "call", "theme", "setMocha"]
+    }
+    Process {
+        id: ipcSetLatte
+        command: ["quickshell", "-c", "config", "ipc", "call", "theme", "setLatte"]
+    }
+
     MouseArea {
         id: ma
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
 
-        // Raise icon above hover rect
-        onClicked: Colors.toggle()
-    }
-
-    // Process objects must live in the same component tree as the caller.
-    // Colors is a singleton but QuickShell creates one instance per component
-    // tree — Bar/ThemeToggle share one instance, shell.qml has another.
-    // Colors.syncRequested signal is caught here where Process works.
-    Process {
-        id: syncMocha
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
-    }
-    Process {
-        id: syncLatte
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
-    }
-    Connections {
-        target: Colors
-        function onSyncRequested(toMocha) {
-            if (toMocha) syncMocha.running = true
-            else syncLatte.running = true
+        onClicked: {
+            Colors.toggle()
+            if (Colors.darkMode) ipcSetMocha.running = true
+            else ipcSetLatte.running = true
         }
     }
 }
