@@ -56,6 +56,7 @@ PACMAN_PKGS=(
     hyprpolkitagent
     xdg-desktop-portal
     xdg-desktop-portal-hyprland
+    xdg-desktop-portal-gtk
     xorg-xwayland
     kitty
     neovim
@@ -186,6 +187,9 @@ make_link "$DOTFILES_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
 make_link "$DOTFILES_DIR/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
 make_link "$DOTFILES_DIR/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
 
+# XDG desktop portal — routes Settings portal to gtk so libadwaita apps get the correct color scheme
+make_link "$DOTFILES_DIR/xdg-desktop-portal/hyprland-portals.conf" "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf"
+
 # ── Bootstrap kitty active-colors.conf ────────────────────────────────────────
 # kitty.conf includes active-colors.conf at startup; sync-theme.sh manages it
 # at runtime by overwriting it. Must be a plain file, not a symlink.
@@ -202,7 +206,7 @@ fi
 info "Enabling systemd user services ..."
 systemctl --user enable --now pipewire wireplumber pipewire-pulse \
     || warn "Could not enable PipeWire services (may need an active user session)"
-systemctl --user enable --now xdg-desktop-portal xdg-desktop-portal-hyprland \
+systemctl --user enable --now xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
     || warn "Could not enable XDG portal services"
 ok "Systemd user services enabled"
 
