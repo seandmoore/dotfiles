@@ -63,7 +63,7 @@ hl.monitor({
 ---- MY PROGRAMS ----
 ---------------------
 
-local terminal = "kitty"
+local terminal = "env DRI_PRIME=0 kitty"
 local launcher = "qs -c config ipc call launcher toggle"
 
 
