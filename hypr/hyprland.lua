@@ -1,10 +1,21 @@
 -- ~/.config/hypr/hyprland.lua
--- Hyprland 0.55+ Lua configuration — Catppuccin Mocha
+-- Hyprland 0.55+ Lua configuration
 -- Refer to https://wiki.hypr.land/Configuring/Start/
 
--- Split into multiple files with require() for larger setups:
--- require("binds")
--- require("rules")
+-- Read persisted Catppuccin mode (written by sync-theme.sh)
+local function read_mode()
+    local f = io.open(os.getenv("HOME") .. "/.cache/catppuccin-mode", "r")
+    if not f then return "mocha" end
+    local m = f:read("*l"); f:close()
+    return (m == "latte") and "latte" or "mocha"
+end
+local mode = read_mode()
+
+local palette = {
+    mocha = { active = "rgba(cba6f7ff)", inactive = "rgba(45475aff)", shadow = "rgba(11111bcc)" },
+    latte = { active = "rgba(8839efff)", inactive = "rgba(bcc0ccff)", shadow = "rgba(dce0e8aa)" },
+}
+local pal = palette[mode]
 
 
 ------------------
@@ -53,15 +64,22 @@ hl.monitor({
 ---------------------
 
 local terminal = "kitty"
-local launcher = "qs ipc call launcher toggle"
+local launcher = "qs -c config ipc call launcher toggle"
 
 
 -----------------------------
 ---- ENVIRONMENT VARIABLES --
 -----------------------------
 
-hl.env("XCURSOR_SIZE",     "24")
-hl.env("HYPRCURSOR_SIZE",  "24")
+hl.env("XCURSOR_SIZE",          "24")
+hl.env("HYPRCURSOR_SIZE",       "24")
+
+-- Qt theming — use Kvantum style, configured via qt5ct/qt6ct
+hl.env("QT_QPA_PLATFORMTHEME",  "qt5ct")
+hl.env("QT_STYLE_OVERRIDE",     "kvantum")
+
+-- GTK theming — ensure apps pick up the correct icon theme
+hl.env("ICON_THEME",            "Papirus-Dark")
 
 
 -------------------
@@ -90,10 +108,9 @@ hl.config({
 
         border_size = 2,
 
-        -- Catppuccin Mocha — Mauve active, Surface1 inactive
         col = {
-            active_border   = "rgba(cba6f7ff)",
-            inactive_border = "rgba(45475aff)",
+            active_border   = pal.active,
+            inactive_border = pal.inactive,
         },
 
         resize_on_border = true,
@@ -112,7 +129,7 @@ hl.config({
             enabled      = true,
             range        = 24,
             render_power = 3,
-            color        = "rgba(11111bcc)",
+            color        = pal.shadow,
         },
 
         blur = {
@@ -210,7 +227,7 @@ local mainMod = "SUPER"
 hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(launcher))
 hl.bind(mainMod .. " + C",      hl.dsp.window.close())
-hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("hyprctl dispatch exit"))
+hl.bind(mainMod .. " + M",      hl.dsp.exit())
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(terminal .. " -e ranger"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
 
