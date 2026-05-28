@@ -78,6 +78,7 @@ PACMAN_PKGS=(
     inotify-tools
     qt5-wayland
     qt6-wayland
+    flatpak
     noto-fonts
     noto-fonts-emoji
     ttf-jetbrains-mono-nerd
@@ -146,6 +147,15 @@ else
     warn "Install them manually: yay -S ${AUR_PKGS[*]}"
 fi
 
+# ── Flatpak / Flathub ─────────────────────────────────────────────────────────
+
+if command -v flatpak &>/dev/null; then
+    info "Configuring Flatpak ..."
+    flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
+        || warn "Could not add Flathub remote (continuing)"
+    ok "Flathub remote ready"
+fi
+
 # ── Symlinks ───────────────────────────────────────────────────────────────────
 
 info "Creating config symlinks ..."
@@ -171,6 +181,10 @@ make_link "$DOTFILES_DIR/kitty/colors-latte.conf"  "$HOME/.config/kitty/colors-l
 # Neovim
 make_link "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 make_link "$DOTFILES_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
+
+# Qt theming (shortcut underlines off, Kvantum style, Papirus-Dark icons)
+make_link "$DOTFILES_DIR/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
+make_link "$DOTFILES_DIR/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
 
 # ── Bootstrap kitty active-colors.conf ────────────────────────────────────────
 # kitty.conf includes active-colors.conf at startup; sync-theme.sh manages it

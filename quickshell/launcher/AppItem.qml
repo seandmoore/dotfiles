@@ -26,18 +26,22 @@ Item {
         width: parent.width - 12
 
         // App icon
-        Image {
-            id: icon
+        Item {
             Layout.alignment: Qt.AlignHCenter
             width: 40
             height: 40
-            source: app.icon ? "image://xdg-icon/" + app.icon : ""
-            visible: status === Image.Ready
+
+            Image {
+                id: icon
+                anchors.fill: parent
+                source: app.icon ? "file://" + app.icon : ""
+                visible: status === Image.Ready
+            }
 
             // Letter fallback when icon unavailable
             Rectangle {
-                visible: icon.status !== Image.Ready
                 anchors.fill: parent
+                visible: icon.status !== Image.Ready
                 color: Colors.mauve
                 radius: 8
 
@@ -48,6 +52,9 @@ Item {
                     font.pixelSize: 18
                     font.weight: Font.Bold
                     font.family: "JetBrainsMono Nerd Font"
+                    font.underline: false
+                    font.italic: false
+                    font.strikeout: false
                 }
             }
         }
@@ -59,6 +66,9 @@ Item {
             text: app.name || ""
             color: Colors.text
             font.family: "JetBrainsMono Nerd Font"
+            font.underline: false
+            font.italic: false
+            font.strikeout: false
             font.pixelSize: 10
             horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight

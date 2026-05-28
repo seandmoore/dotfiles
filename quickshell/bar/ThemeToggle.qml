@@ -13,6 +13,9 @@ Item {
         text: Colors.darkMode ? "󰖔" : "󰖨"
         color: Colors.darkMode ? Colors.lavender : Colors.yellow
         font.family: "JetBrainsMono Nerd Font"
+        font.underline: false
+        font.italic: false
+        font.strikeout: false
         font.pixelSize: 15
 
         Behavior on color { ColorAnimation { duration: 250 } }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import "../theme"
 
 RowLayout {
@@ -33,7 +34,13 @@ RowLayout {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Hyprland.dispatch("workspace " + modelData.id)
+                onClicked: wsSwitcher.running = true
+            }
+
+            Process {
+                id: wsSwitcher
+                command: ["hyprctl", "eval", "hl.dsp.focus({workspace=" + modelData.id + "})"]
+                running: false
             }
         }
     }

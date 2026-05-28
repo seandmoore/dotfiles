@@ -73,6 +73,9 @@ PanelWindow {
                 text: root.brightness >= 70 ? "󰃠" : root.brightness >= 30 ? "󰃟" : "󰃞"
                 color: Colors.yellow
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 18
             }
 
@@ -97,6 +100,9 @@ PanelWindow {
                 text: root.brightness + "%"
                 color: Colors.subtext1
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 12
                 Layout.minimumWidth: 36
                 horizontalAlignment: Text.AlignRight

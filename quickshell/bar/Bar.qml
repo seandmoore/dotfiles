@@ -13,31 +13,30 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: 36
+    implicitHeight: 60
     color: "transparent"
     exclusiveZone: height
 
-    // Main bar background
+    // Main bar background — floating + rounded
     Rectangle {
-        anchors.fill: parent
+        anchors {
+            top: parent.top
+            topMargin: 16
+            left: parent.left
+            leftMargin: 16
+            right: parent.right
+            rightMargin: 16
+        }
+        height: 44
+        radius: 22
         color: Qt.rgba(
             Colors.base.r,
             Colors.base.g,
             Colors.base.b,
             0.92
         )
-
-        // Bottom accent line
-        Rectangle {
-            anchors {
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
-            height: 1
-            color: Colors.mauve
-            opacity: 0.6
-        }
+        border.color: Colors.surface1
+        border.width: 1
 
         RowLayout {
             anchors {

@@ -76,6 +76,9 @@ PanelWindow {
                         font.pixelSize: 13
                         font.weight: Font.Bold
                         font.family: "JetBrainsMono Nerd Font"
+                        font.underline: false
+                        font.italic: false
+                        font.strikeout: false
                     }
                 }
 
@@ -83,6 +86,9 @@ PanelWindow {
                     text: notification.appName || ""
                     color: Colors.subtext0
                     font.family: "JetBrainsMono Nerd Font"
+                    font.underline: false
+                    font.italic: false
+                    font.strikeout: false
                     font.pixelSize: 11
                     Layout.fillWidth: true
                     elide: Text.ElideRight
@@ -93,6 +99,9 @@ PanelWindow {
                     color: Colors.overlay1
                     font.pixelSize: 11
                     font.family: "JetBrainsMono Nerd Font"
+                    font.underline: false
+                    font.italic: false
+                    font.strikeout: false
 
                     MouseArea {
                         anchors.fill: parent
@@ -110,6 +119,9 @@ PanelWindow {
                 text: notification.summary || ""
                 color: Colors.text
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 13
                 font.weight: Font.SemiBold
                 Layout.fillWidth: true
@@ -122,6 +134,9 @@ PanelWindow {
                 text: notification.body || ""
                 color: Colors.subtext1
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 11
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap

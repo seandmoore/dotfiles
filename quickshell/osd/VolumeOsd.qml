@@ -75,6 +75,9 @@ PanelWindow {
                 text: root.muted ? "󰖁" : root.volume >= 50 ? "󰕾" : "󰖀"
                 color: root.muted ? Colors.red : Colors.blue
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 18
             }
 
@@ -99,6 +102,9 @@ PanelWindow {
                 text: root.volume + "%"
                 color: Colors.subtext1
                 font.family: "JetBrainsMono Nerd Font"
+                font.underline: false
+                font.italic: false
+                font.strikeout: false
                 font.pixelSize: 12
                 Layout.minimumWidth: 36
                 horizontalAlignment: Text.AlignRight

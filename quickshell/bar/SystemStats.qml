@@ -16,6 +16,9 @@ RowLayout {
             text: "󰍛"
             color: cpuValue > 80 ? Colors.red : cpuValue > 50 ? Colors.yellow : Colors.green
             font.family: "JetBrainsMono Nerd Font"
+            font.underline: false
+            font.italic: false
+            font.strikeout: false
             font.pixelSize: 13
         }
         Text {
@@ -23,6 +26,9 @@ RowLayout {
             text: cpuValue + "%"
             color: Colors.subtext1
             font.family: "JetBrainsMono Nerd Font"
+            font.underline: false
+            font.italic: false
+            font.strikeout: false
             font.pixelSize: 11
         }
     }
@@ -35,6 +41,9 @@ RowLayout {
             text: "󰧑"
             color: ramPercent > 85 ? Colors.red : ramPercent > 60 ? Colors.yellow : Colors.blue
             font.family: "JetBrainsMono Nerd Font"
+            font.underline: false
+            font.italic: false
+            font.strikeout: false
             font.pixelSize: 13
         }
         Text {
@@ -42,6 +51,9 @@ RowLayout {
             text: ramUsed + " GB"
             color: Colors.subtext1
             font.family: "JetBrainsMono Nerd Font"
+            font.underline: false
+            font.italic: false
+            font.strikeout: false
             font.pixelSize: 11
         }
     }

@@ -21,6 +21,11 @@ PanelWindow {
         function toggle() { root.visible = !root.visible }
     }
 
+    Shortcut {
+        sequence: "Escape"
+        onActivated: root.visible = false
+    }
+
     onVisibleChanged: {
         if (visible) {
             searchField.text = ""
@@ -82,6 +87,9 @@ PanelWindow {
                         text: ""
                         color: Colors.overlay0
                         font.family: "JetBrainsMono Nerd Font"
+                        font.underline: false
+                        font.italic: false
+                        font.strikeout: false
                         font.pixelSize: 16
                     }
 
@@ -90,6 +98,9 @@ PanelWindow {
                         Layout.fillWidth: true
                         color: Colors.text
                         font.family: "JetBrainsMono Nerd Font"
+                        font.underline: false
+                        font.italic: false
+                        font.strikeout: false
                         font.pixelSize: 14
                         selectionColor: Colors.mauve
                         selectedTextColor: Colors.base
@@ -112,7 +123,7 @@ PanelWindow {
                 cellWidth: 100
                 cellHeight: 104
 
-                model: appsModel
+                model: appsModel.filteredApps
 
                 delegate: AppItem {
                     required property var modelData
@@ -165,20 +176,47 @@ PanelWindow {
                 const cmd = app.exec
                     .replace(/%[fFuUdDnNickvm]/g, "")
                     .trim()
-                Quickshell.exec(["bash", "-c", cmd + " &"])
+                launchProcess.command = ["bash", "-c", "nohup " + cmd + " &>/dev/null &"]
+                launchProcess.running = true
             }
         }
+    }
+
+    Process {
+        id: launchProcess
+        running: false
     }
 
     // Parse .desktop files
     Process {
         id: appLoader
         command: ["bash", "-c",
-            "find /usr/share/applications ~/.local/share/applications -name '*.desktop' 2>/dev/null | " +
-            "xargs -I{} awk -F= 'BEGIN{f=\"{}\"; n=\"\"; e=\"\"; i=\"\"; nt=0} " +
-            "/\\[Desktop Entry\\]/{nt=1} nt && /^Name=/{n=$2} nt && /^Exec=/{e=$2} " +
-            "nt && /^Icon=/{i=$2} nt && /^NoDisplay=true/{nt=-1} " +
-            "END{if(nt==1 && n!=\"\" && e!=\"\") print n\"|\"e\"|\"i}' {} | sort -u"]
+            "find /usr/share/applications ~/.local/share/applications " +
+            "/var/lib/flatpak/exports/share/applications " +
+            "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/applications " +
+            "-name '*.desktop' 2>/dev/null | " +
+            "xargs -I{} awk 'BEGIN{f=\"{}\"; n=\"\"; e=\"\"; i=\"\"; nt=0} " +
+            "/\\[Desktop Entry\\]/{nt=1} " +
+            "nt && /^Name=/{n=substr($0,index($0,\"=\")+1)} " +
+            "nt && /^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
+            "nt && /^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
+            "nt && /^NoDisplay=true/{nt=-1} " +
+            "END{if(nt==1 && n!=\"\" && e!=\"\") print n\"|\"e\"|\"i}' {} | sort -u | " +
+            "while IFS='|' read -r name exec icon; do " +
+            "  resolved=''; " +
+            "  if [ -n \"$icon\" ]; then " +
+            "    case \"$icon\" in /*) resolved=\"$icon\" ;; " +
+            "    *) resolved=$(find " +
+            "/usr/share/icons/Papirus-Dark/48x48 /usr/share/icons/Papirus/48x48 " +
+            "/usr/share/icons/hicolor/48x48 /usr/share/icons/hicolor/scalable " +
+            "/var/lib/flatpak/exports/share/icons " +
+            "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/icons " +
+            "/usr/share/pixmaps " +
+            "-name \"${icon}.svg\" -o -name \"${icon}.png\" 2>/dev/null | head -1) ;; " +
+            "    esac; " +
+            "  fi; " +
+            "  echo \"${name}|${exec}|${resolved}\"; " +
+            "done"]
         running: false
 
         property var parsed: []
