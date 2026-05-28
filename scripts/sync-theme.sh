@@ -83,6 +83,18 @@ gsettings set org.gnome.desktop.interface cursor-theme     "$CURSOR_THEME"  2>/d
 gsettings set org.gnome.desktop.interface color-scheme     \
     "$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)" 2>/dev/null || true
 
+# ── Wayland cursor theme (XCURSOR_THEME env var) ────────────────────────────────
+export XCURSOR_THEME="$CURSOR_THEME"
+export XCURSOR_SIZE=24
+
+# Update user-level default cursor theme (~/.local/share/icons/default/index.theme)
+# This takes precedence over system defaults and doesn't require sudo
+mkdir -p "$HOME/.local/share/icons/default"
+cat > "$HOME/.local/share/icons/default/index.theme" << CURSOREOF
+[Icon Theme]
+Inherits=$CURSOR_THEME
+CURSOREOF
+
 # ── Kvantum ────────────────────────────────────────────────────────────────────
 KVANTUM_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"
 sed -i "s/^theme=.*/theme=$KVANTUM_THEME/" "$KVANTUM_CFG"
