@@ -13,7 +13,7 @@ PanelWindow {
         right: true
     }
 
-    height: 36
+    implicitHeight: 36
     color: "transparent"
     exclusiveZone: height
 

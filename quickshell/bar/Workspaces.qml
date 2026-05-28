@@ -19,10 +19,10 @@ RowLayout {
             Rectangle {
                 id: dot
                 anchors.centerIn: parent
-                width: modelData.id === Hyprland.focusedWorkspace.id ? 10 : 7
+                width: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id ? 10 : 7
                 height: width
                 radius: width / 2
-                color: modelData.id === Hyprland.focusedWorkspace.id
+                color: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id
                     ? Colors.mauve
                     : (modelData.windows > 0 ? Colors.overlay1 : Colors.surface1)
 

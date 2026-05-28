@@ -5,6 +5,7 @@ import Quickshell.Io
 import "../theme"
 
 RowLayout {
+    id: root
     spacing: 14
 
     // CPU
@@ -65,12 +66,12 @@ RowLayout {
                 const nums = parts.slice(1).map(Number)
                 const idle = nums[3] + nums[4]
                 const total = nums.reduce((a, b) => a + b, 0)
-                const dIdle  = idle  - parent._prevIdle
-                const dTotal = total - parent._prevTotal
+                const dIdle  = idle  - root._prevIdle
+                const dTotal = total - root._prevTotal
                 if (dTotal > 0)
                     cpuValue = Math.round((1 - dIdle / dTotal) * 100)
-                parent._prevIdle  = idle
-                parent._prevTotal = total
+                root._prevIdle  = idle
+                root._prevTotal = total
             }
         }
     }

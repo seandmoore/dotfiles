@@ -7,8 +7,8 @@ import "../theme"
 RowLayout {
     spacing: 6
 
-    property bool hasMedia: MprisController.players.length > 0
-    property var player: hasMedia ? MprisController.players[0] : null
+    property bool hasMedia: Mpris.players.length > 0
+    property var player: hasMedia ? Mpris.players[0] : null
 
     // Prev
     Text {
@@ -27,7 +27,7 @@ RowLayout {
 
     // Play/Pause
     Text {
-        text: (player && player.playbackStatus === MprisPlaybackStatus.Playing) ? "󰏤" : "󰐊"
+        text: (player && player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
         color: Colors.mauve
         font.family: "JetBrainsMono Nerd Font"
         font.pixelSize: 14

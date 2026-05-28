@@ -10,8 +10,8 @@ PanelWindow {
     anchors.bottom: true
     margins.bottom: 80
 
-    width: 300
-    height: 56
+    implicitWidth: 300
+    implicitHeight: 56
     color: "transparent"
 
     visible: false
