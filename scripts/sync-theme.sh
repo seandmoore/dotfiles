@@ -80,21 +80,24 @@ for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
     [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
 done
 
-# ── Flatpak — keep GTK theme and libadwaita color scheme in sync ───────────────
-# Flatpak redirects XDG_CONFIG_HOME to a per-app dir (~/.var/app/<id>/config),
-# so GTK4 reads gtk.css from there, not from ~/.config/gtk-4.0/.
-# Deploy the CSS to every installed Flatpak app's per-app config dir.
+# ── Flatpak — libadwaita color scheme + catppuccin CSS ────────────────────────
+# Two paths for gtk.css:
+#   1. ~/.config/gtk-4.0/gtk.css — bind-mounted into sandboxes that have the
+#      xdg-config/gtk-4.0 filesystem permission (e.g. Mission Center). GTK4
+#      hot-reloads CSS on file change, so running apps pick this up immediately.
+#   2. ~/.var/app/<id>/config/gtk-4.0/gtk.css — fallback for apps without that
+#      permission; their sandbox reads XDG_CONFIG_HOME/gtk-4.0/gtk.css from the
+#      per-app dir instead.
+# Color scheme: the host gsettings change above propagates to all running
+# libadwaita Flatpak apps via the org.freedesktop.portal.Settings portal.
+# ADW_DEBUG_COLOR_SCHEME is an env-var fallback for apps started after the switch.
+# Do NOT set GTK_THEME in Flatpak — a missing theme causes GTK4 to fall back to
+# legacy Adwaita CSS which overrides libadwaita's own modern stylesheet.
 ADW_COLOR_SCHEME="$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)"
-# Do NOT set GTK_THEME in Flatpak — if the theme isn't in the sandbox, GTK4 falls
-# back to legacy Adwaita which overrides libadwaita's own modern stylesheet
 flatpak override --user --env=ADW_DEBUG_COLOR_SCHEME="$ADW_COLOR_SCHEME" 2>/dev/null || true
 flatpak list --app --columns=application 2>/dev/null | while read -r app; do
     app_gtk4_dir="$HOME/.var/app/$app/config/gtk-4.0"
     mkdir -p "$app_gtk4_dir"
     cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$app_gtk4_dir/gtk.css"
-    # Set color-scheme in each app's in-sandbox dconf — ADW_DEBUG_COLOR_SCHEME
-    # is not reliable; the sandbox dconf is what libadwaita actually reads
-    flatpak run --command=gsettings "$app" set org.gnome.desktop.interface \
-        color-scheme "$ADW_COLOR_SCHEME" 2>/dev/null || true
 done
 
