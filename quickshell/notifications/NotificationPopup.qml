@@ -10,8 +10,8 @@ PanelWindow {
 
     required property Notification notification
 
-    property int timeout: notification.expireTimeout > 0
-        ? notification.expireTimeout
+    property int timeout: notification
+        ? (notification.expireTimeout > 0 ? notification.expireTimeout : 5000)
         : 5000
 
     // Stack from top-right, 12px from screen edge
@@ -23,8 +23,8 @@ PanelWindow {
 
     property int stackIndex: 0
 
-    width: 360
-    height: contentCol.implicitHeight + 24
+    implicitWidth: 360
+    implicitHeight: contentCol.implicitHeight + 24
     color: "transparent"
 
     // Background card
@@ -71,7 +71,7 @@ PanelWindow {
 
                     Text {
                         anchors.centerIn: parent
-                        text: notification.appName ? notification.appName[0].toUpperCase() : "?"
+                        text: (notification && notification.appName) ? notification.appName[0].toUpperCase() : "?"
                         color: Colors.base
                         font.pixelSize: 13
                         font.weight: Font.Bold
@@ -83,7 +83,7 @@ PanelWindow {
                 }
 
                 Text {
-                    text: notification.appName || ""
+                    text: (notification && notification.appName) ? notification.appName : ""
                     color: Colors.subtext0
                     font.family: "JetBrainsMono Nerd Font"
                     font.underline: false
@@ -107,7 +107,7 @@ PanelWindow {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            notification.dismiss()
+                            if (notification) notification.dismiss()
                             root.destroy()
                         }
                     }
@@ -116,14 +116,14 @@ PanelWindow {
 
             // Title
             Text {
-                text: notification.summary || ""
+                text: (notification && notification.summary) ? notification.summary : ""
                 color: Colors.text
                 font.family: "JetBrainsMono Nerd Font"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false
                 font.pixelSize: 13
-                font.weight: Font.SemiBold
+                font.weight: Font.Bold
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
                 visible: text !== ""
@@ -131,7 +131,7 @@ PanelWindow {
 
             // Body
             Text {
-                text: notification.body || ""
+                text: (notification && notification.body) ? notification.body : ""
                 color: Colors.subtext1
                 font.family: "JetBrainsMono Nerd Font"
                 font.underline: false
@@ -147,6 +147,7 @@ PanelWindow {
 
             // Timeout progress bar
             Rectangle {
+                id: progressTrack
                 Layout.fillWidth: true
                 height: 3
                 color: Colors.surface1
@@ -155,17 +156,17 @@ PanelWindow {
                 Rectangle {
                     id: progressBar
                     height: parent.height
-                    width: parent.width
+                    width: progressTrack.width
                     radius: 2
                     color: Colors.mauve
 
                     NumberAnimation on width {
-                        from: parent.parent.width
+                        from: progressTrack.width
                         to: 0
                         duration: root.timeout
                         running: true
                         onFinished: {
-                            notification.dismiss()
+                            if (notification) notification.dismiss()
                             root.destroy()
                         }
                     }
