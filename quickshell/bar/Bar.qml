@@ -69,6 +69,7 @@ PanelWindow {
 
             Workspaces {
                 Layout.alignment: Qt.AlignVCenter
+                screenName: root.screen ? root.screen.name : ""
             }
 
             Item { Layout.fillWidth: true }

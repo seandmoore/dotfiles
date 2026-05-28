@@ -11,6 +11,8 @@ RowLayout {
     opacity: 1
     scale: 1
 
+    property string screenName: ""
+
     Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
     Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
 
@@ -26,6 +28,7 @@ RowLayout {
 
         delegate: Item {
             required property var modelData
+            visible: !root.screenName || (modelData.monitor && modelData.monitor.name === root.screenName)
             width: 10
             height: 10
             Layout.alignment: Qt.AlignVCenter

@@ -288,6 +288,16 @@ hl.bind("Print",         hl.dsp.exec_cmd("grimblast copy area"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd("grimblast copy screen"))
 
 
+--------------------
+---- WORKSPACES ----
+--------------------
+
+-- Keep workspaces 1-9 alive even when empty
+for i = 1, 9 do
+    hl.workspace_rule({ workspace = tostring(i), persistent = true })
+end
+
+
 --------------------------------
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
