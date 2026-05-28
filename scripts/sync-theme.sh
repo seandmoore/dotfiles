@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-theme.sh — propagate Catppuccin theme switch to external apps
+# sync-theme.sh — propagate Catppuccin theme switch to all apps
 # Usage: sync-theme.sh [mocha|latte]
 
 MODE="${1:-mocha}"
@@ -8,29 +8,78 @@ if [[ "$MODE" == "latte" ]]; then
     ACTIVE_BORDER="rgba(8839efff)"
     INACTIVE_BORDER="rgba(bcc0ccff)"
     SHADOW_COLOR="rgba(dce0e8aa)"
+    GTK_THEME="catppuccin-latte-mauve-standard+default"
+    KVANTUM_THEME="catppuccin-latte-mauve"
+    ICON_THEME="Papirus"
+    PREFER_DARK="0"
 else
     ACTIVE_BORDER="rgba(cba6f7ff)"
     INACTIVE_BORDER="rgba(45475aff)"
     SHADOW_COLOR="rgba(11111bcc)"
+    GTK_THEME="catppuccin-mocha-mauve-standard+default"
+    KVANTUM_THEME="catppuccin-mocha-mauve"
+    ICON_THEME="Papirus-Dark"
+    PREFER_DARK="1"
 fi
 
-# ── Hyprland — update colors live ─────────────────────────────────────────────
-# Border colors (path unchanged between hyprlang and Lua configs)
-hyprctl keyword general:col.active_border   "$ACTIVE_BORDER"   2>/dev/null
-hyprctl keyword general:col.inactive_border "$INACTIVE_BORDER" 2>/dev/null
-# Shadow color path changed in 0.55+ Lua config: decoration.shadow.color
-hyprctl keyword decoration:shadow:color     "$SHADOW_COLOR"    2>/dev/null
+# ── Persist selection (before Hyprland reload so Lua reads the new value) ──────
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}"
+echo "$MODE" > "${XDG_CACHE_HOME:-$HOME/.cache}/catppuccin-mode"
 
-# ── Kitty — write active color file and reload all instances ──────────────────
+# ── Hyprland — reload so Lua config re-reads the cache file ────────────────────
+hyprctl reload 2>/dev/null || true
+
+# ── Kitty ──────────────────────────────────────────────────────────────────────
 KITTY_COLORS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/kitty"
-ACTIVE_COLORS="$KITTY_COLORS_DIR/active-colors.conf"
-
 if [[ -f "$KITTY_COLORS_DIR/colors-$MODE.conf" ]]; then
-    cp "$KITTY_COLORS_DIR/colors-$MODE.conf" "$ACTIVE_COLORS"
-    # SIGUSR1 causes kitty to reload its config
+    cp "$KITTY_COLORS_DIR/colors-$MODE.conf" "$KITTY_COLORS_DIR/active-colors.conf"
     pkill -SIGUSR1 -x kitty 2>/dev/null || true
 fi
 
-# ── Persist selection ─────────────────────────────────────────────────────────
-mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}"
-echo "$MODE" > "${XDG_CACHE_HOME:-$HOME/.cache}/catppuccin-mode"
+# ── GTK3 settings ──────────────────────────────────────────────────────────────
+GTK3_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini"
+sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK3_SETTINGS"
+sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK3_SETTINGS"
+sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK3_SETTINGS"
+
+# ── GTK4 settings ──────────────────────────────────────────────────────────────
+GTK4_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/settings.ini"
+sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK4_SETTINGS"
+sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK4_SETTINGS"
+sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK4_SETTINGS"
+
+# ── GTK4 / libadwaita CSS (symlink swap) ───────────────────────────────────────
+GTK4_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
+THEME_DIR="/usr/share/themes/${GTK_THEME}/gtk-4.0"
+if [[ -d "$THEME_DIR" ]]; then
+    ln -sf "$THEME_DIR/gtk.css"      "$GTK4_DIR/gtk.css"
+    ln -sf "$THEME_DIR/gtk-dark.css" "$GTK4_DIR/gtk-dark.css"
+    rm -rf "$GTK4_DIR/assets"
+    ln -sf "$THEME_DIR/assets"       "$GTK4_DIR/assets"
+fi
+
+# ── gsettings (running GNOME/GTK apps pick this up live) ───────────────────────
+gsettings set org.gnome.desktop.interface gtk-theme        "$GTK_THEME"     2>/dev/null || true
+gsettings set org.gnome.desktop.interface icon-theme       "$ICON_THEME"    2>/dev/null || true
+gsettings set org.gnome.desktop.interface color-scheme     \
+    "$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)" 2>/dev/null || true
+
+# ── Kvantum ────────────────────────────────────────────────────────────────────
+KVANTUM_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"
+sed -i "s/^theme=.*/theme=$KVANTUM_THEME/" "$KVANTUM_CFG"
+
+# ── kdeglobals (Qt icon theme) ─────────────────────────────────────────────────
+KDEGLOBALS="${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals"
+sed -i "s/^Theme=.*/Theme=$ICON_THEME/" "$KDEGLOBALS" 2>/dev/null || true
+
+# ── qt5ct / qt6ct icon theme ───────────────────────────────────────────────────
+for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
+           "${XDG_CONFIG_HOME:-$HOME/.config}/qt6ct/qt6ct.conf"; do
+    [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
+done
+
+# ── Flatpak — keep GTK theme and libadwaita color scheme in sync ───────────────
+ADW_COLOR_SCHEME="$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)"
+flatpak override --user --env=GTK_THEME="$GTK_THEME" 2>/dev/null || true
+flatpak override --user --env=ADW_DEBUG_COLOR_SCHEME="$ADW_COLOR_SCHEME" 2>/dev/null || true
+
