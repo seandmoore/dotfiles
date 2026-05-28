@@ -12,7 +12,7 @@ if [[ "$MODE" == "latte" ]]; then
     GTK_THEME="catppuccin-latte-mauve-standard+default"
     KVANTUM_THEME="catppuccin-latte-mauve"
     ICON_THEME="Papirus"
-    CURSOR_THEME="Catppuccin-Latte-Mauve"
+    CURSOR_THEME="catppuccin-latte-mauve-cursors"
     PREFER_DARK="0"
 else
     ACTIVE_BORDER="rgba(cba6f7ff)"
@@ -21,7 +21,7 @@ else
     GTK_THEME="catppuccin-mocha-mauve-standard+default"
     KVANTUM_THEME="catppuccin-mocha-mauve"
     ICON_THEME="Papirus-Dark"
-    CURSOR_THEME="Catppuccin-Mocha-Mauve"
+    CURSOR_THEME="catppuccin-mocha-mauve-cursors"
     PREFER_DARK="1"
 fi
 
@@ -43,12 +43,14 @@ fi
 GTK3_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini"
 sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK3_SETTINGS"
 sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK3_SETTINGS"
+sed -i "s/^gtk-cursor-theme-name = .*/gtk-cursor-theme-name = $CURSOR_THEME/" "$GTK3_SETTINGS"
 sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK3_SETTINGS"
 
 # ── GTK4 settings ──────────────────────────────────────────────────────────────
 GTK4_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/settings.ini"
 sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK4_SETTINGS"
 sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK4_SETTINGS"
+sed -i "s/^gtk-cursor-theme-name = .*/gtk-cursor-theme-name = $CURSOR_THEME/" "$GTK4_SETTINGS"
 sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK4_SETTINGS"
 
 # ── GTK4 / libadwaita CSS ──────────────────────────────────────────────────────
