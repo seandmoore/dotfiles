@@ -46,7 +46,13 @@ PanelWindow {
             }
             spacing: 0
 
-            // Left section — workspaces
+            // Left section — app menu + workspaces
+            AppMenuButton {
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            Item { implicitWidth: 8 }
+
             Workspaces {
                 Layout.alignment: Qt.AlignVCenter
             }

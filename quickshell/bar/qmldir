@@ -1,3 +1,4 @@
+AppMenuButton AppMenuButton.qml
 Bar Bar.qml
 Clock Clock.qml
 MediaPlayer MediaPlayer.qml
