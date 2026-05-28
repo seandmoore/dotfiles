@@ -85,7 +85,8 @@ done
 # so GTK4 reads gtk.css from there, not from ~/.config/gtk-4.0/.
 # Deploy the CSS to every installed Flatpak app's per-app config dir.
 ADW_COLOR_SCHEME="$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)"
-flatpak override --user --env=GTK_THEME="$GTK_THEME" 2>/dev/null || true
+# Do NOT set GTK_THEME in Flatpak — if the theme isn't in the sandbox, GTK4 falls
+# back to legacy Adwaita which overrides libadwaita's own modern stylesheet
 flatpak override --user --env=ADW_DEBUG_COLOR_SCHEME="$ADW_COLOR_SCHEME" 2>/dev/null || true
 flatpak list --app --columns=application 2>/dev/null | while read -r app; do
     app_gtk4_dir="$HOME/.var/app/$app/config/gtk-4.0"
