@@ -45,6 +45,8 @@ hl.monitor({
     -- Raise sdrbrightness toward 1.5-2.0 if SDR content looks too dim on your panel
     sdrbrightness  = 1.0,
     sdrsaturation  = 1.0,
+    sdr_min_luminance = 0,
+    sdr_max_luminance = 1000,
 
     -- VRR mode 3: auto-enables adaptive sync for fullscreen game/video content
     vrr       = 3,
