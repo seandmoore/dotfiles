@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell.Io
 import "../theme"
 
 Item {
@@ -40,5 +41,25 @@ Item {
 
         // Raise icon above hover rect
         onClicked: Colors.toggle()
+    }
+
+    // Process objects must live in the same component tree as the caller.
+    // Colors is a singleton but QuickShell creates one instance per component
+    // tree — Bar/ThemeToggle share one instance, shell.qml has another.
+    // Colors.syncRequested signal is caught here where Process works.
+    Process {
+        id: syncMocha
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
+    }
+    Process {
+        id: syncLatte
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
+    }
+    Connections {
+        target: Colors
+        function onSyncRequested(toMocha) {
+            if (toMocha) syncMocha.running = true
+            else syncLatte.running = true
+        }
     }
 }

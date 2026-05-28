@@ -1,24 +1,17 @@
 pragma Singleton
 import QtQuick
-import Quickshell.Io
 
 QtObject {
     // ── Theme state ────────────────────────────────────────────────────────────
     property bool darkMode: true
 
-    // Pre-declared processes — dynamic command assignment doesn't work in
-    // QuickShell's Process type (property batch fires running before command applies)
-    property var _syncMocha: Process {
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
-    }
-    property var _syncLatte: Process {
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
-    }
+    // Emitted by toggle() so listeners in the same component tree can
+    // run sync-theme.sh via their own Process objects
+    signal syncRequested(bool toMocha)
 
     function toggle() {
         darkMode = !darkMode
-        if (darkMode) _syncMocha.running = true
-        else _syncLatte.running = true
+        syncRequested(darkMode)
     }
 
     // ── Catppuccin Mocha ───────────────────────────────────────────────────────

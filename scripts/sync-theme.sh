@@ -3,6 +3,7 @@
 # Usage: sync-theme.sh [mocha|latte]
 
 MODE="${1:-mocha}"
+echo "$(date): sync-theme.sh $MODE caller=$0" >> /tmp/sync-theme.log
 
 if [[ "$MODE" == "latte" ]]; then
     ACTIVE_BORDER="rgba(8839efff)"

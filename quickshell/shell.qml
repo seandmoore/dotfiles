@@ -50,12 +50,30 @@ ShellRoot {
         }
     }
 
-    // IPC: switch theme externally — Colors.toggle() handles the sync internally
+    // IPC: switch theme externally
     //   quickshell ipc -i <id> call theme setMocha
     //   quickshell ipc -i <id> call theme setLatte
     IpcHandler {
         target: "theme"
         function setMocha() { if (!Colors.darkMode) Colors.toggle() }
         function setLatte() { if (Colors.darkMode)  Colors.toggle() }
+    }
+
+    // shell.qml has its own Colors instance — catch syncRequested here too
+    // so IPC-triggered toggles also run sync-theme.sh
+    Process {
+        id: ipcSyncMocha
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
+    }
+    Process {
+        id: ipcSyncLatte
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
+    }
+    Connections {
+        target: Colors
+        function onSyncRequested(toMocha) {
+            if (toMocha) ipcSyncMocha.running = true
+            else ipcSyncLatte.running = true
+        }
     }
 }
