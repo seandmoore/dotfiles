@@ -50,6 +50,34 @@ ShellRoot {
         }
     }
 
-    // Theme sync is handled in ThemeToggle.qml — it owns the Process
-    // and calls sync-theme.sh directly from the same component tree as Colors.
+    // Pre-declared processes with fixed commands — dynamic command assignment
+    // doesn't work reliably in QuickShell's Process type.
+    Process {
+        id: syncMocha
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
+    }
+    Process {
+        id: syncLatte
+        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
+    }
+
+    // Propagate Colors.darkMode changes to system theme — fires when ThemeToggle
+    // calls Colors.toggle(). Uses pre-declared processes so no dynamic command
+    // assignment is needed (which fails in QuickShell's Process implementation).
+    Connections {
+        target: Colors
+        function onDarkModeChanged() {
+            if (Colors.darkMode) syncMocha.running = true
+            else syncLatte.running = true
+        }
+    }
+
+    // IPC: switch theme externally
+    //   quickshell ipc -i <id> call theme setMocha
+    //   quickshell ipc -i <id> call theme setLatte
+    IpcHandler {
+        target: "theme"
+        function setMocha() { Colors.darkMode = true }
+        function setLatte() { Colors.darkMode = false }
+    }
 }

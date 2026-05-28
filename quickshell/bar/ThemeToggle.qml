@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell.Io
 import "../theme"
 
 Item {
@@ -40,16 +39,6 @@ Item {
         cursorShape: Qt.PointingHandCursor
 
         // Raise icon above hover rect
-        onClicked: {
-            Colors.toggle()
-            syncTheme.command = ["bash", "-c",
-                "~/.config/quickshell/scripts/sync-theme.sh " +
-                (Colors.darkMode ? "mocha" : "latte")]
-            syncTheme.running = true
-        }
-    }
-
-    Process {
-        id: syncTheme
+        onClicked: Colors.toggle()
     }
 }
