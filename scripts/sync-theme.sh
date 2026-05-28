@@ -91,5 +91,9 @@ flatpak list --app --columns=application 2>/dev/null | while read -r app; do
     app_gtk4_dir="$HOME/.var/app/$app/config/gtk-4.0"
     mkdir -p "$app_gtk4_dir"
     cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$app_gtk4_dir/gtk.css"
+    # Set color-scheme in each app's in-sandbox dconf — ADW_DEBUG_COLOR_SCHEME
+    # is not reliable; the sandbox dconf is what libadwaita actually reads
+    flatpak run --command=gsettings "$app" set org.gnome.desktop.interface \
+        color-scheme "$ADW_COLOR_SCHEME" 2>/dev/null || true
 done
 
