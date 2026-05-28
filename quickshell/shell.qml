@@ -50,19 +50,6 @@ ShellRoot {
         }
     }
 
-    // Propagate theme changes to Hyprland + Kitty
-    Connections {
-        target: Colors
-        function onDarkModeChanged() {
-            themeSync.command = ["bash", "-c",
-                "~/.config/quickshell/scripts/sync-theme.sh " +
-                (Colors.darkMode ? "mocha" : "latte")]
-            themeSync.running = true
-        }
-    }
-
-    Process {
-        id: themeSync
-        running: false
-    }
+    // Theme sync is handled in ThemeToggle.qml — it owns the Process
+    // and calls sync-theme.sh directly from the same component tree as Colors.
 }
