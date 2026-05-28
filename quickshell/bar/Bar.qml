@@ -19,6 +19,7 @@ PanelWindow {
 
     // Main bar background — floating + rounded
     Rectangle {
+        id: barBg
         anchors {
             top: parent.top
             topMargin: 16
@@ -37,6 +38,19 @@ PanelWindow {
         )
         border.color: Colors.surface1
         border.width: 1
+        opacity: 1
+        scale: 1
+        transformOrigin: Item.Top
+
+        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+        Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+
+        Component.onCompleted: {
+            opacity = 0
+            scale = 0.95
+            opacity = 1
+            scale = 1
+        }
 
         RowLayout {
             anchors {

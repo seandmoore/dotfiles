@@ -18,8 +18,10 @@ Item {
         font.italic: false
         font.strikeout: false
         font.pixelSize: 15
+        rotation: 0
 
         Behavior on color { ColorAnimation { duration: 250 } }
+        Behavior on rotation { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
     }
 
     // Hover glow
@@ -52,6 +54,7 @@ Item {
 
         onClicked: {
             Colors.toggle()
+            icon.rotation += 180
             if (Colors.darkMode) ipcSetMocha.running = true
             else ipcSetLatte.running = true
         }

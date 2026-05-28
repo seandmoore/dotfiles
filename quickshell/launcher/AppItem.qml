@@ -17,7 +17,9 @@ Item {
         anchors.fill: parent
         color: ma.containsMouse ? Colors.accentDim : "transparent"
         radius: 12
+        scale: ma.containsMouse ? 1.05 : 1
         Behavior on color { ColorAnimation { duration: 120 } }
+        Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
     }
 
     ColumnLayout {
@@ -27,9 +29,18 @@ Item {
 
         // App icon
         Item {
+            id: iconItem
             Layout.alignment: Qt.AlignHCenter
             width: 40
             height: 40
+            scale: 1
+
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+
+            Component.onCompleted: {
+                scale = 0.8
+                scale = 1
+            }
 
             Image {
                 id: icon

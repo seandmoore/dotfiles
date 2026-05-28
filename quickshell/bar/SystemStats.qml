@@ -7,12 +7,25 @@ import "../theme"
 RowLayout {
     id: root
     spacing: 14
+    opacity: 1
+    scale: 1
+
+    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+    Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+
+    Component.onCompleted: {
+        opacity = 0
+        scale = 0.9
+        opacity = 1
+        scale = 1
+    }
 
     // CPU
     RowLayout {
         spacing: 4
 
         Text {
+            id: cpuIcon
             text: "󰍛"
             color: cpuValue > 80 ? Colors.red : cpuValue > 50 ? Colors.yellow : Colors.green
             font.family: "JetBrainsMono Nerd Font"
@@ -20,6 +33,10 @@ RowLayout {
             font.italic: false
             font.strikeout: false
             font.pixelSize: 13
+            scale: 1
+            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            onColorChanged: { scale = 1.2; scale = 1 }
         }
         Text {
             id: cpuLabel
@@ -38,6 +55,7 @@ RowLayout {
         spacing: 4
 
         Text {
+            id: ramIcon
             text: "󰧑"
             color: ramPercent > 85 ? Colors.red : ramPercent > 60 ? Colors.yellow : Colors.blue
             font.family: "JetBrainsMono Nerd Font"
@@ -45,6 +63,10 @@ RowLayout {
             font.italic: false
             font.strikeout: false
             font.pixelSize: 13
+            scale: 1
+            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            onColorChanged: { scale = 1.2; scale = 1 }
         }
         Text {
             id: ramLabel

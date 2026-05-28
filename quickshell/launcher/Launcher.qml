@@ -49,6 +49,7 @@ PanelWindow {
 
     // Center panel
     Rectangle {
+        id: centerPanel
         anchors.centerIn: parent
         width: Math.min(parent.width * 0.7, 800)
         height: Math.min(parent.height * 0.75, 640)
@@ -56,6 +57,11 @@ PanelWindow {
         border.color: Colors.surface1
         border.width: 1
         radius: 18
+        opacity: root.visible ? 1 : 0
+        scale: root.visible ? 1 : 0.9
+
+        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
+        Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
 
         ColumnLayout {
             anchors {
@@ -195,13 +201,14 @@ PanelWindow {
             "/var/lib/flatpak/exports/share/applications " +
             "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/applications " +
             "-name '*.desktop' 2>/dev/null | " +
-            "xargs -I{} awk 'BEGIN{f=\"{}\"; n=\"\"; e=\"\"; i=\"\"; nt=0} " +
-            "/\\[Desktop Entry\\]/{nt=1} " +
-            "nt && /^Name=/{n=substr($0,index($0,\"=\")+1)} " +
-            "nt && /^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
-            "nt && /^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
-            "nt && /^NoDisplay=true/{nt=-1} " +
-            "END{if(nt==1 && n!=\"\" && e!=\"\") print n\"|\"e\"|\"i}' {} | sort -u | " +
+            "xargs -I{} awk 'BEGIN{n=\"\"; e=\"\"; i=\"\"; nt=0; nd=0} " +
+            "/\\[Desktop Entry\\]/{nt=1; next} " +
+            "/^\\[/{nt=0} " +
+            "nt==1 && /^Name=/{n=substr($0,index($0,\"=\")+1)} " +
+            "nt==1 && /^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
+            "nt==1 && /^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
+            "nt==1 && /^NoDisplay=true/{nd=1} " +
+            "END{if(!nd && n!=\"\" && e!=\"\") print n\"|\"e\"|\"i}' {} | sort -u | " +
             "while IFS='|' read -r name exec icon; do " +
             "  resolved=''; " +
             "  if [ -n \"$icon\" ]; then " +

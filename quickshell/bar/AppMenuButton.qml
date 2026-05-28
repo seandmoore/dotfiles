@@ -19,12 +19,15 @@ Item {
     }
 
     Text {
+        id: icon
         anchors.centerIn: parent
         text: "󰣇"
         font.family: "JetBrainsMono Nerd Font"
         font.pixelSize: 16
         color: Colors.mauve
+        scale: 1
         Behavior on color { ColorAnimation { duration: 250 } }
+        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
     }
 
     MouseArea {
@@ -32,7 +35,11 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: launcherProc.running = true
+        onClicked: {
+            icon.scale = 1.15
+            icon.scale = 1
+            launcherProc.running = true
+        }
     }
 
     // Uses quickshell IPC to toggle the launcher, which lives in shell.qml's

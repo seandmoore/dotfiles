@@ -12,6 +12,7 @@ if [[ "$MODE" == "latte" ]]; then
     GTK_THEME="catppuccin-latte-mauve-standard+default"
     KVANTUM_THEME="catppuccin-latte-mauve"
     ICON_THEME="Papirus"
+    CURSOR_THEME="Catppuccin-Latte-Mauve"
     PREFER_DARK="0"
 else
     ACTIVE_BORDER="rgba(cba6f7ff)"
@@ -20,6 +21,7 @@ else
     GTK_THEME="catppuccin-mocha-mauve-standard+default"
     KVANTUM_THEME="catppuccin-mocha-mauve"
     ICON_THEME="Papirus-Dark"
+    CURSOR_THEME="Catppuccin-Mocha-Mauve"
     PREFER_DARK="1"
 fi
 
@@ -75,6 +77,7 @@ fi
 # ── gsettings (running GNOME/GTK apps pick this up live) ───────────────────────
 gsettings set org.gnome.desktop.interface gtk-theme        "$GTK_THEME"     2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme       "$ICON_THEME"    2>/dev/null || true
+gsettings set org.gnome.desktop.interface cursor-theme     "$CURSOR_THEME"  2>/dev/null || true
 gsettings set org.gnome.desktop.interface color-scheme     \
     "$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)" 2>/dev/null || true
 

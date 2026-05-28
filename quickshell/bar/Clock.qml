@@ -3,7 +3,20 @@ import QtQuick.Layouts
 import "../theme"
 
 ColumnLayout {
+    id: root
     spacing: 0
+    opacity: 1
+    scale: 1
+
+    Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+    Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+
+    Component.onCompleted: {
+        opacity = 0
+        scale = 0.9
+        opacity = 1
+        scale = 1
+    }
 
     Text {
         id: timeLabel
