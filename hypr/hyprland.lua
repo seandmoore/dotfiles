@@ -74,12 +74,16 @@ local launcher = "qs -c config ipc call launcher toggle"
 hl.env("XCURSOR_SIZE",          "24")
 hl.env("HYPRCURSOR_SIZE",       "24")
 
+-- Catppuccin cursor theme — matches mocha/latte mode
+local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-mauve-cursors"
+hl.env("XCURSOR_THEME",         cursor_theme)
+
 -- Qt theming — use Kvantum style, configured via qt5ct/qt6ct
 hl.env("QT_QPA_PLATFORMTHEME",  "qt5ct")
 hl.env("QT_STYLE_OVERRIDE",     "kvantum")
 
 -- GTK theming — ensure apps pick up the correct icon theme
-hl.env("ICON_THEME",            "Papirus-Dark")
+hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark")
 
 
 -------------------
