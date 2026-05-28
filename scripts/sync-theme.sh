@@ -53,8 +53,8 @@ GTK4_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
 THEME_DIR="/usr/share/themes/${GTK_THEME}/gtk-4.0"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 if [[ -d "$THEME_DIR" ]]; then
-    # gtk.css: @imports the catppuccin GTK4 theme + defines libadwaita color palette
-    ln -sf "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$GTK4_DIR/gtk.css"
+    # gtk.css must be a real file (not symlink) — Flatpak sandboxes block symlinks outside whitelisted paths
+    cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$GTK4_DIR/gtk.css"
     ln -sf "$THEME_DIR/gtk-dark.css" "$GTK4_DIR/gtk-dark.css"
     rm -rf "$GTK4_DIR/assets"
     ln -sf "$THEME_DIR/assets"       "$GTK4_DIR/assets"

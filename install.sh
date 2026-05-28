@@ -190,9 +190,11 @@ make_link "$DOTFILES_DIR/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
 # XDG desktop portal — routes Settings portal to gtk so libadwaita apps get the correct color scheme
 make_link "$DOTFILES_DIR/xdg-desktop-portal/hyprland-portals.conf" "$HOME/.config/xdg-desktop-portal/hyprland-portals.conf"
 
-# GTK4 / libadwaita CSS — @imports catppuccin GTK4 theme + defines libadwaita color palette
-# sync-theme.sh updates this symlink at runtime when switching mocha <-> latte
-make_link "$DOTFILES_DIR/gtk-4.0/gtk-mocha-mauve.css" "$HOME/.config/gtk-4.0/gtk.css"
+# GTK4 / libadwaita CSS — must be a real file (Flatpak blocks symlinks outside whitelisted paths)
+# sync-theme.sh overwrites this file when switching mocha <-> latte
+mkdir -p "$HOME/.config/gtk-4.0"
+cp "$DOTFILES_DIR/gtk-4.0/gtk-mocha-mauve.css" "$HOME/.config/gtk-4.0/gtk.css"
+ok "Wrote ~/.config/gtk-4.0/gtk.css (Catppuccin Mocha default)"
 
 # ── Bootstrap kitty active-colors.conf ────────────────────────────────────────
 # kitty.conf includes active-colors.conf at startup; sync-theme.sh manages it
