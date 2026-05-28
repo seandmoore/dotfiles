@@ -292,9 +292,12 @@ hl.bind("SHIFT + Print", hl.dsp.exec_cmd("grimblast copy screen"))
 ---- WORKSPACES ----
 --------------------
 
--- Keep workspaces 1-9 alive even when empty
-for i = 1, 9 do
-    hl.workspace_rule({ workspace = tostring(i), persistent = true })
+-- Workspaces 1-5 on main (DP-1), 6-9 on secondary (HDMI-A-1), all persistent
+for i = 1, 5 do
+    hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "DP-1" })
+end
+for i = 6, 9 do
+    hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "HDMI-A-1" })
 end
 
 
