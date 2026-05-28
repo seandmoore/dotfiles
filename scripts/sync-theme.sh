@@ -48,16 +48,27 @@ sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK4_SETTINGS"
 sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK4_SETTINGS"
 sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK4_SETTINGS"
 
-# ── GTK4 / libadwaita CSS (symlink swap) ───────────────────────────────────────
+# ── GTK4 / libadwaita CSS ──────────────────────────────────────────────────────
 GTK4_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
 THEME_DIR="/usr/share/themes/${GTK_THEME}/gtk-4.0"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
-if [[ -d "$THEME_DIR" ]]; then
-    # gtk.css must be a real file (not symlink) — Flatpak sandboxes block symlinks outside whitelisted paths
-    cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$GTK4_DIR/gtk.css"
-    ln -sf "$THEME_DIR/gtk-dark.css" "$GTK4_DIR/gtk-dark.css"
+LOCAL_THEME_DIR="$HOME/.local/share/themes/${GTK_THEME}/gtk-4.0"
+
+# Update local user theme (~/.local/share/themes/) — this is what Flatpak sandboxes
+# read via xdg-data/themes:ro permission. When gsettings gtk-theme changes, GTK4
+# reloads the theme live in all running apps via the Settings portal.
+mkdir -p "$LOCAL_THEME_DIR"
+cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$LOCAL_THEME_DIR/gtk.css"
+cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$LOCAL_THEME_DIR/gtk-dark.css"
+
+# Update ~/.config/gtk-4.0/gtk.css for native (non-Flatpak) GTK4 apps.
+# Flatpak apps get the colors from the local theme above.
+cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$GTK4_DIR/gtk.css"
+
+# Keep assets symlink for native GTK4 apps that use the system theme path
+if [[ -d "$THEME_DIR/assets" ]]; then
     rm -rf "$GTK4_DIR/assets"
-    ln -sf "$THEME_DIR/assets"       "$GTK4_DIR/assets"
+    ln -sf "$THEME_DIR/assets" "$GTK4_DIR/assets"
 fi
 
 # ── gsettings (running GNOME/GTK apps pick this up live) ───────────────────────
@@ -80,24 +91,13 @@ for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
     [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
 done
 
-# ── Flatpak — libadwaita color scheme + catppuccin CSS ────────────────────────
-# Two paths for gtk.css:
-#   1. ~/.config/gtk-4.0/gtk.css — bind-mounted into sandboxes that have the
-#      xdg-config/gtk-4.0 filesystem permission (e.g. Mission Center). GTK4
-#      hot-reloads CSS on file change, so running apps pick this up immediately.
-#   2. ~/.var/app/<id>/config/gtk-4.0/gtk.css — fallback for apps without that
-#      permission; their sandbox reads XDG_CONFIG_HOME/gtk-4.0/gtk.css from the
-#      per-app dir instead.
-# Color scheme: the host gsettings change above propagates to all running
-# libadwaita Flatpak apps via the org.freedesktop.portal.Settings portal.
-# ADW_DEBUG_COLOR_SCHEME is an env-var fallback for apps started after the switch.
-# Do NOT set GTK_THEME in Flatpak — a missing theme causes GTK4 to fall back to
-# legacy Adwaita CSS which overrides libadwaita's own modern stylesheet.
+# ── Flatpak — libadwaita color scheme ─────────────────────────────────────────
+# Theme colors: the local theme in ~/.local/share/themes/ is accessible to all
+# Flatpak apps via the global xdg-data/themes:ro override. The gsettings gtk-theme
+# change above propagates via the Settings portal and GTK4 reloads the theme live.
+# Color scheme (dark/light): propagates to running libadwaita Flatpak apps via
+# the Settings portal (org.gnome.desktop.interface color-scheme).
+# ADW_DEBUG_COLOR_SCHEME is an env-var fallback for apps launched after the switch.
 ADW_COLOR_SCHEME="$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)"
 flatpak override --user --env=ADW_DEBUG_COLOR_SCHEME="$ADW_COLOR_SCHEME" 2>/dev/null || true
-flatpak list --app --columns=application 2>/dev/null | while read -r app; do
-    app_gtk4_dir="$HOME/.var/app/$app/config/gtk-4.0"
-    mkdir -p "$app_gtk4_dir"
-    cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$app_gtk4_dir/gtk.css"
-done
 
