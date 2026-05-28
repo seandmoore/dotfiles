@@ -6,8 +6,8 @@ import Quickshell.Io
 Item {
     id: root
 
-    VolumeOsd   { id: volumeOsd }
-    BrightnessOsd { id: brightnessOsd }
+    required property VolumeOsd volumeOsd
+    required property BrightnessOsd brightnessOsd
 
     // Watch pactl for volume changes
     Process {

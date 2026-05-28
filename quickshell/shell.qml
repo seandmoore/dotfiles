@@ -23,8 +23,15 @@ ShellRoot {
     // Notification daemon (singleton — one per compositor session)
     NotificationServer {}
 
-    // OSD listeners (singleton)
-    OsdRoot {}
+    // OSD windows (must live at ShellRoot level as PanelWindows)
+    VolumeOsd    { id: volumeOsd }
+    BrightnessOsd { id: brightnessOsd }
+
+    // OSD listeners (singleton) — receives window refs to call show()
+    OsdRoot {
+        volumeOsd:    volumeOsd
+        brightnessOsd: brightnessOsd
+    }
 
     // App launcher (fullscreen overlay, hidden by default)
     Launcher {}

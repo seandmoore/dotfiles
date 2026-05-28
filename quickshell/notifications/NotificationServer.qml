@@ -13,20 +13,15 @@ NotificationServer {
     bodyMarkupSupported: true
     imageSupported: true
 
+    property int nextIndex: 0
+    property var popupComponent: Qt.createComponent("NotificationPopup.qml")
+
     onNotification: notification => {
-        const popup = popupComponent.createObject(popupLayer, {
-            notification: notification
-        })
-    }
-
-    Component {
-        id: popupComponent
-        NotificationPopup {}
-    }
-
-    // Anchor layer so popups stack correctly
-    Item {
-        id: popupLayer
-        anchors.fill: parent
+        if (popupComponent.status === Component.Ready) {
+            popupComponent.createObject(null, {
+                notification: notification,
+                stackIndex: nextIndex++
+            })
+        }
     }
 }

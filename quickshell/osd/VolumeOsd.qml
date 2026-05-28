@@ -4,13 +4,10 @@ import Quickshell
 import Quickshell.Wayland
 import "../theme"
 
-FloatingWindow {
+PanelWindow {
     id: root
 
-    anchors {
-        bottom: true
-        horizontalCenter: true
-    }
+    anchors.bottom: true
     margins.bottom: 80
 
     width: 300
@@ -18,10 +15,10 @@ FloatingWindow {
     color: "transparent"
 
     visible: false
-    opacity: 0
 
     property int volume: 0
     property bool muted: false
+    property real windowOpacity: 0
 
     function show(vol, mut) {
         volume = vol
@@ -34,7 +31,7 @@ FloatingWindow {
     NumberAnimation {
         id: fadeIn
         target: root
-        property: "opacity"
+        property: "windowOpacity"
         from: 0; to: 1
         duration: 120
         easing.type: Easing.OutCubic
@@ -43,7 +40,7 @@ FloatingWindow {
     NumberAnimation {
         id: fadeOut
         target: root
-        property: "opacity"
+        property: "windowOpacity"
         from: 1; to: 0
         duration: 300
         easing.type: Easing.InCubic
@@ -59,6 +56,7 @@ FloatingWindow {
     // Pill background
     Rectangle {
         anchors.fill: parent
+        opacity: root.windowOpacity
         color: Colors.surface0
         border.color: Colors.surface1
         border.width: 1

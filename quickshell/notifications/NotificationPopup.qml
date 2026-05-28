@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Services.Notifications
 import "../theme"
 
-FloatingWindow {
+PanelWindow {
     id: root
 
     required property Notification notification
@@ -27,17 +27,19 @@ FloatingWindow {
     height: contentCol.implicitHeight + 24
     color: "transparent"
 
-    // Slide in from the right
-    NumberAnimation on anchors.margins.right {
-        from: -400
-        to: 12
-        duration: 250
-        easing.type: Easing.OutCubic
-        running: true
-    }
-
     // Background card
     Rectangle {
+        // Slide in from right on appear
+        property real slideX: 400
+        transform: Translate { x: card.slideX }
+        id: card
+
+        NumberAnimation on slideX {
+            from: 400; to: 0
+            duration: 250
+            easing.type: Easing.OutCubic
+            running: true
+        }
         anchors.fill: parent
         color: Colors.surface0
         border.color: Colors.surface1
