@@ -22,7 +22,7 @@ else
     GTK_THEME="catppuccin-mocha-mauve-standard+default"
     KVANTUM_THEME="catppuccin-mocha-mauve"
     ICON_THEME="Papirus-Dark"
-    CURSOR_THEME="catppuccin-mocha-mauve-cursors"
+    CURSOR_THEME="catppuccin-mocha-dark-cursors"
     PREFER_DARK="1"
     SDDM_THEME="catppuccin-mocha-mauve"
 fi

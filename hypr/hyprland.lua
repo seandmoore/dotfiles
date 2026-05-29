@@ -90,7 +90,7 @@ hl.env("XCURSOR_SIZE",          "24")
 hl.env("HYPRCURSOR_SIZE",       "24")
 
 -- Catppuccin cursor theme — matches mocha/latte mode
-local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-mauve-cursors"
+local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-dark-cursors"
 hl.env("XCURSOR_THEME",    cursor_theme)
 hl.env("HYPRCURSOR_THEME", cursor_theme)
 
@@ -110,11 +110,13 @@ hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark
 -- hyprpaper, hypridle, hyprpolkitagent are managed by systemd user services
 -- (enabled via uwsm/graphical-session.target) — no need to exec them here.
 local function apply_cursor()
-    hl.exec_cmd("hyprctl setcursor '" .. cursor_theme .. " 24'")
+    hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " 24")
+    hl.exec_cmd("systemctl --user set-environment XCURSOR_THEME=" .. cursor_theme ..
+                " XCURSOR_SIZE=24 HYPRCURSOR_THEME=" .. cursor_theme .. " HYPRCURSOR_SIZE=24")
 end
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE")
     apply_cursor()
     hl.exec_cmd("quickshell -c config")
 end)
