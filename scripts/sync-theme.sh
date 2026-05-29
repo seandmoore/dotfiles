@@ -112,7 +112,7 @@ done
 
 # ── Flatpak — update GTK_THEME override ───────────────────────────────────────
 if command -v flatpak &>/dev/null; then
-    flatpak override --user --env=GTK_THEME="$GTK_THEME"
+    sudo flatpak override --system --env=GTK_THEME="$GTK_THEME" 2>/dev/null || true
 fi
 
 # ── Flatpak — restart running libadwaita apps ──────────────────────────────────
@@ -120,8 +120,7 @@ fi
 # preventing live dark/light switching. We rely on the portal instead (no env var).
 # The @define-color palette in gtk.css only takes effect at launch, so running
 # libadwaita Flatpak apps must be restarted to pick up the new theme.
-flatpak list --app --columns=application 2>/dev/null | while read -r app; do
-    # Check if any process for this app is running
+flatpak list --app --system --columns=application 2>/dev/null | while read -r app; do
     if pgrep -f "$app" > /dev/null 2>&1; then
         pkill -f "$app" 2>/dev/null || true
         sleep 0.5

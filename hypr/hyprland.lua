@@ -52,6 +52,19 @@ hl.monitor({
     vrr       = 3,
 })
 
+-- Samsung LF24T35 on HDMI-A-1
+-- 1080p SDR monitor, 99% sRGB gamut — srgb is the correct colour space
+-- Portrait flipped (transform 3 = 270°), positioned left of DP-1
+-- Effective portrait dimensions are 1080×1920, so x = -1080 sits flush left of DP-1
+hl.monitor({
+    output    = "HDMI-A-1",
+    mode      = "1920x1080@75",
+    position  = "-1080x0",
+    scale     = 1,
+    transform = 3,
+    cm        = "srgb",
+})
+
 -- Fallback rule for any other display plugged in
 hl.monitor({
     output   = "",
@@ -78,7 +91,8 @@ hl.env("HYPRCURSOR_SIZE",       "24")
 
 -- Catppuccin cursor theme — matches mocha/latte mode
 local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-mauve-cursors"
-hl.env("XCURSOR_THEME",         cursor_theme)
+hl.env("XCURSOR_THEME",    cursor_theme)
+hl.env("HYPRCURSOR_THEME", cursor_theme)
 
 -- Qt theming — use Kvantum style, configured via qt5ct/qt6ct
 hl.env("QT_QPA_PLATFORMTHEME",  "qt5ct")
@@ -93,11 +107,10 @@ hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark
 -------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Autostart/
+-- hyprpaper, hypridle, hyprpolkitagent are managed by systemd user services
+-- (enabled via uwsm/graphical-session.target) — no need to exec them here.
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-    hl.exec_cmd("hyprpolkitagent")
-    hl.exec_cmd("hyprpaper")
-    hl.exec_cmd("hypridle")
     hl.exec_cmd("quickshell -c config")
 end)
 
@@ -337,6 +350,6 @@ hl.window_rule({
     opacity = "0.92 0.85",
 })
 
--- Quickshell layer rules
--- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Blur/
-hl.layer_rule({ match = { namespace = "quickshell" }, blur = true })
+-- No blur on quickshell layer — blur only works on SDR monitors (not HDR/DP-1),
+-- causing an asymmetric frosted effect on HDMI-A-1. Bar uses its own opacity instead.
+

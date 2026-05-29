@@ -29,6 +29,17 @@ PanelWindow {
     readonly property int   bubbleR:      20
     readonly property int   bubblePad:    14
 
+    // ── FROSTED GLASS BACKDROP ───────────────────────────────────────────────
+    Rectangle {
+        anchors { left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
+        y: (56 - height) / 2
+        height: root.bubbleH
+        radius: root.bubbleR
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.75)
+        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.4)
+        border.width: 1
+    }
+
     // ── LEFT BUBBLE — app menu + workspaces ──────────────────────────────────
     Rectangle {
         id: leftBubble
