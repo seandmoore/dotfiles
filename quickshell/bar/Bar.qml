@@ -14,8 +14,9 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: powerMenuOpen ? 240 : 60
-    exclusiveZone: 60
+    implicitHeight: powerMenuOpen ? 236 : 56
+    exclusiveZone: 56
+    margins.top: 0
     color: "transparent"
 
     property bool powerMenuOpen: false
@@ -27,24 +28,17 @@ PanelWindow {
         id: barBg
         anchors {
             top: parent.top
-            topMargin: 16
+            topMargin: 0
             left: parent.left
             leftMargin: 16
             right: parent.right
             rightMargin: 16
         }
-        height: 44
+        height: 56
         radius: 22
         color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.55)
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
-
-        // Glass top highlight
-        Rectangle {
-            anchors { top: parent.top; left: parent.left; right: parent.right }
-            height: 1; radius: 22
-            color: Qt.rgba(1, 1, 1, 0.08)
-        }
 
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
         Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
@@ -82,6 +76,41 @@ PanelWindow {
                 }
 
                 ThemeToggle { Layout.alignment: Qt.AlignVCenter }
+
+                // Wallpaper switcher button
+                Item {
+                    Layout.alignment: Qt.AlignVCenter
+                    width: 28; height: 28
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 32; height: 32; radius: 8
+                        color: Colors.accentDim
+                        opacity: wallMa.containsMouse ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: 150 } }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰋩"
+                        font.pixelSize: 15
+                        font.family: "JetBrainsMono Nerd Font"
+                        color: Colors.sky
+                    }
+
+                    MouseArea {
+                        id: wallMa
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: wallpaperIpc.running = true
+                    }
+
+                    Process {
+                        id: wallpaperIpc
+                        command: ["quickshell", "-c", "config", "ipc", "call", "wallpaper", "toggle"]
+                    }
+                }
 
                 // Power button
                 Item {
@@ -129,7 +158,7 @@ PanelWindow {
 
         anchors {
             top: barBg.bottom
-            topMargin: 8
+            topMargin: 6
             right: barBg.right
             rightMargin: 12
         }

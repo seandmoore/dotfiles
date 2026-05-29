@@ -236,6 +236,7 @@ hl.bind(mainMod .. " + C",      hl.dsp.window.close())
 hl.bind(mainMod .. " + M",      hl.dsp.exit())
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(terminal .. " -e ranger"))
 hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
+hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call wallpaper toggle"))
 
 -- Window management
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -338,5 +339,4 @@ hl.window_rule({
 
 -- Quickshell layer rules
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Blur/
-hl.layer_rule({ match = { namespace = "quickshell" }, blur        = true })
-hl.layer_rule({ match = { namespace = "quickshell" }, ignore_alpha = true })
+hl.layer_rule({ match = { namespace = "quickshell" }, blur = true })

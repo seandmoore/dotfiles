@@ -6,6 +6,7 @@ import "./bar"
 import "./notifications"
 import "./osd"
 import "./launcher"
+import "./wallpaper"
 import "./theme"
 
 // Entry point — Quickshell loads this file automatically.
@@ -35,6 +36,9 @@ ShellRoot {
 
     // App launcher (fullscreen overlay, hidden by default)
     Launcher {}
+
+    // Wallpaper switcher (fullscreen overlay, hidden by default)
+    WallpaperSwitcher {}
 
 
     // ── Theme sync ─────────────────────────────────────────────────────────────
