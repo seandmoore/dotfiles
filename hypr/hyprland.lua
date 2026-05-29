@@ -109,13 +109,18 @@ hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark
 -- See https://wiki.hypr.land/Configuring/Basics/Autostart/
 -- hyprpaper, hypridle, hyprpolkitagent are managed by systemd user services
 -- (enabled via uwsm/graphical-session.target) — no need to exec them here.
+local function apply_cursor()
+    hl.exec_cmd("hyprctl setcursor '" .. cursor_theme .. " 24'")
+end
+
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
-    -- hl.env sets vars for child processes; hyprctl setcursor applies the theme
-    -- to the compositor cursor itself (otherwise it stays at the default).
-    hl.exec_cmd("hyprctl setcursor '" .. cursor_theme .. " 24'")
+    apply_cursor()
     hl.exec_cmd("quickshell -c config")
 end)
+
+-- Re-apply on every config reload (cursor resets to default on reload).
+hl.on("config.reloaded", apply_cursor)
 
 
 -----------------------
