@@ -5,3 +5,4 @@ MediaPlayer MediaPlayer.qml
 SystemStats SystemStats.qml
 ThemeToggle ThemeToggle.qml
 Workspaces Workspaces.qml
+PowerMenu PowerMenu.qml
