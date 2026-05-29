@@ -113,7 +113,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
     -- hl.env sets vars for child processes; hyprctl setcursor applies the theme
     -- to the compositor cursor itself (otherwise it stays at the default).
-    hl.exec_cmd("hyprctl setcursor " .. cursor_theme .. " 24")
+    hl.exec_cmd("hyprctl setcursor '" .. cursor_theme .. " 24'")
     hl.exec_cmd("quickshell -c config")
 end)
 
