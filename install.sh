@@ -168,6 +168,7 @@ if command -v flatpak &>/dev/null; then
     flatpak override --user --filesystem=~/.local/share/themes
     flatpak override --user --filesystem=~/.local/share/icons
     flatpak override --user --filesystem=~/.icons
+    flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
     flatpak override --user --env=GTK_THEME=catppuccin-mocha-mauve-standard+default
     ok "Flatpak theme overrides applied"
 fi
