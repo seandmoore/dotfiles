@@ -109,6 +109,11 @@ for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
     [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
 done
 
+# ── Flatpak — update GTK_THEME override ───────────────────────────────────────
+if command -v flatpak &>/dev/null; then
+    flatpak override --user --env=GTK_THEME="$GTK_THEME"
+fi
+
 # ── Flatpak — restart running libadwaita apps ──────────────────────────────────
 # ADW_DEBUG_COLOR_SCHEME permanently overrides the portal for the process lifetime,
 # preventing live dark/light switching. We rely on the portal instead (no env var).
