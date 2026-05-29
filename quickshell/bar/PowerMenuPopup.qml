@@ -8,16 +8,27 @@ import "../theme"
 PanelWindow {
     id: root
 
-    anchors { top: true; right: true }
-    implicitWidth: 170
-    implicitHeight: visible ? menu.implicitHeight + 20 : 0
+    anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
     visible: false
     aboveWindows: true
+    focusable: true
 
     IpcHandler {
         target: "powermenu"
-        function toggle() { root.visible = !root.visible }
+        function toggle() {
+            if (root.visible) {
+                root.visible = false
+            } else {
+                openTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: openTimer
+        interval: 50
+        onTriggered: root.visible = true
     }
 
     Shortcut {
@@ -25,23 +36,34 @@ PanelWindow {
         onActivated: root.visible = false
     }
 
+    // Dismiss on outside click
+    MouseArea {
+        anchors.fill: parent
+        onClicked: root.visible = false
+    }
+
+    // Menu panel — top-right corner
     Rectangle {
         id: menu
+        width: 160
+        height: col.implicitHeight + 16
+        radius: 14
+        color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.97)
+        border.color: Colors.surface1
+        border.width: 1
+
         anchors {
             top: parent.top
             topMargin: 68
             right: parent.right
             rightMargin: 16
         }
-        implicitWidth: 158
-        implicitHeight: col.implicitHeight + 16
-        radius: 14
-        color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.97)
-        border.color: Colors.surface1
-        border.width: 1
 
-        layer.enabled: true
-        layer.effect: null
+        opacity: root.visible ? 1 : 0
+        scale: root.visible ? 1 : 0.92
+        transformOrigin: Item.TopRight
+        Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
+        Behavior on scale   { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
         ColumnLayout {
             id: col
@@ -96,13 +118,6 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    // Dismiss on outside click
-    MouseArea {
-        anchors.fill: parent
-        onClicked: root.visible = false
-        z: -1
     }
 
     Process { id: proc }
