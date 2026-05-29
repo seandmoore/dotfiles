@@ -106,6 +106,10 @@ PanelWindow {
                 ThemeToggle {
                     Layout.alignment: Qt.AlignVCenter
                 }
+
+                PowerMenu {
+                    Layout.alignment: Qt.AlignVCenter
+                }
             }
         }
     }

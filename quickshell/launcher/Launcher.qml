@@ -15,7 +15,6 @@ PanelWindow {
     color: "transparent"
     visible: false
 
-    // IPC toggle — called by: qs ipc call launcher toggle
     IpcHandler {
         target: "launcher"
         function toggle() { root.visible = !root.visible }
@@ -31,211 +30,323 @@ PanelWindow {
             searchField.text = ""
             searchField.forceActiveFocus()
             appsModel.refresh()
+            categoryList.currentIndex = 0
         }
     }
 
     // Scrim
     Rectangle {
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.7)
+        color: Qt.rgba(0, 0, 0, 0.65)
         opacity: root.visible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 200 } }
-
         MouseArea {
             anchors.fill: parent
             onClicked: root.visible = false
         }
     }
 
-    // Center panel
+    // Main panel
     Rectangle {
-        id: centerPanel
+        id: panel
         anchors.centerIn: parent
-        width: Math.min(parent.width * 0.7, 800)
-        height: Math.min(parent.height * 0.75, 640)
-        color: Colors.base
+        width: Math.min(parent.width * 0.72, 860)
+        height: Math.min(parent.height * 0.72, 620)
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.97)
         border.color: Colors.surface1
         border.width: 1
-        radius: 18
+        radius: 20
         opacity: root.visible ? 1 : 0
-        scale: root.visible ? 1 : 0.9
+        scale: root.visible ? 1 : 0.93
+        Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }
+        Behavior on scale   { NumberAnimation { duration: 280; easing.type: Easing.OutBack } }
 
-        Behavior on opacity { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
-        Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 0
+            spacing: 0
 
-        ColumnLayout {
-            anchors {
-                fill: parent
-                margins: 16
-            }
-            spacing: 12
-
-            // Search bar
+            // ── Left sidebar — categories ──────────────────────────────────────
             Rectangle {
-                Layout.fillWidth: true
-                height: 44
-                color: Colors.surface0
-                border.color: searchField.activeFocus ? Colors.mauve : Colors.surface1
-                border.width: 1
-                radius: 12
+                Layout.preferredWidth: 160
+                Layout.fillHeight: true
+                color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.95)
+                radius: 20
 
-                Behavior on border.color { ColorAnimation { duration: 150 } }
+                // Right side flat to merge with content area
+                Rectangle {
+                    anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
+                    width: 20
+                    color: parent.color
+                }
 
-                RowLayout {
-                    anchors {
-                        fill: parent
-                        leftMargin: 12
-                        rightMargin: 12
-                    }
-                    spacing: 8
+                ColumnLayout {
+                    anchors { fill: parent; margins: 10 }
+                    spacing: 4
 
                     Text {
-                        text: ""
-                        color: Colors.overlay0
+                        text: "Apps"
+                        color: Colors.subtext0
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
                         font.family: "JetBrainsMono Nerd Font"
-                        font.underline: false
-                        font.italic: false
-                        font.strikeout: false
-                        font.pixelSize: 16
+                        leftPadding: 8
+                        topPadding: 4
                     }
 
-                    TextInput {
-                        id: searchField
+                    ListView {
+                        id: categoryList
                         Layout.fillWidth: true
-                        color: Colors.text
-                        font.family: "JetBrainsMono Nerd Font"
-                        font.underline: false
-                        font.italic: false
-                        font.strikeout: false
-                        font.pixelSize: 14
-                        selectionColor: Colors.mauve
-                        selectedTextColor: Colors.base
+                        Layout.fillHeight: true
                         clip: true
+                        currentIndex: 0
+                        spacing: 2
 
-                        Keys.onEscapePressed: root.visible = false
+                        model: appsModel.categories
 
-                        onTextChanged: appsModel.filterText = text
+                        onCurrentIndexChanged: appsModel.selectedCategory = model[currentIndex] ?? "All"
+
+                        delegate: Rectangle {
+                            required property string modelData
+                            required property int index
+                            width: categoryList.width
+                            height: 34
+                            radius: 8
+                            color: categoryList.currentIndex === index
+                                ? Qt.rgba(Colors.mauve.r, Colors.mauve.g, Colors.mauve.b, 0.22)
+                                : (catMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.6) : "transparent")
+                            Behavior on color { ColorAnimation { duration: 100 } }
+
+                            RowLayout {
+                                anchors { fill: parent; leftMargin: 10; rightMargin: 8 }
+                                spacing: 8
+
+                                Text {
+                                    text: appsModel.categoryIcon(modelData)
+                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.pixelSize: 13
+                                    color: categoryList.currentIndex === index ? Colors.mauve : Colors.overlay1
+                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                }
+
+                                Text {
+                                    text: modelData
+                                    font.pixelSize: 12
+                                    color: categoryList.currentIndex === index ? Colors.text : Colors.subtext0
+                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                    Layout.fillWidth: true
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            MouseArea {
+                                id: catMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: categoryList.currentIndex = index
+                            }
+                        }
                     }
                 }
             }
 
-            // App grid
-            GridView {
-                id: grid
+            // ── Right content area ─────────────────────────────────────────────
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                clip: true
+                spacing: 10
 
-                cellWidth: 100
-                cellHeight: 104
+                anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
+                anchors.margins: 14
 
-                model: appsModel.filteredApps
+                // Search bar
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 42
+                    color: Colors.surface0
+                    border.color: searchField.activeFocus ? Colors.mauve : Colors.surface1
+                    border.width: 1
+                    radius: 12
+                    Behavior on border.color { ColorAnimation { duration: 150 } }
 
-                delegate: AppItem {
-                    required property var modelData
-                    app: modelData
-                    onActivated: {
-                        appsModel.launch(modelData)
-                        root.visible = false
+                    RowLayout {
+                        anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
+                        spacing: 8
+
+                        Text {
+                            text: ""
+                            color: Colors.overlay0
+                            font.family: "JetBrainsMono Nerd Font"
+                            font.pixelSize: 15
+                        }
+
+                        TextInput {
+                            id: searchField
+                            Layout.fillWidth: true
+                            color: Colors.text
+                            font.pixelSize: 13
+                            font.family: "JetBrainsMono Nerd Font"
+                            selectionColor: Colors.mauve
+                            selectedTextColor: Colors.base
+                            clip: true
+                            Keys.onEscapePressed: root.visible = false
+                            onTextChanged: appsModel.filterText = text
+                        }
+
+                        Text {
+                            text: "⌘K"
+                            color: Colors.overlay0
+                            font.pixelSize: 10
+                            visible: searchField.text === ""
+                        }
                     }
                 }
 
-                ScrollBar.vertical: ScrollBar {
-                    policy: ScrollBar.AsNeeded
-                    contentItem: Rectangle {
-                        radius: 3
+                // App grid
+                GridView {
+                    id: grid
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    cellWidth: 96
+                    cellHeight: 100
+                    model: appsModel.filteredApps
+
+                    delegate: AppItem {
+                        required property var modelData
+                        app: modelData
+                        onActivated: {
+                            appsModel.launch(modelData)
+                            root.visible = false
+                        }
+                    }
+
+                    ScrollBar.vertical: ScrollBar {
+                        policy: ScrollBar.AsNeeded
+                        contentItem: Rectangle {
+                            radius: 3
+                            color: Colors.surface1
+                            implicitWidth: 4
+                        }
+                    }
+
+                    // Empty state
+                    Text {
+                        anchors.centerIn: parent
+                        visible: grid.count === 0
+                        text: "No apps found"
                         color: Colors.overlay0
+                        font.pixelSize: 14
                     }
                 }
             }
         }
     }
 
-    // App list model — reads .desktop files
+    // ── App model ──────────────────────────────────────────────────────────────
     QtObject {
         id: appsModel
 
         property string filterText: ""
+        property string selectedCategory: "All"
         property var apps: []
         property var filteredApps: []
+        property var categories: ["All"]
 
         onFilterTextChanged: updateFilter()
+        onSelectedCategoryChanged: updateFilter()
 
-        function refresh() {
-            appLoader.running = true
+        function categoryIcon(cat) {
+            const icons = {
+                "All": "󰣇", "Internet": "󰖟", "Media": "󰝚", "Graphics": "󰋩",
+                "Games": "󰊗", "Office": "󰈙", "Development": "󰅨", "System": "󰒓",
+                "Utilities": "󰦛", "Education": "󰑐", "Science": "󰻲", "Other": "󰏔",
+            }
+            return icons[cat] ?? "󰏔"
         }
+
+        function refresh() { appLoader.running = true }
 
         function updateFilter() {
             const q = filterText.toLowerCase()
-            if (q === "") {
-                filteredApps = apps.slice()
-            } else {
-                filteredApps = apps.filter(a =>
+            let pool = selectedCategory === "All"
+                ? apps.slice()
+                : apps.filter(a => (a.category ?? "Other") === selectedCategory)
+            if (q !== "")
+                pool = pool.filter(a =>
                     a.name.toLowerCase().includes(q) ||
                     (a.comment && a.comment.toLowerCase().includes(q))
                 )
-            }
+            filteredApps = pool
+        }
+
+        function buildCategories() {
+            const seen = new Set()
+            apps.forEach(a => { if (a.category) seen.add(a.category) })
+            const sorted = Array.from(seen).sort()
+            categories = ["All", ...sorted]
         }
 
         function launch(app) {
             if (app.exec) {
-                const cmd = app.exec
-                    .replace(/%[fFuUdDnNickvm]/g, "")
-                    .trim()
+                const cmd = app.exec.replace(/%[fFuUdDnNickvm]/g, "").trim()
                 launchProcess.command = ["bash", "-c", "nohup " + cmd + " &>/dev/null &"]
                 launchProcess.running = true
             }
         }
     }
 
-    Process {
-        id: launchProcess
-        running: false
-    }
+    Process { id: launchProcess }
 
-    // Parse .desktop files
     Process {
         id: appLoader
+        property var parsed: []
+
         command: ["bash", "-c",
             "find /usr/share/applications ~/.local/share/applications " +
             "/var/lib/flatpak/exports/share/applications " +
             "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/applications " +
-            "-name '*.desktop' 2>/dev/null | " +
-            "xargs -I{} awk 'BEGIN{n=\"\"; e=\"\"; i=\"\"; nt=0; nd=0} " +
-            "/\\[Desktop Entry\\]/{nt=1; next} " +
-            "/^\\[/{nt=0} " +
-            "nt==1 && /^Name=/{n=substr($0,index($0,\"=\")+1)} " +
-            "nt==1 && /^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
-            "nt==1 && /^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
-            "nt==1 && /^NoDisplay=true/{nd=1} " +
-            "END{if(!nd && n!=\"\" && e!=\"\") print n\"|\"e\"|\"i}' {} | sort -u | " +
-            "while IFS='|' read -r name exec icon; do " +
+            "-name '*.desktop' 2>/dev/null | sort -u | " +
+            "xargs -I{} awk 'BEGIN{n=\"\";e=\"\";i=\"\";c=\"\";nd=0;nt=0} " +
+            "/\\[Desktop Entry\\]/{nt=1;next} /^\\[/{nt=0} " +
+            "nt&&/^Name=/{n=substr($0,index($0,\"=\")+1)} " +
+            "nt&&/^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
+            "nt&&/^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
+            "nt&&/^Categories=/{c=substr($0,index($0,\"=\")+1)} " +
+            "nt&&/^NoDisplay=true/{nd=1} " +
+            "END{if(!nd&&n!=\"\"&&e!=\"\")print n\"|\"e\"|\"i\"|\"c}' {} | sort -u | " +
+            "while IFS='|' read -r name exec icon cats; do " +
+            "  cat=$(echo \"$cats\" | tr ';' '\\n' | grep -Ew " +
+            "'AudioVideo|Audio|Video|Graphics|Office|Game|Network|Science|Education|Development|System|Utility' " +
+            "| head -1); " +
+            "  case $cat in " +
+            "    AudioVideo|Audio|Video) cat=Media ;; " +
+            "    Game) cat=Games ;; " +
+            "    Network) cat=Internet ;; " +
+            "    Utility) cat=Utilities ;; " +
+            "    *) [ -z \"$cat\" ] && cat=Other ;; " +
+            "  esac; " +
             "  resolved=''; " +
-            "  if [ -n \"$icon\" ]; then " +
-            "    case \"$icon\" in /*) resolved=\"$icon\" ;; " +
-            "    *) resolved=$(find " +
-            "/usr/share/icons/Papirus-Dark/48x48 /usr/share/icons/Papirus/48x48 " +
+            "  if [ -n \"$icon\" ]; then case \"$icon\" in " +
+            "    /*) resolved=\"$icon\" ;; " +
+            "    *) resolved=$(find /usr/share/icons/Papirus-Dark/48x48 /usr/share/icons/Papirus/48x48 " +
             "/usr/share/icons/hicolor/48x48 /usr/share/icons/hicolor/scalable " +
             "/var/lib/flatpak/exports/share/icons " +
             "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/icons " +
-            "/usr/share/pixmaps " +
-            "-name \"${icon}.svg\" -o -name \"${icon}.png\" 2>/dev/null | head -1) ;; " +
-            "    esac; " +
-            "  fi; " +
-            "  echo \"${name}|${exec}|${resolved}\"; " +
-            "done"]
-        running: false
-
-        property var parsed: []
+            "/usr/share/pixmaps -name \"${icon}.svg\" -o -name \"${icon}.png\" 2>/dev/null | head -1) ;; " +
+            "  esac; fi; " +
+            "  echo \"${name}|${exec}|${resolved}|${cat}\"; " +
+            "done"
+        ]
 
         stdout: SplitParser {
             onRead: line => {
                 const parts = line.split("|")
                 if (parts.length >= 2) {
                     appLoader.parsed.push({
-                        name: parts[0],
-                        exec: parts[1],
-                        icon: parts[2] || ""
+                        name: parts[0], exec: parts[1],
+                        icon: parts[2] || "", category: parts[3] || "Other"
                     })
                 }
             }
@@ -245,6 +356,7 @@ PanelWindow {
             if (!running && parsed.length > 0) {
                 appsModel.apps = parsed.sort((a, b) => a.name.localeCompare(b.name))
                 parsed = []
+                appsModel.buildCategories()
                 appsModel.updateFilter()
             }
         }
