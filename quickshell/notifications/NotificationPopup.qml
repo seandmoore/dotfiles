@@ -75,7 +75,7 @@ PanelWindow {
                         color: Colors.base
                         font.pixelSize: 13
                         font.weight: Font.Bold
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: "JetBrainsMono Nerd Font Propo"
                         font.underline: false
                         font.italic: false
                         font.strikeout: false
@@ -85,7 +85,7 @@ PanelWindow {
                 Text {
                     text: (notification && notification.appName) ? notification.appName : ""
                     color: Colors.subtext0
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                     font.underline: false
                     font.italic: false
                     font.strikeout: false
@@ -98,7 +98,7 @@ PanelWindow {
                     text: "✕"
                     color: Colors.overlay1
                     font.pixelSize: 11
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                     font.underline: false
                     font.italic: false
                     font.strikeout: false
@@ -118,7 +118,7 @@ PanelWindow {
             Text {
                 text: (notification && notification.summary) ? notification.summary : ""
                 color: Colors.text
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false
@@ -133,7 +133,7 @@ PanelWindow {
             Text {
                 text: (notification && notification.body) ? notification.body : ""
                 color: Colors.subtext1
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false

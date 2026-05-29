@@ -28,10 +28,7 @@ RowLayout {
             id: cpuIcon
             text: "󰍛"
             color: cpuValue > 80 ? Colors.red : cpuValue > 50 ? Colors.yellow : Colors.green
-            font.family: "JetBrainsMono Nerd Font"
-            font.underline: false
-            font.italic: false
-            font.strikeout: false
+            font.family: "JetBrainsMono Nerd Font Propo"
             font.pixelSize: 13
             scale: 1
             Behavior on color { ColorAnimation { duration: 200 } }
@@ -42,10 +39,7 @@ RowLayout {
             id: cpuLabel
             text: cpuValue + "%"
             color: Colors.subtext1
-            font.family: "JetBrainsMono Nerd Font"
-            font.underline: false
-            font.italic: false
-            font.strikeout: false
+            font.family: "JetBrainsMono Nerd Font Propo"
             font.pixelSize: 11
         }
     }
@@ -58,10 +52,7 @@ RowLayout {
             id: ramIcon
             text: "󰧑"
             color: ramPercent > 85 ? Colors.red : ramPercent > 60 ? Colors.yellow : Colors.blue
-            font.family: "JetBrainsMono Nerd Font"
-            font.underline: false
-            font.italic: false
-            font.strikeout: false
+            font.family: "JetBrainsMono Nerd Font Propo"
             font.pixelSize: 13
             scale: 1
             Behavior on color { ColorAnimation { duration: 200 } }
@@ -72,10 +63,7 @@ RowLayout {
             id: ramLabel
             text: ramUsed + " GB"
             color: Colors.subtext1
-            font.family: "JetBrainsMono Nerd Font"
-            font.underline: false
-            font.italic: false
-            font.strikeout: false
+            font.family: "JetBrainsMono Nerd Font Propo"
             font.pixelSize: 11
         }
     }

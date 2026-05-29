@@ -72,7 +72,7 @@ PanelWindow {
             Text {
                 text: root.brightness >= 70 ? "󰃠" : root.brightness >= 30 ? "󰃟" : "󰃞"
                 color: Colors.yellow
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false
@@ -99,7 +99,7 @@ PanelWindow {
             Text {
                 text: root.brightness + "%"
                 color: Colors.subtext1
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false

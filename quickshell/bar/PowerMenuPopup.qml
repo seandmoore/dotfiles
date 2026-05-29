@@ -92,7 +92,7 @@ PanelWindow {
 
                         Text {
                             text: modelData.icon
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             font.pixelSize: 14
                             color: modelData.color
                         }

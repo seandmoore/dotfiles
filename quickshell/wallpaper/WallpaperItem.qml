@@ -57,7 +57,7 @@ Item {
                     text: "󰋩"
                     font.pixelSize: 24
                     color: Colors.overlay0
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                 }
 
                 Rectangle {
@@ -86,7 +86,7 @@ Item {
                 }
                 color: isSelected ? Colors.mauve : Colors.subtext0
                 font.pixelSize: 10
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideMiddle
             }

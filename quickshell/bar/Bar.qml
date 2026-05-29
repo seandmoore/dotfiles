@@ -23,21 +23,22 @@ PanelWindow {
 
     Behavior on implicitHeight { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
 
-    // Main bar background
+    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     0.92)
+    readonly property color bubbleBorder: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.8)
+    readonly property int   bubbleH:      40
+    readonly property int   bubbleR:      20
+    readonly property int   bubblePad:    14
+
+    // ── LEFT BUBBLE — app menu + workspaces ──────────────────────────────────
     Rectangle {
-        id: barBg
-        anchors {
-            top: parent.top
-            topMargin: 0
-            left: parent.left
-            leftMargin: 16
-            right: parent.right
-            rightMargin: 16
-        }
-        height: 56
-        radius: 22
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.55)
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
+        id: leftBubble
+        anchors { left: parent.left; leftMargin: 12 }
+        y: (56 - bubbleH) / 2
+        height: root.bubbleH
+        width: leftRow.implicitWidth + root.bubblePad * 2
+        radius: root.bubbleR
+        color: root.bubbleBg
+        border.color: root.bubbleBorder
         border.width: 1
 
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
@@ -45,122 +46,158 @@ PanelWindow {
         Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
 
         RowLayout {
-            anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-            spacing: 0
+            id: leftRow
+            anchors.centerIn: parent
+            spacing: 8
 
             AppMenuButton { Layout.alignment: Qt.AlignVCenter }
-            Item { implicitWidth: 8 }
             Workspaces {
                 Layout.alignment: Qt.AlignVCenter
                 screenName: root.screen ? root.screen.name : ""
             }
+        }
+    }
 
-            Item { Layout.fillWidth: true }
-            Clock { Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter }
-            Item { Layout.fillWidth: true }
+    // ── CENTER BUBBLE — clock ────────────────────────────────────────────────
+    Rectangle {
+        id: centerBubble
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: (56 - bubbleH) / 2
+        height: root.bubbleH
+        width: clockItem.implicitWidth + root.bubblePad * 2 + 8
+        radius: root.bubbleR
+        color: root.bubbleBg
+        border.color: root.bubbleBorder
+        border.width: 1
 
-            RowLayout {
+        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+        Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+        Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
+
+        Clock {
+            id: clockItem
+            anchors.centerIn: parent
+        }
+    }
+
+    // ── RIGHT BUBBLE — stats + controls ─────────────────────────────────────
+    Rectangle {
+        id: rightBubble
+        anchors { right: parent.right; rightMargin: 12 }
+        y: (56 - bubbleH) / 2
+        height: root.bubbleH
+        width: rightRow.implicitWidth + root.bubblePad * 2
+        radius: root.bubbleR
+        color: root.bubbleBg
+        border.color: root.bubbleBorder
+        border.width: 1
+
+        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+        Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+        Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
+
+        RowLayout {
+            id: rightRow
+            anchors.centerIn: parent
+            spacing: 12
+
+            MediaPlayer {
+                visible: hasMedia
                 Layout.alignment: Qt.AlignVCenter
-                spacing: 16
+            }
 
-                MediaPlayer {
-                    visible: hasMedia
-                    Layout.alignment: Qt.AlignVCenter
-                }
-                SystemStats { Layout.alignment: Qt.AlignVCenter }
+            SystemStats { Layout.alignment: Qt.AlignVCenter }
+
+            Rectangle {
+                width: 1; height: 18
+                color: Colors.surface1
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            ThemeToggle { Layout.alignment: Qt.AlignVCenter }
+
+            // Wallpaper button
+            Item {
+                Layout.alignment: Qt.AlignVCenter
+                width: 28; height: 28
 
                 Rectangle {
-                    width: 1; height: 18
-                    color: Colors.surface1
-                    Layout.alignment: Qt.AlignVCenter
+                    anchors.centerIn: parent
+                    width: 32; height: 32; radius: 8
+                    color: Colors.accentDim
+                    opacity: wallMa.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
                 }
 
-                ThemeToggle { Layout.alignment: Qt.AlignVCenter }
-
-                // Wallpaper switcher button
-                Item {
-                    Layout.alignment: Qt.AlignVCenter
-                    width: 28; height: 28
-
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 32; height: 32; radius: 8
-                        color: Colors.accentDim
-                        opacity: wallMa.containsMouse ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                    }
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "󰋩"
-                        font.pixelSize: 15
-                        font.family: "JetBrainsMono Nerd Font"
-                        color: Colors.sky
-                    }
-
-                    MouseArea {
-                        id: wallMa
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: wallpaperIpc.running = true
-                    }
-
-                    Process {
-                        id: wallpaperIpc
-                        command: ["quickshell", "-c", "config", "ipc", "call", "wallpaper", "toggle"]
-                    }
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰋩"
+                    font.pixelSize: 15
+                    font.family: "JetBrainsMono Nerd Font Propo"
+                    color: Colors.sky
                 }
 
-                // Power button
-                Item {
-                    id: powerBtn
-                    Layout.alignment: Qt.AlignVCenter
-                    width: 28; height: 28
+                MouseArea {
+                    id: wallMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: wallpaperIpc.running = true
+                }
 
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: 32; height: 32; radius: 8
-                        color: Colors.accentDim
-                        opacity: powerMa.containsMouse ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: 150 } }
-                    }
+                Process {
+                    id: wallpaperIpc
+                    command: ["quickshell", "-c", "config", "ipc", "call", "wallpaper", "toggle"]
+                }
+            }
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: "⏻"
-                        font.pixelSize: 15
-                        color: root.powerMenuOpen ? Colors.red : Colors.mauve
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                    }
+            // Power button
+            Item {
+                Layout.alignment: Qt.AlignVCenter
+                width: 28; height: 28
 
-                    MouseArea {
-                        id: powerMa
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.powerMenuOpen = !root.powerMenuOpen
-                    }
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 32; height: 32; radius: 8
+                    color: Colors.accentDim
+                    opacity: powerMa.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 150 } }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "⏻"
+                    font.family: "JetBrainsMono Nerd Font Propo"
+                    font.pixelSize: 15
+                    color: root.powerMenuOpen ? Colors.red : Colors.mauve
+                    Behavior on color { ColorAnimation { duration: 150 } }
+                }
+
+                MouseArea {
+                    id: powerMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.powerMenuOpen = !root.powerMenuOpen
                 }
             }
         }
     }
 
-    // Power menu dropdown — inside same PanelWindow so it's always on the right screen
+    // ── POWER MENU DROPDOWN ──────────────────────────────────────────────────
     Rectangle {
         id: powerMenuPanel
         width: 160
         height: menuCol.implicitHeight + 16
         radius: 14
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.60)
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.92)
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
 
         anchors {
-            top: barBg.bottom
+            top: rightBubble.bottom
             topMargin: 6
-            right: barBg.right
-            rightMargin: 12
+            right: rightBubble.right
         }
 
         visible: root.powerMenuOpen
@@ -177,9 +214,9 @@ PanelWindow {
 
             Repeater {
                 model: [
-                    { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"] },
-                    { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["hyprctl", "dispatch", "exit", "0"] },
-                    { icon: "⏻",  label: "Shutdown", color: Colors.red,    cmd: ["systemctl", "poweroff"] },
+                    { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"]                    },
+                    { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["hyprctl", "dispatch", "exit", "0"]        },
+                    { icon: "⏻",  label: "Shutdown", color: Colors.red,    cmd: ["systemctl", "poweroff"]                   },
                 ]
 
                 delegate: Rectangle {
@@ -195,12 +232,13 @@ PanelWindow {
                         spacing: 10
                         Text {
                             text: modelData.icon
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             font.pixelSize: 14
                             color: modelData.color
                         }
                         Text {
                             text: modelData.label
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             font.pixelSize: 13
                             color: Colors.text
                             Layout.fillWidth: true
@@ -225,9 +263,9 @@ PanelWindow {
         Process { id: proc }
     }
 
-    // Dismiss on click outside the menu
+    // Dismiss power menu on click outside
     MouseArea {
-        anchors { top: barBg.bottom; left: parent.left; right: parent.right; bottom: parent.bottom }
+        anchors { top: parent.top; topMargin: 56; left: parent.left; right: parent.right; bottom: parent.bottom }
         visible: root.powerMenuOpen
         onClicked: root.powerMenuOpen = false
         z: -1

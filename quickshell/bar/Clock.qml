@@ -4,12 +4,12 @@ import "../theme"
 
 ColumnLayout {
     id: root
-    spacing: 0
+    spacing: 1
     opacity: 1
     scale: 1
 
     Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
-    Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
+    Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
 
     Component.onCompleted: {
         opacity = 0
@@ -21,26 +21,21 @@ ColumnLayout {
     Text {
         id: timeLabel
         Layout.alignment: Qt.AlignHCenter
-        text: Qt.formatDateTime(new Date(), "hh:mm")
+        text: Qt.formatDateTime(new Date(), "h:mm ap")
         color: Colors.text
-        font.family: "JetBrainsMono Nerd Font"
-        font.underline: false
-        font.italic: false
-        font.strikeout: false
-        font.pixelSize: 14
-        font.weight: Font.Medium
+        font.family: "JetBrainsMono Nerd Font Propo"
+        font.weight: Font.Bold
+        font.pixelSize: 15
     }
 
     Text {
         id: dateLabel
         Layout.alignment: Qt.AlignHCenter
-        text: Qt.formatDateTime(new Date(), "ddd dd MMM")
-        color: Colors.subtext1
-        font.family: "JetBrainsMono Nerd Font"
-        font.underline: false
-        font.italic: false
-        font.strikeout: false
-        font.pixelSize: 10
+        text: Qt.formatDateTime(new Date(), "ddd, MMM d")
+        color: Colors.subtext0
+        font.family: "JetBrainsMono Nerd Font Propo"
+        font.weight: Font.Normal
+        font.pixelSize: 11
     }
 
     Timer {
@@ -49,8 +44,8 @@ ColumnLayout {
         repeat: true
         onTriggered: {
             const now = new Date()
-            timeLabel.text = Qt.formatDateTime(now, "hh:mm")
-            dateLabel.text = Qt.formatDateTime(now, "ddd dd MMM")
+            timeLabel.text = Qt.formatDateTime(now, "h:mm ap")
+            dateLabel.text = Qt.formatDateTime(now, "ddd, MMM d")
         }
     }
 }

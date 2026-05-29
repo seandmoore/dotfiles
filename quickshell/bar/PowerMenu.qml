@@ -18,6 +18,7 @@ Item {
     Text {
         anchors.centerIn: parent
         text: "⏻"
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 15
         color: Colors.mauve
     }

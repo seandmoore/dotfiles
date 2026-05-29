@@ -74,7 +74,7 @@ PanelWindow {
             Text {
                 text: root.muted ? "󰖁" : root.volume >= 50 ? "󰕾" : "󰖀"
                 color: root.muted ? Colors.red : Colors.blue
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false
@@ -101,7 +101,7 @@ PanelWindow {
             Text {
                 text: root.volume + "%"
                 color: Colors.subtext1
-                font.family: "JetBrainsMono Nerd Font"
+                font.family: "JetBrainsMono Nerd Font Propo"
                 font.underline: false
                 font.italic: false
                 font.strikeout: false

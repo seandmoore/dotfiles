@@ -28,7 +28,7 @@ RowLayout {
         id: prevBtn
         text: "󰒮"
         color: Colors.subtext0
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.underline: false
         font.italic: false
         font.strikeout: false
@@ -52,7 +52,7 @@ RowLayout {
         id: playBtn
         text: (player && player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
         color: Colors.mauve
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.underline: false
         font.italic: false
         font.strikeout: false
@@ -76,7 +76,7 @@ RowLayout {
         id: nextBtn
         text: "󰒭"
         color: Colors.subtext0
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.underline: false
         font.italic: false
         font.strikeout: false
@@ -99,10 +99,7 @@ RowLayout {
     Text {
         text: player ? (player.trackTitle || "Unknown Track") : ""
         color: Colors.subtext1
-        font.family: "JetBrainsMono Nerd Font"
-        font.underline: false
-        font.italic: false
-        font.strikeout: false
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.pixelSize: 11
         visible: parent.hasMedia
         elide: Text.ElideRight

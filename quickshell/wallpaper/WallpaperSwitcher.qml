@@ -75,19 +75,28 @@ PanelWindow {
                 Layout.fillWidth: true
                 spacing: 12
 
-                Text {
-                    text: "󰋩  Wallpapers"
-                    color: Colors.text
-                    font.pixelSize: 16
-                    font.weight: Font.Bold
-                    font.family: "JetBrainsMono Nerd Font"
+                RowLayout {
+                    spacing: 6
+                    Text {
+                        text: "󰋩"
+                        color: Colors.text
+                        font.family: "JetBrainsMono Nerd Font Propo"
+                        font.pixelSize: 16
+                    }
+                    Text {
+                        text: "Wallpapers"
+                        color: Colors.text
+                        font.family: "JetBrainsMono Nerd Font Propo"
+                        font.weight: Font.Bold
+                        font.pixelSize: 16
+                    }
                 }
 
                 Text {
                     text: root.wallpapers.length + " images"
                     color: Colors.overlay0
                     font.pixelSize: 12
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                     Layout.alignment: Qt.AlignVCenter
                 }
 
@@ -109,7 +118,7 @@ PanelWindow {
                         Text {
                             text: ""
                             color: Colors.overlay0
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             font.pixelSize: 13
                         }
                         TextInput {
@@ -117,7 +126,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             color: Colors.text
                             font.pixelSize: 12
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             Keys.onEscapePressed: root.visible = false
                             onTextChanged: root.filterText = text.toLowerCase()
                         }
@@ -149,7 +158,6 @@ PanelWindow {
                         applyProc.command = [
                             "bash", "-c",
                             "wp=\"$1\";" +
-                            "hyprctl hyprpaper preload \"$wp\" &&" +
                             "hyprctl hyprpaper wallpaper \",${wp}\" &&" +
                             "printf 'preload = %s\\nwallpaper = ,%s\\nsplash = false\\n'" +
                             " \"$wp\" \"$wp\" > \"$HOME/dotfiles/hypr/hyprpaper.conf\"",
@@ -175,7 +183,7 @@ PanelWindow {
                     text: scanner.running ? "Scanning…" : "No wallpapers found"
                     color: Colors.overlay0
                     font.pixelSize: 14
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                 }
             }
         }
@@ -206,7 +214,7 @@ PanelWindow {
         id: currentLoader
         command: [
             "bash", "-c",
-            "hyprctl hyprpaper listactive 2>/dev/null | awk -F ' = ' 'NF==2{print $2}' | head -1"
+            "hyprctl hyprpaper listactive 2>/dev/null | awk -F ': ' 'NF==2{print $2}' | head -1"
         ]
         stdout: SplitParser {
             onRead: line => { if (line.trim()) root.currentWallpaper = line.trim() }

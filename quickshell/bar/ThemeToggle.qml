@@ -13,7 +13,7 @@ Item {
         // Moon for dark, sun for light
         text: Colors.darkMode ? "󰖔" : "󰖨"
         color: Colors.darkMode ? Colors.lavender : Colors.yellow
-        font.family: "JetBrainsMono Nerd Font"
+        font.family: "JetBrainsMono Nerd Font Propo"
         font.underline: false
         font.italic: false
         font.strikeout: false

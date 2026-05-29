@@ -89,7 +89,7 @@ PanelWindow {
                         color: Colors.subtext0
                         font.pixelSize: 11
                         font.weight: Font.Medium
-                        font.family: "JetBrainsMono Nerd Font"
+                        font.family: "JetBrainsMono Nerd Font Propo"
                         leftPadding: 8
                         topPadding: 4
                     }
@@ -123,7 +123,7 @@ PanelWindow {
 
                                 Text {
                                     text: appsModel.categoryIcon(modelData)
-                                    font.family: "JetBrainsMono Nerd Font"
+                                    font.family: "JetBrainsMono Nerd Font Propo"
                                     font.pixelSize: 13
                                     color: categoryList.currentIndex === index ? Colors.mauve : Colors.overlay1
                                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -131,6 +131,7 @@ PanelWindow {
 
                                 Text {
                                     text: modelData
+                                    font.family: "JetBrainsMono Nerd Font Propo"
                                     font.pixelSize: 12
                                     color: categoryList.currentIndex === index ? Colors.text : Colors.subtext0
                                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -177,7 +178,7 @@ PanelWindow {
                         Text {
                             text: ""
                             color: Colors.overlay0
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             font.pixelSize: 15
                         }
 
@@ -186,7 +187,7 @@ PanelWindow {
                             Layout.fillWidth: true
                             color: Colors.text
                             font.pixelSize: 13
-                            font.family: "JetBrainsMono Nerd Font"
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             selectionColor: Colors.mauve
                             selectedTextColor: Colors.base
                             clip: true

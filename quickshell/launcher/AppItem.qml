@@ -62,7 +62,7 @@ Item {
                     color: Colors.base
                     font.pixelSize: 18
                     font.weight: Font.Bold
-                    font.family: "JetBrainsMono Nerd Font"
+                    font.family: "JetBrainsMono Nerd Font Propo"
                     font.underline: false
                     font.italic: false
                     font.strikeout: false
@@ -76,7 +76,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             text: app.name || ""
             color: Colors.text
-            font.family: "JetBrainsMono Nerd Font"
+            font.family: "JetBrainsMono Nerd Font Propo"
             font.underline: false
             font.italic: false
             font.strikeout: false
