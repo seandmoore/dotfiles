@@ -79,6 +79,9 @@ PACMAN_PKGS=(
     inotify-tools
     qt5-wayland
     qt6-wayland
+    qt5ct
+    qt6ct
+    kvantum
     flatpak
     noto-fonts
     noto-fonts-emoji
@@ -131,6 +134,9 @@ fi
 AUR_PKGS=(
     quickshell-git
     grimblast-git
+    kvantum-theme-catppuccin-git
+    catppuccin-gtk-theme-mocha
+    catppuccin-cursors-mocha
 )
 
 if command -v yay &>/dev/null; then
