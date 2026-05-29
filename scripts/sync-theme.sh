@@ -63,12 +63,11 @@ LOCAL_THEME_DIR="$HOME/.local/share/themes/${GTK_THEME}/gtk-4.0"
 # read via xdg-data/themes:ro permission. When gsettings gtk-theme changes, GTK4
 # reloads the theme live in all running apps via the Settings portal.
 mkdir -p "$LOCAL_THEME_DIR"
-cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$LOCAL_THEME_DIR/gtk.css"
-cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$LOCAL_THEME_DIR/gtk-dark.css"
+cp "$THEME_DIR/gtk.css"      "$LOCAL_THEME_DIR/gtk.css"
+cp "$THEME_DIR/gtk-dark.css" "$LOCAL_THEME_DIR/gtk-dark.css" 2>/dev/null || cp "$THEME_DIR/gtk.css" "$LOCAL_THEME_DIR/gtk-dark.css"
 
 # Update ~/.config/gtk-4.0/gtk.css for native (non-Flatpak) GTK4 apps.
-# Flatpak apps get the colors from the local theme above.
-cp "$DOTFILES_DIR/gtk-4.0/gtk-${MODE}-mauve.css" "$GTK4_DIR/gtk.css"
+cp "$THEME_DIR/gtk.css" "$GTK4_DIR/gtk.css"
 
 # Keep assets symlink for native GTK4 apps that use the system theme path
 if [[ -d "$THEME_DIR/assets" ]]; then
