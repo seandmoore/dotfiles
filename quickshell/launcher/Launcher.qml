@@ -52,8 +52,8 @@ PanelWindow {
         anchors.centerIn: parent
         width: Math.min(parent.width * 0.72, 860)
         height: Math.min(parent.height * 0.72, 620)
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.97)
-        border.color: Colors.surface1
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.60)
+        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.45)
         border.width: 1
         radius: 20
         opacity: root.visible ? 1 : 0
@@ -70,7 +70,7 @@ PanelWindow {
             Rectangle {
                 Layout.preferredWidth: 160
                 Layout.fillHeight: true
-                color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.95)
+                color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.45)
                 radius: 20
 
                 // Right side flat to merge with content area
@@ -164,8 +164,8 @@ PanelWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     height: 42
-                    color: Colors.surface0
-                    border.color: searchField.activeFocus ? Colors.mauve : Colors.surface1
+                    color: Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.55)
+                    border.color: searchField.activeFocus ? Colors.mauve : Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
                     border.width: 1
                     radius: 12
                     Behavior on border.color { ColorAnimation { duration: 150 } }

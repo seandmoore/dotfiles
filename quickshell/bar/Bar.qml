@@ -35,9 +35,16 @@ PanelWindow {
         }
         height: 44
         radius: 22
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.92)
-        border.color: Colors.surface1
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.55)
+        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
+
+        // Glass top highlight
+        Rectangle {
+            anchors { top: parent.top; left: parent.left; right: parent.right }
+            height: 1; radius: 22
+            color: Qt.rgba(1, 1, 1, 0.08)
+        }
 
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
         Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
@@ -116,8 +123,8 @@ PanelWindow {
         width: 160
         height: menuCol.implicitHeight + 16
         radius: 14
-        color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.97)
-        border.color: Colors.surface1
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.60)
+        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
 
         anchors {
