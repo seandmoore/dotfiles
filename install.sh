@@ -163,6 +163,13 @@ if command -v flatpak &>/dev/null; then
     flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
         || warn "Could not add Flathub remote (continuing)"
     ok "Flathub remote ready"
+
+    info "Applying Flatpak Catppuccin theme overrides ..."
+    flatpak override --user --filesystem=~/.local/share/themes
+    flatpak override --user --filesystem=~/.local/share/icons
+    flatpak override --user --filesystem=~/.icons
+    flatpak override --user --env=GTK_THEME=catppuccin-mocha-mauve-standard+default
+    ok "Flatpak theme overrides applied"
 fi
 
 # ── Symlinks ───────────────────────────────────────────────────────────────────
