@@ -82,6 +82,8 @@ PACMAN_PKGS=(
     qt5ct
     qt6ct
     kvantum
+    nautilus
+    xdg-user-dirs
     flatpak
     noto-fonts
     noto-fonts-emoji
@@ -212,6 +214,12 @@ if [[ ! -f "$ACTIVE_COLORS" ]]; then
 else
     ok "active-colors.conf already exists — leaving it untouched"
 fi
+
+# ── XDG user directories ─────────────────────────────────────────────────────
+
+info "Setting up home folders ..."
+xdg-user-dirs-update
+ok "Home folders ready (Documents, Downloads, Music, Pictures, Videos, etc.)"
 
 # ── Systemd user services ─────────────────────────────────────────────────────
 
