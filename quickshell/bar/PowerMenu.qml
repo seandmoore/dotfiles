@@ -32,6 +32,6 @@ Item {
 
     Process {
         id: toggleProc
-        command: ["quickshell", "ipc", "call", "powermenu", "toggle"]
+        command: ["quickshell", "-c", "config", "ipc", "call", "powermenu", "toggle"]
     }
 }
