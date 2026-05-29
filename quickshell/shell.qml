@@ -36,8 +36,6 @@ ShellRoot {
     // App launcher (fullscreen overlay, hidden by default)
     Launcher {}
 
-    // Power menu popup (top-right dropdown)
-    PowerMenuPopup {}
 
     // ── Theme sync ─────────────────────────────────────────────────────────────
 

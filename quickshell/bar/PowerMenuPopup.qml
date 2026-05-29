@@ -56,7 +56,7 @@ PanelWindow {
             top: parent.top
             topMargin: 68
             right: parent.right
-            rightMargin: 16
+            rightMargin: 28
         }
 
         opacity: root.visible ? 1 : 0
