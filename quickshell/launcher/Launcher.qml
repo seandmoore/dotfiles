@@ -155,10 +155,10 @@ PanelWindow {
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.topMargin: 14
+                Layout.bottomMargin: 14
+                Layout.rightMargin: 14
                 spacing: 10
-
-                anchors { top: parent.top; bottom: parent.bottom; right: parent.right }
-                anchors.margins: 14
 
                 // Search bar
                 Rectangle {

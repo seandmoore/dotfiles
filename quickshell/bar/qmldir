@@ -6,3 +6,4 @@ SystemStats SystemStats.qml
 ThemeToggle ThemeToggle.qml
 Workspaces Workspaces.qml
 PowerMenu PowerMenu.qml
+PowerMenuPopup PowerMenuPopup.qml
