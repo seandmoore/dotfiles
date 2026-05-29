@@ -14,6 +14,7 @@ if [[ "$MODE" == "latte" ]]; then
     ICON_THEME="Papirus"
     CURSOR_THEME="catppuccin-latte-mauve-cursors"
     PREFER_DARK="0"
+    SDDM_THEME="catppuccin-latte-mauve"
 else
     ACTIVE_BORDER="rgba(cba6f7ff)"
     INACTIVE_BORDER="rgba(45475aff)"
@@ -23,6 +24,7 @@ else
     ICON_THEME="Papirus-Dark"
     CURSOR_THEME="catppuccin-mocha-mauve-cursors"
     PREFER_DARK="1"
+    SDDM_THEME="catppuccin-mocha-mauve"
 fi
 
 # ── Persist selection (before Hyprland reload so Lua reads the new value) ──────
@@ -127,4 +129,17 @@ flatpak list --app --columns=application 2>/dev/null | while read -r app; do
         disown
     fi
 done
+
+# ── Cursor theme — apply live to compositor and new processes ─────────────────
+systemctl --user set-environment \
+    XCURSOR_THEME="$CURSOR_THEME" \
+    XCURSOR_SIZE=24 \
+    HYPRCURSOR_THEME="$CURSOR_THEME" \
+    HYPRCURSOR_SIZE=24 2>/dev/null || true
+hyprctl setcursor "$CURSOR_THEME" 24 2>/dev/null || true
+
+# ── SDDM theme ────────────────────────────────────────────────────────────────
+if command -v sddm-set-theme &>/dev/null; then
+    sudo sddm-set-theme "$SDDM_THEME" 2>/dev/null || true
+fi
 
