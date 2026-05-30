@@ -38,28 +38,40 @@ hl.monitor({
     -- 10-bit is required for HDR10 / Rec. 2020 colour depth
     bitdepth  = 10,
 
-    -- "hdr" → BT.2020 primaries + PQ (ST 2084) transfer = HDR10 / Rec. 2020 signal path
+    -- "hdr" → BT.2020 (Rec.2020) primaries + PQ (ST 2084) transfer = the HDR10 signal path.
+    -- The BT.2020 container is wider than any panel, so the QD-OLED renders its FULL native
+    -- gamut. Use "hdr" (standard BT.2020 primaries) for accuracy — NOT "hdredid", whose EDID
+    -- primaries the Hyprland wiki calls "known to be inaccurate".
     cm        = "hdr",
 
     -- Panel-specific ICC profile for accurate Rec. 2020 gamut mapping.
     -- Generate with DisplayCAL + a colorimeter, then point this at the resulting .icc file.
     -- icc_profile = os.getenv("HOME") .. "/.local/share/icc/msi-dp1.icc",
 
-    -- SDR content tone-mapping inside the Rec. 2020 / HDR10 container.
-    -- sdrbrightness: nit multiplier for SDR apps (1.0 = reference 100 nit white).
-    --   Raise to 1.5–2.0 if SDR windows look dim against HDR content.
-    -- sdrsaturation: compensates for sRGB apps looking washed-out inside the wider BT.2020 gamut.
-    --   1.1–1.2 restores perceptual saturation without clipping; tune to taste.
+    -- SDR content handling inside the HDR (BT.2020 + PQ) container. Both default to 1.0,
+    -- which is the accurate / neutral setting: SDR apps keep their authored colours.
+    -- sdrbrightness: luminance multiplier for SDR apps (1.0 = reference SDR white).
+    -- sdrsaturation: saturation multiplier for SDR apps. 1.0 = accurate; values >1.0 push
+    --   artificial saturation (1.25 was a +25% boost — the source of inaccurate colour).
     sdrbrightness = 1.0,
-    sdrsaturation = 1.25,
+    sdrsaturation = 1.0,
 
-    -- Luminance metadata sent to the panel for HDR tone-mapping.
-    -- sdr_min_luminance: panel black level in nits (0.0 for LCD; 0.0005 for OLED).
-    -- sdr_max_luminance: panel HDR peak in nits — must match your panel spec exactly.
-    --   HDR400 → 400 | HDR600 → 600 | HDR1000 → 1000
-    --   Wrong value causes blown highlights (too low) or crushed tone-map (too high).
-    sdr_min_luminance = 0,
-    sdr_max_luminance = 1000,
+    -- Two DIFFERENT luminance concepts, don't conflate them:
+    --  • sdr_*_luminance = how SDR/desktop content is mapped INTO the HDR container.
+    --  • max_luminance   = the PANEL's own HDR peak, used to tone-map HDR content.
+    -- sdr_min_luminance: floor SDR content maps to (default 0.2; fine for OLED near-black).
+    -- sdr_max_luminance: SDR white level in nits. Set to 250 = this QD-OLED's full-field
+    --   (100% window) sustained ceiling, so the desktop is as bright as the panel can
+    --   actually hold. (203 = BT.2408 reference white; 80 = spec-dim default. The old 1000
+    --   was the WRONG knob — that's SDR white, not panel peak.) No point going higher: ABL
+    --   caps full-screen white here regardless, and brighter only pumps + risks burn-in.
+    sdr_min_luminance = 0.2,
+    sdr_max_luminance = 250,
+
+    -- Panel HDR peak = 1000 nits (this QD-OLED's "peak 1000" mode). Stating it explicitly
+    -- keeps HDR-content tone-mapping correct even if the EDID is incomplete. Black point and
+    -- MaxFALL stay auto (min_luminance / max_avg_luminance unset = -1 = read from EDID).
+    max_luminance = 1000,
 
     -- VRR mode 3: adaptive sync enabled automatically for fullscreen game/video content
     vrr       = 3,
@@ -126,6 +138,10 @@ hl.on("hyprland.start", function()
     apply_cursor()
     hl.exec_cmd("quickshell -c config")
     hl.exec_cmd("xsettingsd")
+    -- Re-apply the last wallpaper now that outputs exist. hyprpaper's systemd service
+    -- often starts before the monitors are ready, so its conf `wallpaper=` line no-ops
+    -- and the desktop comes up blank; this restore (with retry) makes it stick.
+    hl.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/restore-wallpaper.sh")
 end)
 
 -- Re-apply on every config reload (cursor resets to default on reload).
@@ -221,6 +237,18 @@ hl.config({
         force_default_wallpaper = 0,
         disable_hyprland_logo   = true,
         animate_manual_resizes  = true,
+    },
+})
+
+-- Cursor — force SOFTWARE cursors. DP-1 is an HDR / 10-bit panel, and the hardware
+-- cursor plane can't colour-manage the (sRGB) cursor bitmap into the HDR/PQ space, so
+-- the themed cursor renders as a washed-out white arrow regardless of XCURSOR/HYPRCURSOR
+-- theme. Software cursors are composited into the frame with the rest of the output, so
+-- the Catppuccin mauve cursor shows correctly. (Must be set via the Lua config —
+-- `hyprctl keyword` is rejected on the non-legacy parser.)
+hl.config({
+    cursor = {
+        no_hardware_cursors = true,
     },
 })
 

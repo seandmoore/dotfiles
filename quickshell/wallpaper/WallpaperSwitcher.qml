@@ -155,12 +155,11 @@ PanelWindow {
                     itemHeight: grid.cellHeight
                     onActivated: (p) => {
                         root.currentWallpaper = p
+                        // set-wallpaper.sh preloads (required by hyprpaper), applies live,
+                        // and persists ~/.config/hypr/hyprpaper.conf so boot restores it.
                         applyProc.command = [
                             "bash", "-c",
-                            "wp=\"$1\";" +
-                            "hyprctl hyprpaper wallpaper \",${wp}\" &&" +
-                            "printf 'preload = %s\\nwallpaper = ,%s\\nsplash = false\\n'" +
-                            " \"$wp\" \"$wp\" > \"$HOME/dotfiles/hypr/hyprpaper.conf\"",
+                            "exec \"$HOME/dotfiles/scripts/set-wallpaper.sh\" \"$1\"",
                             "--", p
                         ]
                         applyProc.running = true

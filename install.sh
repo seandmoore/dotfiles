@@ -27,6 +27,21 @@ make_link() {
     ok "Linked $dest -> $src"
 }
 
+# Copy a default into place only if dest isn't already a real file. For files that
+# become local runtime state (e.g. hyprpaper.conf records the current wallpaper), so
+# they must NOT be symlinks into the repo (writing them would dirty git).
+seed_file() {
+    local src="$1" dest="$2"
+    mkdir -p "$(dirname "$dest")"
+    if [[ -f "$dest" && ! -L "$dest" ]]; then
+        ok "Kept existing $dest"
+    else
+        [[ -L "$dest" ]] && rm -f "$dest"   # replace a stale symlink from older installs
+        cp "$src" "$dest"
+        ok "Seeded $dest <- $src"
+    fi
+}
+
 # ── Arch Linux detection ───────────────────────────────────────────────────────
 
 [[ -f /etc/arch-release ]] || die "This script requires Arch Linux (/etc/arch-release not found)."
@@ -218,7 +233,7 @@ info "Creating config symlinks ..."
 
 # Hyprland
 make_link "$DOTFILES_DIR/hypr/hyprland.lua"   "$HOME/.config/hypr/hyprland.lua"
-make_link "$DOTFILES_DIR/hypr/hyprpaper.conf"  "$HOME/.config/hypr/hyprpaper.conf"
+seed_file "$DOTFILES_DIR/hypr/hyprpaper.conf"  "$HOME/.config/hypr/hyprpaper.conf"   # local runtime state (current wallpaper)
 make_link "$DOTFILES_DIR/hypr/hyprlock.conf"   "$HOME/.config/hypr/hyprlock.conf"
 make_link "$DOTFILES_DIR/hypr/hypridle.conf"   "$HOME/.config/hypr/hypridle.conf"
 
