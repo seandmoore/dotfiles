@@ -329,14 +329,10 @@ PanelWindow {
             "    *) [ -z \"$cat\" ] && cat=Other ;; " +
             "  esac; " +
             "  resolved=''; " +
-            "  if [ -n \"$icon\" ]; then case \"$icon\" in " +
-            "    /*) resolved=\"$icon\" ;; " +
-            "    *) resolved=$(find /usr/share/icons/Papirus-Dark/48x48 /usr/share/icons/Papirus/48x48 " +
-            "/usr/share/icons/hicolor/48x48 /usr/share/icons/hicolor/scalable " +
-            "/var/lib/flatpak/exports/share/icons " +
-            "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/icons " +
-            "/usr/share/pixmaps -name \"${icon}.svg\" -o -name \"${icon}.png\" 2>/dev/null | head -1) ;; " +
-            "  esac; fi; " +
+            "  mode=theme; [[ \";${cats};\" == *\";Game;\"* ]] && mode=original; " +
+            "  if [ -n \"$icon\" ]; then " +
+            "    resolved=$(\"$HOME/dotfiles/scripts/icon-resolve.sh\" \"$icon\" \"${ICON_THEME:-Papirus-Dark}\" \"$mode\"); " +
+            "  fi; " +
             "  echo \"${name}|${exec}|${resolved}|${cat}\"; " +
             "done"
         ]

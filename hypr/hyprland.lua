@@ -119,6 +119,12 @@ hl.env("HYPRCURSOR_THEME",      cursor_theme)
 hl.env("XCURSOR_SIZE",          "24")
 hl.env("HYPRCURSOR_SIZE",       "24")
 
+-- Qt apps (Dolphin = KF6/Qt6, etc.) only follow the Catppuccin Kvantum theme when the
+-- platform-theme plugin is loaded. Without this they fall back to plain Fusion. qt6ct
+-- reads style=kvantum from ~/.config/qt6ct/qt6ct.conf; Kvantum reads the active flavour
+-- from ~/.config/Kvantum/kvantum.kvconfig (written by sync-theme.sh on mocha/latte).
+hl.env("QT_QPA_PLATFORMTHEME",  "qt6ct")
+
 
 -------------------
 ---- AUTOSTART ----
@@ -134,7 +140,7 @@ local function apply_cursor()
 end
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE QT_QPA_PLATFORMTHEME")
     apply_cursor()
     hl.exec_cmd("quickshell -c config")
     hl.exec_cmd("xsettingsd")

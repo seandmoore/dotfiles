@@ -144,8 +144,16 @@ CURSOREOF
 done
 
 # ── Kvantum ────────────────────────────────────────────────────────────────────
+# Kvantum (the Qt style behind qt5ct/qt6ct's style=kvantum) reads its active theme from
+# here. Update the theme= line in place if present, otherwise create the file — a plain
+# `sed -i` silently no-ops on a missing/empty config, which left Qt apps unthemed.
 KVANTUM_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"
-sed -i "s/^theme=.*/theme=$KVANTUM_THEME/" "$KVANTUM_CFG"
+mkdir -p "$(dirname "$KVANTUM_CFG")"
+if [[ -f "$KVANTUM_CFG" ]] && grep -q '^theme=' "$KVANTUM_CFG"; then
+    sed -i "s/^theme=.*/theme=$KVANTUM_THEME/" "$KVANTUM_CFG"
+else
+    printf '[General]\ntheme=%s\n' "$KVANTUM_THEME" > "$KVANTUM_CFG"
+fi
 
 # ── kdeglobals (Qt icon theme) ─────────────────────────────────────────────────
 KDEGLOBALS="${XDG_CONFIG_HOME:-$HOME/.config}/kdeglobals"
