@@ -71,8 +71,10 @@ PACMAN_PKGS=(
     bluez
     bluez-utils
     blueman
-    ranger
-    firefox
+    nautilus
+    nwg-look
+    xsettingsd
+    uwsm
     pipewire
     wireplumber
     pipewire-pulse
@@ -138,7 +140,9 @@ AUR_PKGS=(
     grimblast-git
     kvantum-theme-catppuccin-git
     catppuccin-gtk-theme-mocha
+    catppuccin-gtk-theme-latte
     catppuccin-cursors-mocha
+    catppuccin-cursors-latte
 )
 
 if command -v yay &>/dev/null; then
@@ -163,6 +167,11 @@ if command -v flatpak &>/dev/null; then
     flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo \
         || warn "Could not add Flathub remote (continuing)"
     ok "Flathub remote ready"
+
+    info "Installing Zen Browser ..."
+    flatpak install --user --noninteractive flathub app.zen_browser.zen \
+        || warn "Could not install Zen Browser (continuing)"
+    ok "Zen Browser installed"
 
     info "Applying Flatpak Catppuccin theme overrides ..."
     flatpak override --user --filesystem=~/.local/share/themes
@@ -212,6 +221,28 @@ mkdir -p "$HOME/.config/gtk-4.0"
 cp "$DOTFILES_DIR/gtk-4.0/gtk-mocha-mauve.css" "$HOME/.config/gtk-4.0/gtk.css"
 ok "Wrote ~/.config/gtk-4.0/gtk.css (Catppuccin Mocha default)"
 
+# ── Bootstrap xsettingsd config ───────────────────────────────────────────────
+# xsettingsd is started by hyprland.lua on startup; sync-theme.sh updates it on
+# theme switch. We only write the file if it doesn't already exist.
+XSETTINGSD_CONF="$HOME/.config/xsettingsd/xsettingsd.conf"
+if [[ ! -f "$XSETTINGSD_CONF" ]]; then
+    mkdir -p "$(dirname "$XSETTINGSD_CONF")"
+    cat > "$XSETTINGSD_CONF" << 'XEOF'
+Net/ThemeName "catppuccin-mocha-mauve-standard+default"
+Net/IconThemeName "Papirus-Dark"
+Gtk/CursorThemeName "catppuccin-mocha-mauve-cursors"
+Net/EnableEventSounds 1
+EnableInputFeedbackSounds 1
+Xft/Antialias 1
+Xft/Hinting 1
+Xft/HintStyle "hintfull"
+Xft/RGBA "rgb"
+XEOF
+    ok "Created $XSETTINGSD_CONF (Catppuccin Mocha default)"
+else
+    ok "xsettingsd.conf already exists — leaving it untouched"
+fi
+
 # ── Bootstrap kitty active-colors.conf ────────────────────────────────────────
 # kitty.conf includes active-colors.conf at startup; sync-theme.sh manages it
 # at runtime by overwriting it. Must be a plain file, not a symlink.
@@ -256,8 +287,10 @@ printf '\n'
 ok "Dotfiles installed successfully!"
 printf '\n'
 printf '  Next steps:\n'
-printf '  1. Place a wallpaper at ~/.config/hypr/wallpaper.png\n'
-printf '     (hyprpaper.conf references this path)\n'
-printf '  2. Run: Hyprland\n'
-printf '  3. Use the theme toggle button in the bar to switch Mocha <-> Latte\n'
+printf '  1. Place a wallpaper in ~/Pictures/ and update\n'
+printf '     ~/dotfiles/hypr/hyprpaper.conf with its path\n'
+printf '  2. Run: Hyprland  (or log in via your display manager)\n'
+printf '  3. Use the theme toggle in the bar to switch Mocha <-> Latte\n'
+printf '     or press SUPER+G to open nwg-look for GTK theme fine-tuning\n'
+printf '  4. Press SUPER+H to open the keybind cheat sheet\n'
 printf '\n'

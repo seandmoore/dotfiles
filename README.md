@@ -7,13 +7,15 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 | Component | Description |
 |-----------|-------------|
 | **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds. |
-| **Quickshell** | Status bar, app launcher, notification daemon, volume/brightness OSD. |
+| **Quickshell** | Status bar, app launcher, notification daemon, volume/brightness OSD, keybind cheat sheet. |
 | **Hyprlock** | Lock screen with blurred background and animated clock. |
 | **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
 | **Hyprpaper** | Wallpaper manager. |
 | **Hyprpolkitagent** | Authentication agent for privilege prompts. |
 | **Kitty** | Terminal emulator with Catppuccin theme and powerline tabs. |
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
+| **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
+| **nwg-look** | GTK theme picker — changes are snapshotted per mode and restored on theme switch. |
 
 ## Screenshots
 
@@ -32,12 +34,13 @@ The script will:
 1. Verify you are on Arch Linux
 2. Clone or update the dotfiles repo to `~/dotfiles`
 3. Install all required packages via `pacman`
-4. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, `grimblast-git`)
-5. Create all config symlinks under `~/.config/`
-6. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-7. Refresh the font cache
+4. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
+5. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
+6. Create all config symlinks under `~/.config/`
+7. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+8. Refresh the font cache
 
-After the script finishes, place a wallpaper at `~/.config/hypr/wallpaper.png` and run `Hyprland`.
+After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
 ## Manual Installation
 
@@ -126,12 +129,20 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `networkmanager` + `network-manager-applet` | Network management |
 | `bluez` + `bluez-utils` + `blueman` | Bluetooth stack and manager |
 
+**Theme & Display tools**
+
+| Package | Purpose |
+|---------|---------|
+| `nwg-look` | GTK theme picker (`SUPER+G`) |
+| `xsettingsd` | Live X11/XWayland theme broadcast |
+| `uwsm` | Session manager used for clean logout |
+
 **Apps**
 
 | Package | Purpose |
 |---------|---------|
-| `ranger` | Terminal file manager (`SUPER+E`) |
-| `firefox` | Web browser (`SUPER+B`) |
+| `nautilus` | File manager (`SUPER+E`) |
+| Zen Browser *(Flatpak)* | Web browser (`SUPER+B`) |
 
 **Fonts**
 
@@ -146,17 +157,23 @@ All packages are available in the Arch official repositories unless noted as AUR
 |------|--------|
 | `SUPER + Return` | Open terminal (Kitty) |
 | `SUPER + SPACE` | Toggle app launcher |
-| `SUPER + Q` | Close window |
-| `SUPER + E` | File manager (ranger) |
-| `SUPER + B` | Browser (Firefox) |
+| `SUPER + C` | Close window |
+| `SUPER + E` | File manager (Nautilus) |
+| `SUPER + B` | Browser (Zen) |
+| `SUPER + G` | GTK theme picker (nwg-look) |
+| `SUPER + W` | Wallpaper switcher |
+| `SUPER + H` | Keybind cheat sheet |
 | `SUPER + M` | Exit Hyprland |
-| `SUPER + H/J/K/L` | Move focus left/down/up/right |
+| `SUPER + J/K/L` | Move focus down/up/right |
 | `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right |
+| `SUPER + ALT + H/J/K/L` | Resize window left/down/up/right |
 | `SUPER + 1–9` | Switch to workspace |
 | `SUPER + SHIFT + 1–9` | Move window to workspace |
+| `SUPER + Scroll` | Cycle workspaces |
 | `SUPER + F` | Toggle fullscreen |
 | `SUPER + V` | Toggle floating |
 | `SUPER + P` | Toggle pseudotile |
+| `SUPER + T` | Toggle split (dwindle) |
 | `Print` | Screenshot selection (copy) |
 | `SHIFT + Print` | Screenshot full screen (copy) |
 | `XF86AudioRaiseVolume/LowerVolume/Mute` | Volume control |
@@ -168,14 +185,16 @@ All packages are available in the Arch official repositories unless noted as AUR
 The setup uses [Catppuccin](https://github.com/catppuccin/catppuccin) in two flavors:
 
 - **Mocha** (dark) — default
-- **Latte** (light) — toggle via the bar button or run:
+- **Latte** (light) — toggle via the bar button, or press `SUPER+G` to open `nwg-look` and apply changes, or run directly:
 
 ```bash
-~/.config/quickshell/scripts/sync-theme.sh latte   # switch to light
-~/.config/quickshell/scripts/sync-theme.sh mocha   # switch to dark
+~/dotfiles/scripts/sync-theme.sh latte   # switch to light
+~/dotfiles/scripts/sync-theme.sh mocha   # switch to dark
 ```
 
 The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login.
+
+`nwg-look` changes are snapshotted per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget variant choices survive theme switches.
 
 ## License
 
