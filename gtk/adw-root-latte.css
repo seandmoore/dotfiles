@@ -1,0 +1,51 @@
+/* Catppuccin Latte (Mauve) — libadwaita 1.6+ custom properties (light).
+ * libadwaita styles its OWN widgets (headerbar, window, sidebar, buttons) through
+ * these :root custom properties and ignores @define-color. Appended after an
+ * @import of the full GTK theme by scripts/sync-theme.sh. Values mirror the theme. */
+:root {
+  --accent-color: #8839ef;
+  --accent-bg-color: #8839ef;
+  --accent-fg-color: #eff1f5;
+  --destructive-color: #d20f39;
+  --destructive-bg-color: #d20f39;
+  --destructive-fg-color: #eff1f5;
+  --success-color: #40a02b;
+  --success-bg-color: #40a02b;
+  --success-fg-color: #eff1f5;
+  --warning-color: #df8e1d;
+  --warning-bg-color: #df8e1d;
+  --warning-fg-color: #eff1f5;
+  --error-color: #d20f39;
+  --error-bg-color: #d20f39;
+  --error-fg-color: #eff1f5;
+  --window-bg-color: #eff1f5;
+  --window-fg-color: #4c4f69;
+  --view-bg-color: #eff1f5;
+  --view-fg-color: #4c4f69;
+  --headerbar-bg-color: #e6e9ef;
+  --headerbar-fg-color: #4c4f69;
+  --headerbar-border-color: #ccd0da;
+  --headerbar-backdrop-color: #eff1f5;
+  --headerbar-shade-color: rgba(0, 0, 0, 0.12);
+  --headerbar-darker-shade-color: rgba(0, 0, 0, 0.24);
+  --sidebar-bg-color: #e6e9ef;
+  --sidebar-fg-color: #4c4f69;
+  --sidebar-backdrop-color: #eff1f5;
+  --sidebar-shade-color: rgba(0, 0, 0, 0.12);
+  --secondary-sidebar-bg-color: #ccd0da;
+  --secondary-sidebar-fg-color: #4c4f69;
+  --secondary-sidebar-backdrop-color: #e6e9ef;
+  --secondary-sidebar-shade-color: rgba(0, 0, 0, 0.12);
+  --card-bg-color: #e6e9ef;
+  --card-fg-color: #4c4f69;
+  --card-shade-color: rgba(0, 0, 0, 0.12);
+  --dialog-bg-color: #e6e9ef;
+  --dialog-fg-color: #4c4f69;
+  --popover-bg-color: #e6e9ef;
+  --popover-fg-color: #4c4f69;
+  --popover-shade-color: rgba(0, 0, 0, 0.12);
+  --shade-color: rgba(0, 0, 0, 0.12);
+  --scrollbar-outline-color: rgba(0, 0, 0, 0.2);
+  --thumbnail-bg-color: #ccd0da;
+  --thumbnail-fg-color: #4c4f69;
+}

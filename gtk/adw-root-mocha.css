@@ -1,0 +1,46 @@
+/* Catppuccin Mocha (Mauve) — libadwaita 1.6+ custom properties.
+ * libadwaita styles its OWN widgets (headerbar, window, sidebar, buttons) through
+ * these :root custom properties and ignores @define-color. Appended after an
+ * @import of the full GTK theme by scripts/sync-theme.sh. Values mirror the theme. */
+:root {
+  --accent-color: #cba6f7;
+  --accent-bg-color: #cba6f7;
+  --accent-fg-color: rgba(17, 17, 27, 0.87);
+  --destructive-color: #f38ba8;
+  --destructive-bg-color: #f38ba8;
+  --destructive-fg-color: rgba(17, 17, 27, 0.87);
+  --error-color: #f38ba8;
+  --error-bg-color: #f38ba8;
+  --error-fg-color: rgba(17, 17, 27, 0.87);
+  --success-color: #a6e3a1;
+  --success-bg-color: #a6e3a1;
+  --success-fg-color: rgba(17, 17, 27, 0.87);
+  --warning-color: #f9e2af;
+  --warning-bg-color: #f9e2af;
+  --warning-fg-color: rgba(17, 17, 27, 0.87);
+  --window-bg-color: #1e1e2e;
+  --window-fg-color: #eff1f5;
+  --view-bg-color: #1e1e2e;
+  --view-fg-color: #eff1f5;
+  --headerbar-bg-color: #181825;
+  --headerbar-fg-color: #eff1f5;
+  --headerbar-border-color: rgba(239, 241, 245, 0.12);
+  --headerbar-backdrop-color: #1e1e2e;
+  --headerbar-shade-color: rgba(239, 241, 245, 0.12);
+  --card-bg-color: #1e1e2e;
+  --card-fg-color: #eff1f5;
+  --card-shade-color: rgba(239, 241, 245, 0.12);
+  --dialog-bg-color: #181825;
+  --dialog-fg-color: #eff1f5;
+  --popover-bg-color: #1e1e2e;
+  --popover-fg-color: #eff1f5;
+  --sidebar-bg-color: #181825;
+  --sidebar-fg-color: #eff1f5;
+  --sidebar-backdrop-color: #1e1e2e;
+  --sidebar-border-color: rgba(239, 241, 245, 0.12);
+  --sidebar-shade-color: rgba(239, 241, 245, 0.12);
+  --secondary-sidebar-bg-color: #181825;
+  --secondary-sidebar-fg-color: #eff1f5;
+  --scrollbar-outline-color: rgba(239, 241, 245, 0.12);
+  --shade-color: rgba(239, 241, 245, 0.12);
+}
