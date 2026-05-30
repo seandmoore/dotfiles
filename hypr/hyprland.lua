@@ -86,20 +86,13 @@ local launcher = "qs -c config ipc call launcher toggle"
 ---- ENVIRONMENT VARIABLES --
 -----------------------------
 
+local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-mauve-cursors"
+
+hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark")
+hl.env("XCURSOR_THEME",         cursor_theme)
+hl.env("HYPRCURSOR_THEME",      cursor_theme)
 hl.env("XCURSOR_SIZE",          "24")
 hl.env("HYPRCURSOR_SIZE",       "24")
-
--- Catppuccin cursor theme — matches mocha/latte mode
-local cursor_theme = (mode == "latte") and "catppuccin-latte-mauve-cursors" or "catppuccin-mocha-dark-cursors"
-hl.env("XCURSOR_THEME",    cursor_theme)
-hl.env("HYPRCURSOR_THEME", cursor_theme)
-
--- Qt theming — use Kvantum style, configured via qt5ct/qt6ct
-hl.env("QT_QPA_PLATFORMTHEME",  "qt5ct")
-hl.env("QT_STYLE_OVERRIDE",     "kvantum")
-
--- GTK theming — ensure apps pick up the correct icon theme
-hl.env("ICON_THEME",            (mode == "latte") and "Papirus" or "Papirus-Dark")
 
 
 -------------------
@@ -119,6 +112,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE")
     apply_cursor()
     hl.exec_cmd("quickshell -c config")
+    hl.exec_cmd("xsettingsd")
 end)
 
 -- Re-apply on every config reload (cursor resets to default on reload).
@@ -257,9 +251,11 @@ hl.bind(mainMod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(launcher))
 hl.bind(mainMod .. " + C",      hl.dsp.window.close())
 hl.bind(mainMod .. " + M",      hl.dsp.exit())
-hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(terminal .. " -e ranger"))
-hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("firefox"))
+hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("nautilus"))
+hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("flatpak run app.zen_browser.zen"))
+hl.bind(mainMod .. " + G",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/nwg-look-sync.sh"))
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call wallpaper toggle"))
+hl.bind(mainMod .. " + H",     hl.dsp.exec_cmd("qs -c config ipc call cheatsheet toggle"))
 
 -- Window management
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -268,7 +264,6 @@ hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.layout("togglesplit"))  -- dwindle only
 
 -- Move focus — vim keys
-hl.bind(mainMod .. " + H", hl.dsp.focus({ direction = "left"  }))
 hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + K", hl.dsp.focus({ direction = "up"    }))
 hl.bind(mainMod .. " + J", hl.dsp.focus({ direction = "down"  }))

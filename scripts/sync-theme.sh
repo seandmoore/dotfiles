@@ -22,7 +22,7 @@ else
     GTK_THEME="catppuccin-mocha-mauve-standard+default"
     KVANTUM_THEME="catppuccin-mocha-mauve"
     ICON_THEME="Papirus-Dark"
-    CURSOR_THEME="catppuccin-mocha-dark-cursors"
+    CURSOR_THEME="catppuccin-mocha-mauve-cursors"
     PREFER_DARK="1"
     SDDM_THEME="catppuccin-mocha-mauve"
 fi
@@ -41,19 +41,31 @@ if [[ -f "$KITTY_COLORS_DIR/colors-$MODE.conf" ]]; then
     pkill -SIGUSR1 -x kitty 2>/dev/null || true
 fi
 
-# ── GTK3 settings ──────────────────────────────────────────────────────────────
+# ── GTK3 / GTK4 settings ───────────────────────────────────────────────────────
+# If the user saved a per-mode snapshot via nwg-look-sync.sh, restore it wholesale
+# so all their nwg-look choices (font, cursor, widget variant, etc.) are preserved.
+# Fall back to sed-based updates when no snapshot exists yet.
+SNAP_DIR="$HOME/.local/share/catppuccin"
 GTK3_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-3.0/settings.ini"
-sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK3_SETTINGS"
-sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK3_SETTINGS"
-sed -i "s/^gtk-cursor-theme-name = .*/gtk-cursor-theme-name = $CURSOR_THEME/" "$GTK3_SETTINGS"
-sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK3_SETTINGS"
-
-# ── GTK4 settings ──────────────────────────────────────────────────────────────
 GTK4_SETTINGS="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0/settings.ini"
-sed -i "s/^gtk-theme-name = .*/gtk-theme-name = $GTK_THEME/" "$GTK4_SETTINGS"
-sed -i "s/^gtk-icon-theme-name = .*/gtk-icon-theme-name = $ICON_THEME/" "$GTK4_SETTINGS"
-sed -i "s/^gtk-cursor-theme-name = .*/gtk-cursor-theme-name = $CURSOR_THEME/" "$GTK4_SETTINGS"
-sed -i "s/^gtk-application-prefer-dark-theme = .*/gtk-application-prefer-dark-theme = $PREFER_DARK/" "$GTK4_SETTINGS"
+
+if [[ -f "$SNAP_DIR/gtk-3.0-${MODE}.ini" ]]; then
+    cp "$SNAP_DIR/gtk-3.0-${MODE}.ini" "$GTK3_SETTINGS"
+else
+    sed -i "s/^gtk-theme-name[[:space:]]*=[[:space:]]*.*/gtk-theme-name=$GTK_THEME/" "$GTK3_SETTINGS"
+    sed -i "s/^gtk-icon-theme-name[[:space:]]*=[[:space:]]*.*/gtk-icon-theme-name=$ICON_THEME/" "$GTK3_SETTINGS"
+    sed -i "s/^gtk-cursor-theme-name[[:space:]]*=[[:space:]]*.*/gtk-cursor-theme-name=$CURSOR_THEME/" "$GTK3_SETTINGS"
+    sed -i "s/^gtk-application-prefer-dark-theme[[:space:]]*=[[:space:]]*.*/gtk-application-prefer-dark-theme=$PREFER_DARK/" "$GTK3_SETTINGS"
+fi
+
+if [[ -f "$SNAP_DIR/gtk-4.0-${MODE}.ini" ]]; then
+    cp "$SNAP_DIR/gtk-4.0-${MODE}.ini" "$GTK4_SETTINGS"
+else
+    sed -i "s/^gtk-theme-name[[:space:]]*=[[:space:]]*.*/gtk-theme-name=$GTK_THEME/" "$GTK4_SETTINGS"
+    sed -i "s/^gtk-icon-theme-name[[:space:]]*=[[:space:]]*.*/gtk-icon-theme-name=$ICON_THEME/" "$GTK4_SETTINGS"
+    sed -i "s/^gtk-cursor-theme-name[[:space:]]*=[[:space:]]*.*/gtk-cursor-theme-name=$CURSOR_THEME/" "$GTK4_SETTINGS"
+    sed -i "s/^gtk-application-prefer-dark-theme[[:space:]]*=[[:space:]]*.*/gtk-application-prefer-dark-theme=$PREFER_DARK/" "$GTK4_SETTINGS"
+fi
 
 # ── GTK4 / libadwaita CSS ──────────────────────────────────────────────────────
 GTK4_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
@@ -84,17 +96,29 @@ gsettings set org.gnome.desktop.interface cursor-theme     "$CURSOR_THEME"  2>/d
 gsettings set org.gnome.desktop.interface color-scheme     \
     "$([ "$MODE" = "latte" ] && echo prefer-light || echo prefer-dark)" 2>/dev/null || true
 
+# ── xsettingsd (broadcasts theme to XWayland/X11 GTK apps live) ───────────────
+XSETTINGSD_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/xsettingsd/xsettingsd.conf"
+if [[ -f "$XSETTINGSD_CONF" ]]; then
+    sed -i "s|^Net/ThemeName .*|Net/ThemeName \"$GTK_THEME\"|"      "$XSETTINGSD_CONF"
+    sed -i "s|^Net/IconThemeName .*|Net/IconThemeName \"$ICON_THEME\"|" "$XSETTINGSD_CONF"
+    sed -i "s|^Gtk/CursorThemeName .*|Gtk/CursorThemeName \"$CURSOR_THEME\"|" "$XSETTINGSD_CONF"
+    pkill -HUP xsettingsd 2>/dev/null || true
+fi
+
 # ── Wayland cursor theme (XCURSOR_THEME env var) ────────────────────────────────
 export XCURSOR_THEME="$CURSOR_THEME"
 export XCURSOR_SIZE=24
 
-# Update user-level default cursor theme (~/.local/share/icons/default/index.theme)
-# This takes precedence over system defaults and doesn't require sudo
-mkdir -p "$HOME/.local/share/icons/default"
-cat > "$HOME/.local/share/icons/default/index.theme" << CURSOREOF
+# Update default cursor theme in both lookup locations.
+# ~/.icons/default takes precedence over ~/.local/share/icons/default for XWayland
+# apps; nwg-look writes the former so we must keep both in sync.
+for cursor_dir in "$HOME/.icons/default" "$HOME/.local/share/icons/default"; do
+    mkdir -p "$cursor_dir"
+    cat > "$cursor_dir/index.theme" << CURSOREOF
 [Icon Theme]
 Inherits=$CURSOR_THEME
 CURSOREOF
+done
 
 # ── Kvantum ────────────────────────────────────────────────────────────────────
 KVANTUM_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"

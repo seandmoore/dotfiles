@@ -7,6 +7,7 @@ import "./notifications"
 import "./osd"
 import "./launcher"
 import "./wallpaper"
+import "./cheatsheet"
 import "./theme"
 
 // Entry point — Quickshell loads this file automatically.
@@ -39,6 +40,9 @@ ShellRoot {
 
     // Wallpaper switcher (fullscreen overlay, hidden by default)
     WallpaperSwitcher {}
+
+    // Keybind cheat sheet (fullscreen overlay, hidden by default)
+    KeybindCheatsheet {}
 
 
     // ── Theme sync ─────────────────────────────────────────────────────────────

@@ -1,7 +1,11 @@
 *.swp
 *.swo
+*.save
 *~
 .DS_Store
 __pycache__/
 node_modules/
 .cache/
+nvim/lua/lua
+scripts/scripts
+quickshell/quickshell

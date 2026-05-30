@@ -73,7 +73,7 @@ PanelWindow {
             Repeater {
                 model: [
                     { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"] },
-                    { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["hyprctl", "dispatch", "exit", "0"] },
+                    { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["uwsm", "stop"] },
                     { icon: "⏻",  label: "Shutdown", color: Colors.red,    cmd: ["systemctl", "poweroff"] },
                 ]
 
