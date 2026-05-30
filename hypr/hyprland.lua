@@ -25,7 +25,7 @@ local pal = palette[mode]
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 
 -- MSI gaming monitor on DP-1
--- 240 Hz, HDR (BT.2020 wide gamut + PQ transfer), 10-bit, VRR mode 3
+-- 240 Hz, HDR10 (Rec. 2020 / BT.2020 primaries + SMPTE ST 2084 PQ transfer), 10-bit, VRR mode 3
 -- VRR modes: 0 = off | 1 = always | 2 = fullscreen only | 3 = fullscreen (content-type aware)
 -- NOTE: verify the resolution below matches your panel — common MSI QHD: 2560x1440
 --       run `hyprctl monitors` to see what Hyprland detects for DP-1
@@ -35,20 +35,33 @@ hl.monitor({
     position  = "0x0",
     scale     = 1,
 
-    -- 10-bit colour depth is required for HDR
+    -- 10-bit is required for HDR10 / Rec. 2020 colour depth
     bitdepth  = 10,
 
-    -- cm = "hdr"  →  wide colour gamut (BT.2020 primaries) + HDR PQ transfer function
+    -- "hdr" → BT.2020 primaries + PQ (ST 2084) transfer = HDR10 / Rec. 2020 signal path
     cm        = "hdr",
 
-    -- SDR app brightness/saturation inside HDR mode (1.0 = unchanged)
-    -- Raise sdrbrightness toward 1.5-2.0 if SDR content looks too dim on your panel
-    sdrbrightness  = 1.0,
-    sdrsaturation  = 1.0,
+    -- Panel-specific ICC profile for accurate Rec. 2020 gamut mapping.
+    -- Generate with DisplayCAL + a colorimeter, then point this at the resulting .icc file.
+    -- icc_profile = os.getenv("HOME") .. "/.local/share/icc/msi-dp1.icc",
+
+    -- SDR content tone-mapping inside the Rec. 2020 / HDR10 container.
+    -- sdrbrightness: nit multiplier for SDR apps (1.0 = reference 100 nit white).
+    --   Raise to 1.5–2.0 if SDR windows look dim against HDR content.
+    -- sdrsaturation: compensates for sRGB apps looking washed-out inside the wider BT.2020 gamut.
+    --   1.1–1.2 restores perceptual saturation without clipping; tune to taste.
+    sdrbrightness = 1.0,
+    sdrsaturation = 1.25,
+
+    -- Luminance metadata sent to the panel for HDR tone-mapping.
+    -- sdr_min_luminance: panel black level in nits (0.0 for LCD; 0.0005 for OLED).
+    -- sdr_max_luminance: panel HDR peak in nits — must match your panel spec exactly.
+    --   HDR400 → 400 | HDR600 → 600 | HDR1000 → 1000
+    --   Wrong value causes blown highlights (too low) or crushed tone-map (too high).
     sdr_min_luminance = 0,
     sdr_max_luminance = 1000,
 
-    -- VRR mode 3: auto-enables adaptive sync for fullscreen game/video content
+    -- VRR mode 3: adaptive sync enabled automatically for fullscreen game/video content
     vrr       = 3,
 })
 
@@ -220,6 +233,10 @@ hl.config({
     input = {
         kb_layout  = "us",
         kb_options = "caps:escape",
+
+        -- NumLock active at startup so numpad digits register at the hyprlock prompt
+        -- (SDDM has NumLock on; without this the same password fails only under Hyprland)
+        numlock_by_default = true,
 
         follow_mouse = 1,
         sensitivity  = 0,
