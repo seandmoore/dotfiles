@@ -160,6 +160,30 @@ else
     warn "Install them manually: yay -S ${AUR_PKGS[*]}"
 fi
 
+# ── Catppuccin Latte GTK theme (prebuilt fallback) ─────────────────────────────
+# The AUR package catppuccin-gtk-theme-latte (above) installs to /usr/share/themes
+# but can fail to build. Fall back to the official prebuilt release into the user
+# theme dir (no sudo/AUR). sync-theme.sh reads ~/.local/share/themes for light mode.
+LATTE_USR="/usr/share/themes/catppuccin-latte-mauve-standard+default/gtk-4.0/gtk.css"
+LATTE_LOCAL="$HOME/.local/share/themes/catppuccin-latte-mauve-standard+default/gtk-4.0/gtk.css"
+if grep -q '@define-color' "$LATTE_USR" 2>/dev/null || grep -q '@define-color' "$LATTE_LOCAL" 2>/dev/null; then
+    ok "Catppuccin Latte GTK theme already present"
+else
+    info "Fetching Catppuccin Latte GTK theme (prebuilt) ..."
+    _latte_tmp=$(mktemp -d)
+    if curl -fsSL -o "$_latte_tmp/latte.zip" \
+        "https://github.com/catppuccin/gtk/releases/download/v1.0.3/catppuccin-latte-mauve-standard+default.zip"; then
+        mkdir -p "$HOME/.local/share/themes"
+        # Extract only the main variant (skip -hdpi/-xhdpi). unzip is often absent; use python.
+        python3 -c "import zipfile; z=zipfile.ZipFile('$_latte_tmp/latte.zip'); z.extractall('$HOME/.local/share/themes/', [n for n in z.namelist() if n.startswith('catppuccin-latte-mauve-standard+default/')])" \
+            && ok "Catppuccin Latte GTK theme installed to ~/.local/share/themes" \
+            || warn "Could not extract Catppuccin Latte theme (python3 missing?)"
+    else
+        warn "Could not download Catppuccin Latte theme; light-mode GTK widgets may be unthemed"
+    fi
+    rm -rf "$_latte_tmp"
+fi
+
 # ── Flatpak / Flathub ─────────────────────────────────────────────────────────
 
 if command -v flatpak &>/dev/null; then
@@ -174,11 +198,17 @@ if command -v flatpak &>/dev/null; then
     ok "Zen Browser installed"
 
     info "Applying Flatpak Catppuccin theme overrides ..."
-    flatpak override --user --filesystem=~/.local/share/themes
-    flatpak override --user --filesystem=~/.local/share/icons
-    flatpak override --user --filesystem=~/.icons
-    flatpak override --user --filesystem=xdg-config/gtk-4.0:ro
-    flatpak override --user --env=GTK_THEME=catppuccin-mocha-mauve-standard+default
+    # Default to mocha (dark); sync-theme.sh flips env + portal on a light/dark switch.
+    # :ro grants let sandboxes READ the host theme/icons/cursors; env picks the flavor
+    # for non-libadwaita GTK apps (libadwaita follows the portal + gtk.css :root).
+    flatpak override --user \
+        --env=GTK_THEME=catppuccin-mocha-mauve-standard+default \
+        --env=ICON_THEME=Papirus-Dark \
+        --filesystem=xdg-config/gtk-3.0:ro \
+        --filesystem=xdg-config/gtk-4.0:ro \
+        --filesystem=xdg-data/themes:ro \
+        --filesystem=xdg-data/icons:ro \
+        --filesystem=~/.icons:ro
     ok "Flatpak theme overrides applied"
 fi
 

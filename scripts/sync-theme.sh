@@ -157,13 +157,17 @@ for cfg in "${XDG_CONFIG_HOME:-$HOME/.config}/qt5ct/qt5ct.conf" \
     [[ -f "$cfg" ]] && sed -i "s/^icon_theme=.*/icon_theme=$ICON_THEME/" "$cfg"
 done
 
-# ── Flatpak — update GTK_THEME override ───────────────────────────────────────
+# ── Flatpak — make sandboxes use THIS flavor (user override; no sudo) ─────────
 if command -v flatpak &>/dev/null; then
-    sudo flatpak override --system --env=GTK_THEME="$GTK_THEME" 2>/dev/null || true
-    # Re-assert the read-only grants that let sandboxes SEE the theme/icons/cursors.
-    # These have been silently wiped before (e.g. via Flatseal), which greys out
-    # every Flatpak app despite GTK_THEME being set — so re-apply them each sync.
+    # libadwaita apps follow the portal color-scheme (set via gsettings above) + the
+    # :root in the bind-mounted gtk.css; GTK_THEME/ICON_THEME cover non-libadwaita GTK
+    # apps and icons. The USER override WINS over any --system override, so set the env
+    # here (also avoids a sudo prompt on every toggle) and re-assert the read-only
+    # grants that let sandboxes SEE the theme/icons/cursors (silently wiped before,
+    # e.g. via Flatseal, which greys out every app despite GTK_THEME being set).
     flatpak override --user \
+        --env=GTK_THEME="$GTK_THEME" \
+        --env=ICON_THEME="$ICON_THEME" \
         --filesystem=xdg-config/gtk-3.0:ro \
         --filesystem=xdg-config/gtk-4.0:ro \
         --filesystem=xdg-data/themes:ro \
@@ -174,9 +178,10 @@ fi
 # ── Flatpak — restart running libadwaita apps ──────────────────────────────────
 # ADW_DEBUG_COLOR_SCHEME permanently overrides the portal for the process lifetime,
 # preventing live dark/light switching. We rely on the portal instead (no env var).
-# The @define-color palette in gtk.css only takes effect at launch, so running
-# libadwaita Flatpak apps must be restarted to pick up the new theme.
-flatpak list --app --system --columns=application 2>/dev/null | while read -r app; do
+# The @define-color palette in gtk.css and GTK_THEME only take effect at launch, so
+# running Flatpak apps must be restarted to pick up the new flavor. List BOTH system
+# and user installations (drop --system; sort -u dedupes apps installed in both).
+flatpak list --app --columns=application 2>/dev/null | sort -u | while read -r app; do
     if pgrep -f "$app" > /dev/null 2>&1; then
         pkill -f "$app" 2>/dev/null || true
         sleep 0.5
