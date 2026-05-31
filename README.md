@@ -52,12 +52,13 @@ The script will:
 
 1. Verify you are on Arch Linux
 2. Clone or update the dotfiles repo to `~/dotfiles`
-3. Install all required packages via `pacman`
-4. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
-5. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
-6. Create all config symlinks under `~/.config/`
-7. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-8. Refresh the font cache
+3. Activate the Git pre-commit hook that lints staged files (`core.hooksPath` → `.githooks/`)
+4. Install all required packages via `pacman`
+5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
+6. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
+7. Create all config symlinks under `~/.config/`
+8. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+9. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -215,6 +216,17 @@ The setup uses [Catppuccin](https://github.com/catppuccin/catppuccin) in two fla
 The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login.
 
 `nwg-look` changes are snapshotted per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget variant choices survive theme switches.
+
+## Development
+
+Config files are syntax-checked by `scripts/verify.sh` — Lua via `luac`, shell via `bash -n`, QML via `qmllint`, plus brace-balance checks for Hyprland/Kitty configs:
+
+```bash
+scripts/verify.sh            # check every tracked file
+scripts/verify.sh --staged   # check only staged files
+```
+
+`install.sh` wires this in as a Git pre-commit hook (`core.hooksPath` → `.githooks/pre-commit`), so broken configs are caught before they land in a commit. Bypass with `git commit --no-verify` when needed.
 
 ## License
 

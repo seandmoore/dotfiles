@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pre-commit hook — lint staged dotfiles before the commit is created.
+# Runs scripts/verify.sh in --staged mode (luac / bash -n / qmllint / conf
+# brace checks); a non-zero exit aborts the commit.
+#
+# Activated repo-wide with:  git config core.hooksPath .githooks
+# (install.sh does this automatically on a fresh checkout.)
+set -euo pipefail
+repo_root="$(git rev-parse --show-toplevel)"
+exec "$repo_root/scripts/verify.sh" --staged

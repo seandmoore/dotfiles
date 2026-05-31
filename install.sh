@@ -61,6 +61,13 @@ else
 fi
 ok "Dotfiles ready at $DOTFILES_DIR"
 
+# ── Git pre-commit hook ─────────────────────────────────────────────────────────
+# Lint staged files (scripts/verify.sh --staged) before each commit. The hook
+# lives in the tracked .githooks/ dir; point git at it so fresh clones pick it up.
+info "Activating the pre-commit hook ..."
+git -C "$DOTFILES_DIR" config core.hooksPath .githooks
+ok "Pre-commit hook active (.githooks/pre-commit)"
+
 # ── pacman packages ────────────────────────────────────────────────────────────
 
 PACMAN_PKGS=(
