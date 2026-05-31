@@ -48,25 +48,27 @@ hl.monitor({
     -- Generate with DisplayCAL + a colorimeter, then point this at the resulting .icc file.
     -- icc_profile = os.getenv("HOME") .. "/.local/share/icc/msi-dp1.icc",
 
-    -- SDR content handling inside the HDR (BT.2020 + PQ) container. Both default to 1.0,
-    -- which is the accurate / neutral setting: SDR apps keep their authored colours.
+    -- SDR content handling inside the HDR (BT.2020 + PQ) container. 1.0 / 1.0 is the
+    -- accurate / neutral setting (SDR apps keep authored colours); the values below
+    -- deliberately push a brighter, slightly more vivid "KDE-punchy" look instead.
     -- sdrbrightness: luminance multiplier for SDR apps (1.0 = reference SDR white).
-    -- sdrsaturation: saturation multiplier for SDR apps. 1.0 = accurate; values >1.0 push
-    --   artificial saturation (1.25 was a +25% boost — the source of inaccurate colour).
-    sdrbrightness = 1.0,
-    sdrsaturation = 1.0,
+    --   1.2 = +20% → desktop/apps read brighter inside the HDR container.
+    -- sdrsaturation: saturation multiplier for SDR apps (1.0 = accurate). 1.1 = +10%,
+    --   ≈ KDE "SDR color intensity" ~10% — a gentle pop (1.25/+25% looked over-saturated).
+    sdrbrightness = 1.2,
+    sdrsaturation = 1.1,
 
     -- Two DIFFERENT luminance concepts, don't conflate them:
     --  • sdr_*_luminance = how SDR/desktop content is mapped INTO the HDR container.
     --  • max_luminance   = the PANEL's own HDR peak, used to tone-map HDR content.
     -- sdr_min_luminance: floor SDR content maps to (default 0.2; fine for OLED near-black).
-    -- sdr_max_luminance: SDR white level in nits. Set to 250 = this QD-OLED's full-field
-    --   (100% window) sustained ceiling, so the desktop is as bright as the panel can
-    --   actually hold. (203 = BT.2408 reference white; 80 = spec-dim default. The old 1000
-    --   was the WRONG knob — that's SDR white, not panel peak.) No point going higher: ABL
-    --   caps full-screen white here regardless, and brighter only pumps + risks burn-in.
+    -- sdr_max_luminance: SDR white level in nits. 250 = this QD-OLED's full-field (100%
+    --   window) accurate ceiling; 300 deliberately overshoots it for a brighter desktop —
+    --   full-screen white still ABL-caps near 250, but smaller/windowed bright UI pops
+    --   higher. (203 = BT.2408 reference white; 80 = spec-dim default. The old 1000 was the
+    --   WRONG knob — that's panel peak, not SDR white.) Higher pumps harder + risks burn-in.
     sdr_min_luminance = 0.2,
-    sdr_max_luminance = 250,
+    sdr_max_luminance = 300,
 
     -- Panel HDR peak = 1000 nits (this QD-OLED's "peak 1000" mode). Stating it explicitly
     -- keeps HDR-content tone-mapping correct even if the EDID is incomplete. Black point and
