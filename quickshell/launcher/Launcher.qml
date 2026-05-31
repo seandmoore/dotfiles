@@ -149,6 +149,72 @@ PanelWindow {
                             }
                         }
                     }
+
+                    // ── Power menu ─────────────────────────────────────────────
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 8
+                        Layout.rightMargin: 8
+                        Layout.topMargin: 4
+                        Layout.preferredHeight: 1
+                        color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.4)
+                    }
+
+                    Text {
+                        text: "Power"
+                        color: Colors.subtext0
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
+                        font.family: "JetBrainsMono Nerd Font Propo"
+                        leftPadding: 8
+                        topPadding: 2
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 2
+                        spacing: 2
+
+                        Repeater {
+                            model: [
+                                { icon: "󰒲", color: Colors.blue,   cmd: ["systemctl", "suspend"]  },
+                                { icon: "󰍃", color: Colors.yellow, cmd: ["uwsm", "stop"]          },
+                                { icon: "󰜉", color: Colors.green,  cmd: ["systemctl", "reboot"]   },
+                                { icon: "⏻",  color: Colors.red,    cmd: ["systemctl", "poweroff"] },
+                            ]
+
+                            delegate: Rectangle {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 34
+                                radius: 8
+                                color: pwrMa.containsMouse
+                                    ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.7)
+                                    : "transparent"
+                                Behavior on color { ColorAnimation { duration: 100 } }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData.icon
+                                    font.family: "JetBrainsMono Nerd Font Propo"
+                                    font.pixelSize: 15
+                                    color: modelData.color
+                                }
+
+                                MouseArea {
+                                    id: pwrMa
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        root.visible = false
+                                        powerProcess.command = modelData.cmd
+                                        powerProcess.running = true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -299,6 +365,8 @@ PanelWindow {
     }
 
     Process { id: launchProcess }
+
+    Process { id: powerProcess }
 
     Process {
         id: appLoader

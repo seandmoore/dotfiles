@@ -6,8 +6,8 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 | Component | Description |
 |-----------|-------------|
-| **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds. |
-| **Quickshell** | Status bar, app launcher, notification daemon, volume/brightness OSD, keybind cheat sheet. |
+| **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds, per-monitor HDR & wide-gamut color management. |
+| **Quickshell** | Frosted-glass status bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher, notification daemon, volume/brightness OSD, keybind cheat sheet. |
 | **Hyprlock** | Lock screen with blurred background and animated clock. |
 | **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
 | **Hyprpaper** | Wallpaper manager. |
@@ -16,6 +16,25 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
 | **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
 | **nwg-look** | GTK theme picker — changes are snapshotted per mode and restored on theme switch. |
+
+## Status bar
+
+A frosted-glass bar split into three floating bubbles:
+
+- **Left** — app-menu button, workspace indicator (scroll to switch workspaces), and a live audio visualizer: a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
+- **Center** — clock.
+- **Right** — MPRIS media player, live CPU & RAM usage graphs, and hover-menu buttons for volume, theme, wallpaper, and power (hover to reveal each dropdown; scroll the volume icon to adjust).
+
+The bar hot-reloads on save and follows the active Catppuccin flavor.
+
+## HDR & color management
+
+Color is managed per monitor in `hypr/hyprland.lua`:
+
+- **HDR displays** run the full HDR10 path — BT.2020 (Rec. 2020) primaries + PQ (ST. 2084) transfer at 10-bit. SDR content inside the HDR container is tunable via `sdrbrightness` / `sdrsaturation`, with panel peak and SDR-white levels set by `max_luminance` / `sdr_max_luminance`.
+- **SDR displays** use the `srgb` color space.
+
+Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
 
 ## Screenshots
 
@@ -111,6 +130,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `pipewire` + `wireplumber` + `pipewire-pulse` | Audio stack |
 | `pavucontrol` | Volume control GUI |
 | `playerctl` | Media player control |
+| `cava` | Audio spectrum feed for the bar visualizer |
 
 **Input & Display**
 

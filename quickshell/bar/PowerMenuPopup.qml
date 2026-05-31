@@ -74,6 +74,7 @@ PanelWindow {
                 model: [
                     { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"] },
                     { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["uwsm", "stop"] },
+                    { icon: "󰜉", label: "Restart",  color: Colors.green,  cmd: ["systemctl", "reboot"] },
                     { icon: "⏻",  label: "Shutdown", color: Colors.red,    cmd: ["systemctl", "poweroff"] },
                 ]
 

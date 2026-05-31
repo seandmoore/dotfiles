@@ -1,5 +1,7 @@
 AppMenuButton AppMenuButton.qml
+AudioVisualizer AudioVisualizer.qml
 Bar Bar.qml
+HoverMenuButton HoverMenuButton.qml
 Clock Clock.qml
 MediaPlayer MediaPlayer.qml
 SystemStats SystemStats.qml

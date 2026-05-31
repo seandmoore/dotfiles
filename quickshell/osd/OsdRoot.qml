@@ -9,7 +9,16 @@ Item {
     required property VolumeOsd volumeOsd
     required property BrightnessOsd brightnessOsd
 
-    // Watch pactl for volume changes
+    // Last-known audio state, so we only flash the OSD on a real change.
+    // pactl emits "change on sink" for many reasons (state RUNNING/IDLE/
+    // SUSPENDED when audio starts/stops, default-sink switches, etc.) — those
+    // must NOT pop the OSD, only actual volume/mute changes should.
+    property int  lastVolume: -1
+    property bool lastMuted: false
+    property bool baselineReady: false
+
+    // Watch pactl for volume changes — only react to the default *device* sink
+    // (note: "on sink #" excludes "on sink-input #", which is per-app streams).
     Process {
         id: pactlWatcher
         command: ["pactl", "subscribe"]
@@ -17,12 +26,14 @@ Item {
 
         stdout: SplitParser {
             onRead: line => {
-                if (line.includes("sink") && line.includes("change")) {
+                if (line.includes("'change'") && line.includes("on sink #"))
                     volumeQuery.running = true
-                }
             }
         }
     }
+
+    // Capture the current volume at startup without flashing the OSD.
+    Component.onCompleted: volumeQuery.running = true
 
     // One-shot pactl query for current volume
     Process {
@@ -38,10 +49,19 @@ Item {
             onRead: line => {
                 volumeQuery.lines.push(line.trim())
                 if (volumeQuery.lines.length >= 2) {
-                    const vol  = parseInt(volumeQuery.lines[0]) || 0
+                    const vol   = parseInt(volumeQuery.lines[0]) || 0
                     const muted = volumeQuery.lines[1] === "yes"
-                    volumeOsd.show(vol, muted)
                     volumeQuery.lines = []
+
+                    const changed = vol !== root.lastVolume || muted !== root.lastMuted
+                    root.lastVolume = vol
+                    root.lastMuted  = muted
+
+                    // Suppress the very first reading (startup baseline) and any
+                    // event that didn't actually move the volume or mute state.
+                    if (root.baselineReady && changed)
+                        volumeOsd.show(vol, muted)
+                    root.baselineReady = true
                 }
             }
         }

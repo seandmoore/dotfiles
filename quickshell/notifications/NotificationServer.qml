@@ -13,15 +13,37 @@ NotificationServer {
     bodyMarkupSupported: true
     imageSupported: true
 
-    property int nextIndex: 0
+    property var popups: []
     property var popupComponent: Qt.createComponent("NotificationPopup.qml")
 
+    // Re-number the stack so popups always pack tightly from the top edge.
+    function relayout() {
+        for (let i = 0; i < popups.length; i++)
+            popups[i].stackIndex = i
+    }
+
+    function remove(popup) {
+        const i = popups.indexOf(popup)
+        if (i >= 0) {
+            popups.splice(i, 1)
+            relayout()
+        }
+        popup.destroy()
+    }
+
     onNotification: notification => {
+        // Retain the notification past this handler so its actions/timeout work.
+        notification.tracked = true
+
         if (popupComponent.status === Component.Ready) {
-            popupComponent.createObject(null, {
+            const popup = popupComponent.createObject(null, {
                 notification: notification,
-                stackIndex: nextIndex++
+                server: root,
+                stackIndex: popups.length
             })
+            if (popup) popups.push(popup)
+        } else {
+            console.warn("NotificationPopup failed to load:", popupComponent.errorString())
         }
     }
 }

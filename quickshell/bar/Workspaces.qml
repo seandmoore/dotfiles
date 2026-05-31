@@ -57,4 +57,14 @@ RowLayout {
             }
         }
     }
+
+    // Scroll over the workspace dots to switch (matches the mainMod + wheel binds)
+    WheelHandler {
+        onWheel: (wheel) => {
+            if (wheel.angleDelta.y < 0)
+                Hyprland.dispatch('hl.dsp.focus({workspace="e+1"})')
+            else if (wheel.angleDelta.y > 0)
+                Hyprland.dispatch('hl.dsp.focus({workspace="e-1"})')
+        }
+    }
 }

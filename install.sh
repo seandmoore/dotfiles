@@ -81,6 +81,7 @@ PACMAN_PKGS=(
     brightnessctl
     playerctl
     pavucontrol
+    cava
     networkmanager
     network-manager-applet
     bluez
@@ -89,6 +90,8 @@ PACMAN_PKGS=(
     nautilus
     nwg-look
     xsettingsd
+    papirus-icon-theme
+    sddm
     uwsm
     pipewire
     wireplumber
