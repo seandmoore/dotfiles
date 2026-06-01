@@ -309,6 +309,37 @@ else
     ok "active-colors.conf already exists — leaving it untouched"
 fi
 
+# ── ROCm (AMD GPU compute) ─────────────────────────────────────────────────────
+# Exposes ROCm to the graphical session (environment.d) and interactive shells,
+# and hides the unsupported Raphael iGPU so compute only sees the discrete GPU.
+info "Configuring ROCm ..."
+
+# GUI apps launched from the uwsm/Hyprland session inherit this.
+make_link "$DOTFILES_DIR/environment.d/rocm.conf" "$HOME/.config/environment.d/rocm.conf"
+
+# Interactive shells source shell/rocm.sh (covers bare TTY/SSH logins). Append the
+# source line once per rc file; the grep guard keeps re-runs idempotent.
+for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rocm.sh' "$rc"; then
+        printf '\n# ROCm (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rocm.sh" ]] && . "$HOME/dotfiles/shell/rocm.sh"\n' >> "$rc"
+        ok "Wired ROCm into $rc"
+    else
+        ok "ROCm already wired into $rc (or rc absent)"
+    fi
+done
+
+# Ollama: hide the iGPU from GPU discovery (bundled rocBLAS crashes probing gfx1036).
+if command -v ollama &>/dev/null; then
+    if sudo install -Dm644 "$DOTFILES_DIR/etc/systemd/system/ollama.service.d/rocm.conf" \
+            /etc/systemd/system/ollama.service.d/rocm.conf \
+        && sudo systemctl daemon-reload \
+        && sudo systemctl try-restart ollama; then
+        ok "Installed Ollama ROCm drop-in"
+    else
+        warn "Could not install Ollama ROCm drop-in"
+    fi
+fi
+
 # ── XDG user directories ─────────────────────────────────────────────────────
 
 info "Setting up home folders ..."
