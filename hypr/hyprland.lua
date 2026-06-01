@@ -333,11 +333,13 @@ hl.bind(mainMod .. " + ALT + L", hl.dsp.window.resize({ x = 40,  y = 0   }), { r
 hl.bind(mainMod .. " + ALT + K", hl.dsp.window.resize({ x = 0,   y = -40 }), { repeating = true })
 hl.bind(mainMod .. " + ALT + J", hl.dsp.window.resize({ x = 0,   y = 40  }), { repeating = true })
 
--- Workspaces
+-- Workspaces — SUPER + 1..9 and SUPER + 0 (= workspace 10)
 for i = 1, 9 do
     hl.bind(mainMod .. " + " .. i,            hl.dsp.focus({ workspace = i }))
     hl.bind(mainMod .. " + SHIFT + " .. i,    hl.dsp.window.move({ workspace = i }))
 end
+hl.bind(mainMod .. " + 0",         hl.dsp.focus({ workspace = 10 }))
+hl.bind(mainMod .. " + SHIFT + 0", hl.dsp.window.move({ workspace = 10 }))
 
 -- Scroll through workspaces with mouse wheel
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
@@ -366,11 +368,11 @@ hl.bind("SHIFT + Print", hl.dsp.exec_cmd("grimblast copy screen"))
 ---- WORKSPACES ----
 --------------------
 
--- Workspaces 1-5 on main (DP-1), 6-9 on secondary (HDMI-A-1), all persistent
+-- Workspaces 1-5 on main (DP-1), 6-10 on secondary (HDMI-A-1), all persistent
 for i = 1, 5 do
     hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "DP-1" })
 end
-for i = 6, 9 do
+for i = 6, 10 do
     hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "HDMI-A-1" })
 end
 

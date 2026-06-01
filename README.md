@@ -21,7 +21,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 A frosted-glass bar split into three floating bubbles:
 
-- **Left** — app-menu button, workspace indicator (scroll to switch workspaces), and a live audio visualizer: a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
+- **Left** — app-menu button, per-monitor workspace indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen), and a live audio visualizer: a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
 - **Center** — clock.
 - **Right** — MPRIS media player, live CPU & RAM usage graphs, and hover-menu buttons for volume, theme, wallpaper, and power (hover to reveal each dropdown; scroll the volume icon to adjust).
 
@@ -57,8 +57,9 @@ The script will:
 5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
 6. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
 7. Create all config symlinks under `~/.config/`
-8. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-9. Refresh the font cache
+8. Configure ROCm for AMD GPUs — link the session environment (`environment.d`), source the shell snippet, and (when Ollama is installed) drop in the GPU-discovery override that hides an unsupported iGPU
+9. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+10. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -188,9 +189,10 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + J/K/L` | Move focus down/up/right |
 | `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right |
 | `SUPER + ALT + H/J/K/L` | Resize window left/down/up/right |
-| `SUPER + 1–9` | Switch to workspace |
-| `SUPER + SHIFT + 1–9` | Move window to workspace |
+| `SUPER + 1–9`, `SUPER + 0` | Switch to workspace (`0` = workspace 10) |
+| `SUPER + SHIFT + 1–9`, `SUPER + SHIFT + 0` | Move window to workspace |
 | `SUPER + Scroll` | Cycle workspaces |
+| Scroll over bar workspaces | Cycle this monitor's workspaces |
 | `SUPER + F` | Toggle fullscreen |
 | `SUPER + V` | Toggle floating |
 | `SUPER + P` | Toggle pseudotile |

@@ -114,9 +114,10 @@ PanelWindow {
                         icon: "󰕰"
                         sectionColor: Colors.sapphire
                         binds: [
-                            { keys: "󰖳 + 1 – 9",             desc: "Switch workspace" },
-                            { keys: "󰖳 + Shift + 1 – 9",     desc: "Move window there" },
-                            { keys: "󰖳 + Scroll",            desc: "Cycle workspaces" },
+                            { keys: "󰖳 + 1 – 9, 0",         desc: "Switch workspace (0 = 10)" },
+                            { keys: "󰖳 + Shift + 1 – 9, 0", desc: "Move window there" },
+                            { keys: "󰖳 + Scroll",           desc: "Cycle workspaces" },
+                            { keys: "Scroll on bar",        desc: "Cycle on this monitor" },
                         ]
                     }
 
