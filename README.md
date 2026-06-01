@@ -7,25 +7,32 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 | Component | Description |
 |-----------|-------------|
 | **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds, per-monitor HDR & wide-gamut color management. |
-| **Quickshell** | Frosted-glass status bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher, notification daemon, volume/brightness OSD, keybind cheat sheet. |
+| **Quickshell** | Centered frosted-glass pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
 | **Hyprlock** | Lock screen with blurred background and animated clock. |
 | **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
 | **Hyprpaper** | Wallpaper manager. |
 | **Hyprpolkitagent** | Authentication agent for privilege prompts. |
-| **Kitty** | Terminal emulator with Catppuccin theme and powerline tabs. |
+| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, and a smooth cursor trail. |
+| **Starship** | Catppuccin powerline shell prompt; flavor follows the active Mocha/Latte theme. |
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
 | **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
 | **nwg-look** | GTK theme picker — changes are snapshotted per mode and restored on theme switch. |
 
 ## Status bar
 
-A frosted-glass bar split into three floating bubbles:
+A single centered, fully-rounded frosted-glass **pill** that gathers every widget into one island, left to right:
 
-- **Left** — app-menu button, per-monitor workspace indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen), and a live audio visualizer: a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
-- **Center** — clock.
-- **Right** — MPRIS media player, live CPU & RAM usage graphs, and hover-menu buttons for volume, theme, wallpaper, and power (hover to reveal each dropdown; scroll the volume icon to adjust).
+- **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved.
+- **Workspaces** — per-monitor indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen); the hover menu shows live per-workspace window counts.
+- **Visualizer** — a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
+- **Clock** — hover opens the calendar.
+- **System** — live CPU & RAM usage graphs (hover for per-core / memory detail) and the MPRIS media player.
+- **Updates** — package icon with a count badge; the dropdown breaks down official-repo, AUR, and Flatpak updates and offers **Update All** (opens an interactive terminal running `yay`/`paru -Syu` + `flatpak update`).
+- **Notifications** — bell with an unread badge; the dropdown is a notification center with history and a **Do-Not-Disturb** toggle plus a *"Mute for…"* submenu.
+- **Clipboard** — recent text copies; click one to put it back on the clipboard.
+- **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper, and power.
 
-The bar hot-reloads on save and follows the active Catppuccin flavor.
+Everything animates — menus spring open, lists cascade in, badges pop, and the bar follows the active Catppuccin flavor. The whole config hot-reloads on save.
 
 ## HDR & color management
 
@@ -57,9 +64,8 @@ The script will:
 5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
 6. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
 7. Create all config symlinks under `~/.config/`
-8. Configure ROCm for AMD GPUs — link the session environment (`environment.d`), source the shell snippet, and (when Ollama is installed) drop in the GPU-discovery override that hides an unsupported iGPU
-9. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-10. Refresh the font cache
+8. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+9. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -87,6 +93,10 @@ ln -sf ~/dotfiles/kitty/kitty.conf        ~/.config/kitty/kitty.conf
 ln -sf ~/dotfiles/kitty/colors-mocha.conf ~/.config/kitty/colors-mocha.conf
 ln -sf ~/dotfiles/kitty/colors-latte.conf ~/.config/kitty/colors-latte.conf
 cp     ~/dotfiles/kitty/colors-mocha.conf ~/.config/kitty/active-colors.conf
+
+# Starship prompt — copy (not symlink): sync-theme.sh rewrites its palette line
+cp ~/dotfiles/starship/starship.toml ~/.config/starship.toml
+echo 'eval "$(starship init bash)"' >> ~/.bashrc
 
 # Neovim
 mkdir -p ~/.config/nvim
@@ -117,6 +127,8 @@ All packages are available in the Arch official repositories unless noted as AUR
 |---------|---------|
 | `quickshell-git` *(AUR)* | Status bar, launcher, notifications, OSD |
 | `qt5-wayland` / `qt6-wayland` | Native Wayland backend for Qt apps |
+| `pacman-contrib` | `checkupdates` — repo update counts for the bar's update menu |
+| `yay` *(AUR helper)* | Drives repo + AUR upgrades from the update menu (`paru` also supported) |
 
 **Terminal & Editor**
 
@@ -124,6 +136,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 |---------|---------|
 | `kitty` | Terminal emulator |
 | `neovim` | Text editor (v0.9+) |
+| `starship` | Shell prompt (Catppuccin powerline) |
 
 **Audio & Video**
 
@@ -139,9 +152,12 @@ All packages are available in the Arch official repositories unless noted as AUR
 | Package | Purpose |
 |---------|---------|
 | `brightnessctl` | Brightness control |
-| `wl-clipboard` | Clipboard support |
-| `grim` + `slurp` | Screenshot dependencies |
-| `grimblast-git` *(AUR)* | Screenshot tool |
+| `wl-clipboard` | Clipboard support + clipboard-history watcher |
+| `grim` + `slurp` | Screenshot capture / region select |
+| `ffmpeg` | HDR-safe screenshot conversion (PPM → PNG) |
+| `jq` | Per-monitor screenshot enumeration |
+| `libnotify` | Desktop notifications (`notify-send`) |
+| `grimblast-git` *(AUR)* | Screenshot helper |
 | `inotify-tools` | Brightness change monitoring |
 
 **Network & Bluetooth**
@@ -197,8 +213,8 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + V` | Toggle floating |
 | `SUPER + P` | Toggle pseudotile |
 | `SUPER + T` | Toggle split (dwindle) |
-| `Print` | Screenshot selection (copy) |
-| `SHIFT + Print` | Screenshot full screen (copy) |
+| `SUPER + S` | Screenshot a region → clipboard **and** `~/Pictures` |
+| `SUPER + SHIFT + S` | Screenshot every monitor → `~/Pictures` |
 | `XF86AudioRaiseVolume/LowerVolume/Mute` | Volume control |
 | `XF86AudioPlay/Next/Prev` | Media control |
 | `XF86MonBrightnessUp/Down` | Brightness control |
@@ -215,7 +231,7 @@ The setup uses [Catppuccin](https://github.com/catppuccin/catppuccin) in two fla
 ~/dotfiles/scripts/sync-theme.sh mocha   # switch to dark
 ```
 
-The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login.
+`sync-theme.sh` propagates the flavor everywhere live — Hyprland borders, GTK/Qt, icons, cursors, Kitty, and the Starship prompt (its `palette` line is swapped so open shells re-color on the next prompt). The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login.
 
 `nwg-look` changes are snapshotted per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget variant choices survive theme switches.
 

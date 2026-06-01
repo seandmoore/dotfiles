@@ -41,6 +41,14 @@ if [[ -f "$KITTY_COLORS_DIR/colors-$MODE.conf" ]]; then
     pkill -SIGUSR1 -x kitty 2>/dev/null || true
 fi
 
+# ── Starship prompt ─────────────────────────────────────────────────────────────
+# Flip the active Catppuccin palette. starship re-reads its config on every prompt,
+# so this takes effect live in all open shells on the next prompt.
+STARSHIP_CFG="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
+if [[ -f "$STARSHIP_CFG" ]]; then
+    sed -i "s/^palette = .*/palette = 'catppuccin_${MODE}'/" "$STARSHIP_CFG"
+fi
+
 # ── GTK3 / GTK4 settings ───────────────────────────────────────────────────────
 # If the user saved a per-mode snapshot via nwg-look-sync.sh, restore it wholesale
 # so all their nwg-look choices (font, cursor, widget variant, etc.) are preserved.
@@ -97,6 +105,13 @@ fi
     if [[ -f "$ADW_ROOT" ]]; then
         echo ""
         cat "$ADW_ROOT"
+    fi
+    # Flavor-independent chrome overrides (uses the :root vars above) so the
+    # libadwaita headerbar tracks Catppuccin instead of falling back to default.
+    ADW_CHROME="$DOTFILES_DIR/gtk/adw-chrome.css"
+    if [[ -f "$ADW_CHROME" ]]; then
+        echo ""
+        cat "$ADW_CHROME"
     fi
 } > "$GTK4_DIR/gtk.css"
 
@@ -183,20 +198,22 @@ if command -v flatpak &>/dev/null; then
         --filesystem=~/.icons:ro 2>/dev/null || true
 fi
 
-# ── Flatpak — restart running libadwaita apps ──────────────────────────────────
-# ADW_DEBUG_COLOR_SCHEME permanently overrides the portal for the process lifetime,
-# preventing live dark/light switching. We rely on the portal instead (no env var).
-# The @define-color palette in gtk.css and GTK_THEME only take effect at launch, so
-# running Flatpak apps must be restarted to pick up the new flavor. List BOTH system
-# and user installations (drop --system; sort -u dedupes apps installed in both).
-flatpak list --app --columns=application 2>/dev/null | sort -u | while read -r app; do
-    if pgrep -f "$app" > /dev/null 2>&1; then
-        pkill -f "$app" 2>/dev/null || true
-        sleep 0.5
-        flatpak run "$app" &>/dev/null &
-        disown
+# ── Flatpak — notify (do NOT auto-restart) ────────────────────────────────────
+# The :root palette in gtk.css and GTK_THEME only take effect at launch (GTK does
+# not live-reload the bind-mounted user css inside the sandbox), so running Flatpak
+# apps keep the OLD flavor until they're relaunched. We deliberately DON'T kill +
+# relaunch them here — force-restarting apps mid-use is disruptive. Instead, just
+# tell the user which running apps still show the old theme so they can restart
+# them on their own schedule. New launches already pick up the new flavor.
+if command -v flatpak &>/dev/null; then
+    running_flatpaks=$(flatpak ps --columns=application 2>/dev/null | sort -u | grep -v '^$' || true)
+    if [[ -n "$running_flatpaks" ]]; then
+        count=$(printf '%s\n' "$running_flatpaks" | wc -l)
+        notify-send -a "Theme" "Theme switched to $MODE" \
+            "$count running Flatpak app(s) still show the old theme. Restart them when convenient:
+$(printf '%s\n' "$running_flatpaks" | sed 's/^/• /')" 2>/dev/null || true
     fi
-done
+fi
 
 # ── Cursor theme — apply live to compositor and new processes ─────────────────
 systemctl --user set-environment \

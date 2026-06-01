@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import Quickshell.Services.Pipewire
 import "../theme"
+import "../services"
 
 PanelWindow {
     id: root
@@ -15,12 +16,16 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: openMenu === "" ? 56 : 300
+    implicitHeight: openMenu === "" ? 56 : 440
     exclusiveZone: 56
     margins.top: 0
     color: "transparent"
 
     Behavior on implicitHeight { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
+
+    // Scan the installed apps once at startup so the launcher / Apps dropdown open
+    // instantly with icons already resolved (instead of re-resolving each time).
+    Component.onCompleted: AppList.ensureLoaded()
 
     // ── HOVER-MENU CONTROLLER ─────────────────────────────────────────────────
     // One menu open at a time; opens after a short hover, closes after a grace
@@ -76,108 +81,145 @@ PanelWindow {
     readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     0.92)
     readonly property color bubbleBorder: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.8)
     readonly property int   bubbleH:      40
-    readonly property int   bubbleR:      20
-    readonly property int   bubblePad:    14
+    readonly property int   bubblePad:    16
 
-    // ── FROSTED GLASS BACKDROP ───────────────────────────────────────────────
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; leftMargin: 12; rightMargin: 12 }
-        y: (56 - height) / 2
-        height: root.bubbleH
-        radius: root.bubbleR
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.75)
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.4)
-        border.width: 1
+    // Thin group separator used between widget clusters inside the pill.
+    component Sep: Rectangle {
+        width: 1
+        Layout.preferredHeight: 18
+        Layout.alignment: Qt.AlignVCenter
+        color: Colors.surface1
+        opacity: 0.6
     }
 
-    // ── LEFT BUBBLE — app menu + workspaces + visualizer ─────────────────────
+    // ── CENTERED PILL — every widget in one rounded island ────────────────────
     Rectangle {
-        id: leftBubble
-        anchors { left: parent.left; leftMargin: 12 }
-        y: (56 - bubbleH) / 2
-        height: root.bubbleH
-        width: leftRow.implicitWidth + root.bubblePad * 2
-        radius: root.bubbleR
-        color: root.bubbleBg
-        border.color: root.bubbleBorder
-        border.width: 1
-
-        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
-        Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
-
-        RowLayout {
-            id: leftRow
-            anchors.centerIn: parent
-            spacing: 8
-
-            AppMenuButton { Layout.alignment: Qt.AlignVCenter }
-            Workspaces {
-                Layout.alignment: Qt.AlignVCenter
-                screenName: root.screen ? root.screen.name : ""
-            }
-
-            AudioVisualizer { Layout.alignment: Qt.AlignVCenter }
-        }
-    }
-
-    // ── CENTER BUBBLE — clock ────────────────────────────────────────────────
-    Rectangle {
-        id: centerBubble
+        id: pill
         anchors.horizontalCenter: parent.horizontalCenter
         y: (56 - bubbleH) / 2
         height: root.bubbleH
-        width: clockItem.implicitWidth + root.bubblePad * 2 + 8
-        radius: root.bubbleR
+        width: pillRow.implicitWidth + root.bubblePad * 2
+        radius: root.bubbleH / 2            // fully rounded pill ends
         color: root.bubbleBg
         border.color: root.bubbleBorder
         border.width: 1
 
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
         Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
-        Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
-
-        Clock {
-            id: clockItem
-            anchors.centerIn: parent
-        }
-    }
-
-    // ── RIGHT BUBBLE — stats + controls (each with a hover menu) ─────────────
-    Rectangle {
-        id: rightBubble
-        anchors { right: parent.right; rightMargin: 12 }
-        y: (56 - bubbleH) / 2
-        height: root.bubbleH
-        width: rightRow.implicitWidth + root.bubblePad * 2
-        radius: root.bubbleR
-        color: root.bubbleBg
-        border.color: root.bubbleBorder
-        border.width: 1
-
-        Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+        Behavior on width   { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
         Component.onCompleted: { opacity = 0; scale = 0.95; opacity = 1; scale = 1 }
 
         RowLayout {
-            id: rightRow
+            id: pillRow
             anchors.centerIn: parent
-            spacing: 12
+            spacing: 10
 
+            // ── Apps · Workspaces · Visualizer ───────────────────────────────
+            HoverPanel {
+                name: "apps"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 300
+                trigger: AppMenuButton {}
+                menu: AppsMenu { onLaunched: root.openMenu = "" }
+            }
+
+            HoverPanel {
+                name: "workspaces"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 240
+                trigger: Workspaces { screenName: root.screen ? root.screen.name : "" }
+                menu: WorkspacesMenu {
+                    screenName: root.screen ? root.screen.name : ""
+                    onSwitched: root.openMenu = ""
+                }
+            }
+
+            HoverPanel {
+                name: "visualizer"; ctrl: root; hAlign: Qt.AlignLeft; menuWidth: 360
+                trigger: AudioVisualizer {}
+                menu: ColumnLayout {
+                    spacing: 8
+                    AudioVisualizer { Layout.fillWidth: true; Layout.preferredHeight: 130 }
+                    Text {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: root.audioSink
+                            ? (root.audioSink.description || root.audioSink.nickname || root.audioSink.name || "Output")
+                            : "No output device"
+                        color: Colors.overlay1
+                        font.family: "JetBrainsMono Nerd Font Propo"
+                        font.pixelSize: 10
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+
+            Sep {}
+
+            // ── Clock · Calendar (center) ────────────────────────────────────
+            HoverPanel {
+                name: "calendar"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 280
+                trigger: Clock {}
+                menu: Calendar {}
+            }
+
+            Sep {}
+
+            // ── Media · System stats ─────────────────────────────────────────
             MediaPlayer {
                 visible: hasMedia
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            SystemStats { Layout.alignment: Qt.AlignVCenter }
-
-            Rectangle {
-                width: 1; height: 18
-                color: Colors.surface1
-                Layout.alignment: Qt.AlignVCenter
+            HoverPanel {
+                name: "system"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 300
+                trigger: SystemStats {}
+                menu: SystemMenu {}
             }
 
-            // ── VOLUME — click mutes, hover opens slider, scroll adjusts ──────
+            Sep {}
+
+            // ── Updates · Notifications · Clipboard ──────────────────────────
+            HoverMenuButton {
+                name: "updates"
+                ctrl: root
+                menuWidth: 300
+                icon: "󰚰"
+                iconColor: Updates.total > 0 ? Colors.peach : Colors.subtext1
+                iconActiveColor: Colors.sky
+                badgeCount: Updates.total
+                badgeColor: Colors.peach
+                onClicked: root.openMenu = (root.openMenu === "updates" ? "" : "updates")
+
+                UpdatesMenu { onActed: root.openMenu = "" }
+            }
+
+            HoverMenuButton {
+                name: "notifications"
+                ctrl: root
+                menuWidth: 350
+                icon: Notifications.dnd ? "󰂛" : "󰂚"
+                iconColor: Notifications.dnd ? Colors.red
+                    : (Notifications.unread > 0 ? Colors.yellow : Colors.subtext1)
+                iconActiveColor: Notifications.dnd ? Colors.red : Colors.sky
+                badgeCount: Notifications.dnd ? 0 : Notifications.unread
+                onClicked: root.openMenu = (root.openMenu === "notifications" ? "" : "notifications")
+                onMenuOpenChanged: if (menuOpen) Notifications.markRead()
+
+                NotificationMenu {}
+            }
+
+            HoverMenuButton {
+                name: "clipboard"
+                ctrl: root
+                menuWidth: 320
+                icon: "󰅎"
+                iconColor: Colors.teal
+                iconActiveColor: Colors.sky
+                onClicked: root.openMenu = (root.openMenu === "clipboard" ? "" : "clipboard")
+
+                ClipboardMenu { onCopied: root.openMenu = "" }
+            }
+
+            Sep {}
+
+            // ── Volume ───────────────────────────────────────────────────────
             HoverMenuButton {
                 name: "volume"
                 ctrl: root
@@ -266,7 +308,7 @@ PanelWindow {
                 }
             }
 
-            // ── THEME — click toggles, hover picks Mocha / Latte ─────────────
+            // ── Theme ────────────────────────────────────────────────────────
             HoverMenuButton {
                 name: "theme"
                 ctrl: root
@@ -335,7 +377,7 @@ PanelWindow {
                 }
             }
 
-            // ── WALLPAPER — click browses, hover offers browse / random ──────
+            // ── Wallpaper ────────────────────────────────────────────────────
             HoverMenuButton {
                 name: "wallpaper"
                 ctrl: root
@@ -392,7 +434,7 @@ PanelWindow {
                 }
             }
 
-            // ── POWER — hover opens the session menu ─────────────────────────
+            // ── Power ────────────────────────────────────────────────────────
             HoverMenuButton {
                 name: "power"
                 ctrl: root

@@ -83,7 +83,7 @@ Item {
                     radius: width / 2
                     color: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id
                         ? Colors.mauve
-                        : (modelData.windows > 0 ? Colors.overlay1 : Colors.surface1)
+                        : (((modelData.lastIpcObject && modelData.lastIpcObject.windows) || 0) > 0 ? Colors.overlay1 : Colors.surface1)
                     scale: ma.containsMouse ? 1.3 : 1
 
                     Behavior on width  { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }

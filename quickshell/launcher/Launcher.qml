@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
 import "../theme"
+import "../services"
 
 PanelWindow {
     id: root
@@ -278,7 +279,20 @@ PanelWindow {
                     clip: true
                     cellWidth: 96
                     cellHeight: 100
-                    model: appsModel.filteredApps
+                    model: appsModel.filesMode ? appsModel.fileResults : appsModel.filteredApps
+
+                    // Cascade in on open; smoothly reflow as the filter changes.
+                    populate: Transition {
+                        NumberAnimation { properties: "opacity"; from: 0; to: 1; duration: 220 }
+                        NumberAnimation { properties: "scale"; from: 0.8; to: 1; duration: 260; easing.type: Easing.OutBack }
+                    }
+                    add: Transition {
+                        NumberAnimation { properties: "opacity"; from: 0; to: 1; duration: 180 }
+                        NumberAnimation { properties: "scale"; from: 0.8; to: 1; duration: 220; easing.type: Easing.OutBack }
+                    }
+                    displaced: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 240; easing.type: Easing.OutCubic }
+                    }
 
                     delegate: AppItem {
                         required property var modelData
@@ -302,7 +316,11 @@ PanelWindow {
                     Text {
                         anchors.centerIn: parent
                         visible: grid.count === 0
-                        text: "No apps found"
+                        text: appsModel.filesMode
+                            ? (appsModel.filterText.trim().length < 2
+                                ? "Type to search files in ~"
+                                : "No files found")
+                            : "No apps found"
                         color: Colors.overlay0
                         font.pixelSize: 14
                     }
@@ -317,25 +335,64 @@ PanelWindow {
 
         property string filterText: ""
         property string selectedCategory: "All"
-        property var apps: []
+        // Apps come from the preloaded singleton (scanned once at startup), so the
+        // grid is populated instantly on open instead of re-resolving every time.
+        readonly property var apps: AppList.apps
         property var filteredApps: []
-        property var categories: ["All"]
+        property var fileResults: []
+        readonly property var categories: AppList.categories.concat(["Files"])
+        readonly property bool filesMode: selectedCategory === "Files"
 
         onFilterTextChanged: updateFilter()
         onSelectedCategoryChanged: updateFilter()
+        onAppsChanged: updateFilter()
 
         function categoryIcon(cat) {
             const icons = {
                 "All": "󰣇", "Internet": "󰖟", "Media": "󰝚", "Graphics": "󰋩",
                 "Games": "󰊗", "Office": "󰈙", "Development": "󰅨", "System": "󰒓",
                 "Utilities": "󰦛", "Education": "󰑐", "Science": "󰻲", "Other": "󰏔",
+                "Files": "󰈞",
             }
             return icons[cat] ?? "󰏔"
         }
 
-        function refresh() { appLoader.running = true }
+        // Map a filename to a nerd-font glyph + Catppuccin colour by extension.
+        function fileGlyph(name) {
+            const ext = (name.split(".").pop() || "").toLowerCase()
+            const t = {
+                png:["󰋩",Colors.sky], jpg:["󰋩",Colors.sky], jpeg:["󰋩",Colors.sky],
+                gif:["󰋩",Colors.sky], webp:["󰋩",Colors.sky], bmp:["󰋩",Colors.sky],
+                svg:["󰜡",Colors.sky], ico:["󰋩",Colors.sky],
+                mp4:["󰕧",Colors.mauve], mkv:["󰕧",Colors.mauve], webm:["󰕧",Colors.mauve],
+                mov:["󰕧",Colors.mauve], avi:["󰕧",Colors.mauve],
+                mp3:["󰈣",Colors.pink], flac:["󰈣",Colors.pink], wav:["󰈣",Colors.pink],
+                ogg:["󰈣",Colors.pink], m4a:["󰈣",Colors.pink],
+                pdf:["󰈦",Colors.red],
+                doc:["󰈬",Colors.blue], docx:["󰈬",Colors.blue], odt:["󰈬",Colors.blue],
+                txt:["󰈙",Colors.subtext1], md:["󰍔",Colors.subtext1], rtf:["󰈙",Colors.subtext1],
+                zip:["󰗄",Colors.peach], tar:["󰗄",Colors.peach], gz:["󰗄",Colors.peach],
+                xz:["󰗄",Colors.peach], "7z":["󰗄",Colors.peach], zst:["󰗄",Colors.peach], rar:["󰗄",Colors.peach],
+                js:["󰌞",Colors.yellow], ts:["󰛦",Colors.blue], py:["󰌠",Colors.yellow],
+                rs:["󱘗",Colors.peach], go:["󰟓",Colors.sky], lua:["󰢱",Colors.blue],
+                c:["󰙱",Colors.blue], cpp:["󰙲",Colors.blue], h:["󰙱",Colors.blue],
+                sh:["󱆃",Colors.green], qml:["󰐱",Colors.mauve],
+                json:["󰘦",Colors.yellow], yaml:["󰈙",Colors.green], yml:["󰈙",Colors.green],
+                toml:["󰈙",Colors.peach], conf:["󰒓",Colors.overlay1], ini:["󰒓",Colors.overlay1],
+            }
+            const g = t[ext]
+            return { glyph: g ? g[0] : "󰈔", color: g ? g[1] : Colors.lavender }
+        }
+
+        function refresh() { AppList.ensureLoaded() }
 
         function updateFilter() {
+            // Files mode: search the filesystem (debounced) instead of the app list.
+            if (filesMode) {
+                fileResults = []
+                fileSearchTimer.restart()
+                return
+            }
             const q = filterText.toLowerCase()
             let pool = selectedCategory === "All"
                 ? apps.slice()
@@ -348,14 +405,13 @@ PanelWindow {
             filteredApps = pool
         }
 
-        function buildCategories() {
-            const seen = new Set()
-            apps.forEach(a => { if (a.category) seen.add(a.category) })
-            const sorted = Array.from(seen).sort()
-            categories = ["All", ...sorted]
-        }
-
         function launch(app) {
+            // File results open with the default handler; apps run their Exec.
+            if (app.isFile) {
+                launchProcess.command = ["xdg-open", app.path]
+                launchProcess.running = true
+                return
+            }
             if (app.exec) {
                 const cmd = app.exec.replace(/%[fFuUdDnNickvm]/g, "").trim()
                 launchProcess.command = ["bash", "-c", "nohup " + cmd + " &>/dev/null &"]
@@ -364,66 +420,54 @@ PanelWindow {
         }
     }
 
-    Process { id: launchProcess }
-
-    Process { id: powerProcess }
+    // Debounce keystrokes before spawning a filesystem search.
+    Timer {
+        id: fileSearchTimer
+        interval: 250
+        repeat: false
+        onTriggered: {
+            const q = appsModel.filterText.trim()
+            if (q.length < 2) { appsModel.fileResults = []; return }
+            // Clear first, so stopping any in-flight search can't briefly flash old hits.
+            fileSearch.parsed = []
+            fileSearch.running = false
+            // Pass the query as argv ($1) so it can't break the script quoting.
+            fileSearch.command = ["bash", "-c", fileSearch.script, "qsfind", q]
+            fileSearch.running = true
+        }
+    }
 
     Process {
-        id: appLoader
+        id: fileSearch
         property var parsed: []
-
-        command: ["bash", "-c",
-            "find /usr/share/applications ~/.local/share/applications " +
-            "/var/lib/flatpak/exports/share/applications " +
-            "${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/applications " +
-            "-name '*.desktop' 2>/dev/null | sort -u | " +
-            "xargs -I{} awk 'BEGIN{n=\"\";e=\"\";i=\"\";c=\"\";nd=0;nt=0} " +
-            "/\\[Desktop Entry\\]/{nt=1;next} /^\\[/{nt=0} " +
-            "nt&&/^Name=/{n=substr($0,index($0,\"=\")+1)} " +
-            "nt&&/^Exec=/{e=substr($0,index($0,\"=\")+1)} " +
-            "nt&&/^Icon=/{i=substr($0,index($0,\"=\")+1)} " +
-            "nt&&/^Categories=/{c=substr($0,index($0,\"=\")+1)} " +
-            "nt&&/^NoDisplay=true/{nd=1} " +
-            "END{if(!nd&&n!=\"\"&&e!=\"\")print n\"|\"e\"|\"i\"|\"c}' {} | sort -u | " +
-            "while IFS='|' read -r name exec icon cats; do " +
-            "  cat=$(echo \"$cats\" | tr ';' '\\n' | grep -Ew " +
-            "'AudioVideo|Audio|Video|Graphics|Office|Game|Network|Science|Education|Development|System|Utility' " +
-            "| head -1); " +
-            "  case $cat in " +
-            "    AudioVideo|Audio|Video) cat=Media ;; " +
-            "    Game) cat=Games ;; " +
-            "    Network) cat=Internet ;; " +
-            "    Utility) cat=Utilities ;; " +
-            "    *) [ -z \"$cat\" ] && cat=Other ;; " +
-            "  esac; " +
-            "  resolved=''; " +
-            "  mode=theme; [[ \";${cats};\" == *\";Game;\"* ]] && mode=original; " +
-            "  if [ -n \"$icon\" ]; then " +
-            "    resolved=$(\"$HOME/dotfiles/scripts/icon-resolve.sh\" \"$icon\" \"${ICON_THEME:-Papirus-Dark}\" \"$mode\"); " +
-            "  fi; " +
-            "  echo \"${name}|${exec}|${resolved}|${cat}\"; " +
-            "done"
-        ]
+        // Prune heavy/irrelevant trees, then case-insensitively match filenames
+        // under $HOME. Capped so a broad query can't flood the grid or hang.
+        readonly property string script:
+            "q=\"$1\"; [ -z \"$q\" ] && exit 0; " +
+            "find \"$HOME\" " +
+            "\\( -path \"$HOME/.cache\" -o -path \"$HOME/.var\" " +
+            "-o -path \"$HOME/.local/share/Trash\" -o -path \"$HOME/.mozilla\" " +
+            "-o -name node_modules -o -name .git \\) -prune -o " +
+            "-type f -iname \"*$q*\" -print 2>/dev/null | head -120"
 
         stdout: SplitParser {
             onRead: line => {
-                const parts = line.split("|")
-                if (parts.length >= 2) {
-                    appLoader.parsed.push({
-                        name: parts[0], exec: parts[1],
-                        icon: parts[2] || "", category: parts[3] || "Other"
-                    })
-                }
+                if (!line) return
+                const path = line
+                const name = path.split("/").pop()
+                const g = appsModel.fileGlyph(name)
+                fileSearch.parsed.push({
+                    name: name, path: path, isFile: true,
+                    glyph: g.glyph, glyphColor: g.color
+                })
             }
         }
-
         onRunningChanged: {
-            if (!running && parsed.length > 0) {
-                appsModel.apps = parsed.sort((a, b) => a.name.localeCompare(b.name))
-                parsed = []
-                appsModel.buildCategories()
-                appsModel.updateFilter()
-            }
+            if (!running) appsModel.fileResults = parsed.slice()
         }
     }
+
+    Process { id: launchProcess }
+
+    Process { id: powerProcess }
 }

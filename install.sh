@@ -82,9 +82,14 @@ PACMAN_PKGS=(
     xorg-xwayland
     kitty
     neovim
+    starship
     wl-clipboard
     grim
     slurp
+    ffmpeg
+    jq
+    libnotify
+    pacman-contrib
     brightnessctl
     playerctl
     pavucontrol
@@ -258,6 +263,19 @@ make_link "$DOTFILES_DIR/scripts" "$HOME/.config/quickshell/scripts"
 make_link "$DOTFILES_DIR/kitty/kitty.conf"        "$HOME/.config/kitty/kitty.conf"
 make_link "$DOTFILES_DIR/kitty/colors-mocha.conf"  "$HOME/.config/kitty/colors-mocha.conf"
 make_link "$DOTFILES_DIR/kitty/colors-latte.conf"  "$HOME/.config/kitty/colors-latte.conf"
+
+# Starship prompt — seeded (not symlinked): sync-theme.sh rewrites the active
+# `palette` line on every light/dark toggle, which would otherwise dirty the repo.
+seed_file "$DOTFILES_DIR/starship/starship.toml" "$HOME/.config/starship.toml"
+
+# Initialise Starship in interactive shells (append once; idempotent).
+for rc in "$HOME/.bashrc:bash" "$HOME/.zshrc:zsh"; do
+    rc_file="${rc%%:*}"; rc_shell="${rc##*:}"
+    if [[ -f "$rc_file" ]] && ! grep -qF 'starship init' "$rc_file"; then
+        printf '\n# Starship prompt (managed by dotfiles)\neval "$(starship init %s)"\n' "$rc_shell" >> "$rc_file"
+        ok "Wired Starship into $rc_file"
+    fi
+done
 
 # Neovim
 make_link "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"

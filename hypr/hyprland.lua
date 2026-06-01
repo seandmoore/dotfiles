@@ -179,7 +179,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 16,
+        rounding       = 20,
         rounding_power = 2.0,
 
         active_opacity   = 1.0,
@@ -211,17 +211,24 @@ hl.curve("smoothOut",  { type = "bezier", points = { {0.36, 0},    {0.66, -0.56}
 hl.curve("smoothIn",   { type = "bezier", points = { {0.25, 1},    {0.5,  1}     } })
 hl.curve("overshot",   { type = "bezier", points = { {0.05, 0.9},  {0.1,  1.05}  } })
 hl.curve("linear",     { type = "bezier", points = { {0,    0},    {1,    1}     } })
+-- Springy open and a buttery glide for window movement / retiling.
+hl.curve("wind",       { type = "bezier", points = { {0.05, 0.9},  {0.1,  1.1}   } })
+hl.curve("winIn",      { type = "bezier", points = { {0.1,  1.1},  {0.1,  1.1}   } })
+hl.curve("winOut",     { type = "bezier", points = { {0.3,  -0.3}, {0,    1}     } })
+hl.curve("glide",      { type = "bezier", points = { {0.25, 1},    {0.35, 1}     } })
 
--- Animations
-hl.animation({ leaf = "windows",     enabled = true, speed = 4,   bezier = "overshot",  style = "slide"     })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = 4,   bezier = "overshot",  style = "slide"     })
-hl.animation({ leaf = "windowsOut",  enabled = true, speed = 4,   bezier = "smoothOut", style = "slide"     })
-hl.animation({ leaf = "windowsMove", enabled = true, speed = 4,   bezier = "smoothIn"                       })
-hl.animation({ leaf = "border",      enabled = true, speed = 5,   bezier = "linear"                         })
+-- Animations. Windows open with a gentle overshoot, close by sliding back, and
+-- MOVE/retile by gliding smoothly to their new slot (the "dynamic" feel). Speed
+-- is the duration in deciseconds — higher = slower/more graceful.
+hl.animation({ leaf = "windows",     enabled = true, speed = 5,   bezier = "wind",      style = "popin 80%" })
+hl.animation({ leaf = "windowsIn",   enabled = true, speed = 5,   bezier = "winIn",     style = "popin 80%" })
+hl.animation({ leaf = "windowsOut",  enabled = true, speed = 5,   bezier = "winOut",    style = "slide"     })
+hl.animation({ leaf = "windowsMove", enabled = true, speed = 5,   bezier = "glide"                          })
+hl.animation({ leaf = "border",      enabled = true, speed = 7,   bezier = "linear"                         })
 hl.animation({ leaf = "borderangle", enabled = true, speed = 8,   bezier = "linear",    style = "loop"      })
-hl.animation({ leaf = "fadeIn",      enabled = true, speed = 4,   bezier = "smoothIn"                       })
-hl.animation({ leaf = "fadeOut",     enabled = true, speed = 4,   bezier = "smoothOut"                      })
-hl.animation({ leaf = "workspaces",  enabled = true, speed = 5,   bezier = "overshot",  style = "slidevert" })
+hl.animation({ leaf = "fadeIn",      enabled = true, speed = 5,   bezier = "smoothIn"                       })
+hl.animation({ leaf = "fadeOut",     enabled = true, speed = 5,   bezier = "smoothOut"                      })
+hl.animation({ leaf = "workspaces",  enabled = true, speed = 6,   bezier = "wind",      style = "slidevert" })
 
 
 -------------------
@@ -360,8 +367,12 @@ hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set +5%"),   { l
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"),   { locked = true, repeating = true })
 
 -- Screenshot
-hl.bind("Print",         hl.dsp.exec_cmd("grimblast copy area"))
-hl.bind("SHIFT + Print", hl.dsp.exec_cmd("grimblast copy screen"))
+-- SUPER+S       → select an area; copy to clipboard AND save to ~/Pictures.
+-- SUPER+SHIFT+S → capture every monitor to its own file in ~/Pictures.
+-- Both go through HDR-safe scripts (PPM→PNG) — grim corrupts PNGs straight off the
+-- HDR/PQ output (DP-1), so we never call grimblast/grim → PNG directly here.
+hl.bind(mainMod .. " + S",         hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/screenshot-area.sh"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/screenshot-all.sh"))
 
 
 --------------------

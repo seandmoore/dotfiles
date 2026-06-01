@@ -58,12 +58,24 @@ PanelWindow {
         return out
     }
 
+    // Slide + fade out, then let the server splice + destroy us.
+    property bool closing: false
+    function close() {
+        if (closing) return
+        closing = true
+        card.slideX = 460
+        card.opacity = 0
+        removeTimer.start()
+    }
+
+    Timer { id: removeTimer; interval: 220; onTriggered: root.server.remove(root) }
+
     function finish(reason) {
         if (notification) {
             if (reason === "expire") notification.expire()
             else notification.dismiss()
         }
-        server.remove(root)
+        close()
     }
 
     function activateDefault() {
@@ -71,15 +83,20 @@ PanelWindow {
             for (let i = 0; i < notification.actions.length; i++)
                 if (notification.actions[i].identifier === "default") {
                     notification.actions[i].invoke()
-                    server.remove(root)
+                    close()
                     return
                 }
         finish("dismiss")
     }
 
-    // Stack from top-right, growing downward
+    // Stack from top-right, growing downward. Animate the top margin so the rest
+    // of the stack glides up smoothly when a popup above is dismissed.
     anchors { top: true; right: true }
-    margins { top: 12 + (stackIndex * (height + 8)); right: 12 }
+    margins {
+        top: 12 + (stackIndex * (height + 8))
+        right: 12
+        Behavior on top { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+    }
 
     implicitWidth: 380
     implicitHeight: contentCol.implicitHeight + 24
@@ -89,15 +106,13 @@ PanelWindow {
         id: card
         anchors.fill: parent
 
-        // Slide in from the right on appear
+        // Slide + fade in on appear; slide + fade out on close() (driven by Behaviors).
         property real slideX: 400
         transform: Translate { x: card.slideX }
-        NumberAnimation on slideX {
-            from: 400; to: 0
-            duration: 250
-            easing.type: Easing.OutCubic
-            running: true
-        }
+        opacity: 0
+        Behavior on slideX { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+        Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
+        Component.onCompleted: { slideX = 0; opacity = 1 }
 
         color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.72)
         border.color: root.isCritical
@@ -321,7 +336,7 @@ PanelWindow {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 modelData.invoke()
-                                root.server.remove(root)
+                                root.close()
                             }
                         }
                     }

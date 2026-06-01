@@ -64,9 +64,12 @@ ShellRoot {
     //   quickshell ipc -i <id> call theme setLatte
     IpcHandler {
         target: "theme"
-        function setMocha() { Colors.darkMode = true;  ipcSyncMocha.running = true }
-        function setLatte() { Colors.darkMode = false; ipcSyncLatte.running = true }
+        function setMocha() { Colors.darkMode = true;  themeTransition.show(); ipcSyncMocha.running = true }
+        function setLatte() { Colors.darkMode = false; themeTransition.show(); ipcSyncLatte.running = true }
     }
+
+    // Brief "applying theme" hint that covers the Flatpak app relaunch
+    ThemeTransition { id: themeTransition }
 
     // IPC-triggered syncs run sync-theme.sh directly
     Process {

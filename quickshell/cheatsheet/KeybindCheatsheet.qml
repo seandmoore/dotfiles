@@ -126,8 +126,8 @@ PanelWindow {
                         icon: "󰹑"
                         sectionColor: Colors.pink
                         binds: [
-                            { keys: "Print",              desc: "Capture area" },
-                            { keys: "Shift + Print",      desc: "Capture screen" },
+                            { keys: "󰖳 + S",            desc: "Area → clipboard + Pictures" },
+                            { keys: "󰖳 + Shift + S",    desc: "All monitors → Pictures" },
                         ]
                     }
 

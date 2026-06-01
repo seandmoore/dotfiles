@@ -1,9 +1,11 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Notifications
+import "../services"
 
 // Implements the org.freedesktop.Notifications DBus interface.
-// Spawns a NotificationPopup for each incoming notification.
+// Spawns a NotificationPopup for each incoming notification (unless DND is on)
+// and logs every notification to the shared history (Notifications singleton).
 NotificationServer {
     id: root
 
@@ -34,6 +36,15 @@ NotificationServer {
     onNotification: notification => {
         // Retain the notification past this handler so its actions/timeout work.
         notification.tracked = true
+
+        // Always record it in the bell's history.
+        Notifications.log(notification)
+
+        // Suppress the on-screen popup while Do Not Disturb is active. Critical
+        // notifications still break through (they shouldn't be silently swallowed).
+        const critical = notification.urgency === NotificationUrgency.Critical
+        if (Notifications.dnd && !critical)
+            return
 
         if (popupComponent.status === Component.Ready) {
             const popup = popupComponent.createObject(null, {

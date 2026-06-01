@@ -1,0 +1,20 @@
+/* Force the libadwaita window chrome to follow the active Catppuccin :root colors.
+ * The @import'd full GTK theme styles the headerbar/titlebar with its own legacy
+ * @define-color selector rules and sets none of libadwaita's custom properties,
+ * which leaves the headerbar on libadwaita's default grey while the window body is
+ * themed. These explicit rules are appended last (USER priority) so they win, and
+ * reference the :root vars (set in adw-root-<mode>.css) so they track the flavor. */
+headerbar,
+.titlebar,
+headerbar.titlebar,
+headerbar windowhandle,
+.top-bar {
+  background-color: var(--headerbar-bg-color);
+  color: var(--headerbar-fg-color);
+  border-color: var(--headerbar-border-color);
+}
+
+headerbar:backdrop,
+.titlebar:backdrop {
+  background-color: var(--headerbar-backdrop-color);
+}

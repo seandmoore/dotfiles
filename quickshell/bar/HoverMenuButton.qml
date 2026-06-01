@@ -19,6 +19,10 @@ Item {
     property int menuWidth: 200
     property var ctrl: null
 
+    // Optional unread badge drawn on the top-right of the icon.
+    property int badgeCount: 0
+    property color badgeColor: Colors.red
+
     signal clicked()
     signal scrolled(real dy)
 
@@ -47,6 +51,31 @@ Item {
         Behavior on color { ColorAnimation { duration: 150 } }
     }
 
+    // Unread badge — pops in/out with a spring when the count crosses zero.
+    Rectangle {
+        id: badge
+        visible: scale > 0.01
+        anchors { right: parent.right; top: parent.top; rightMargin: 1; topMargin: 1 }
+        implicitWidth: Math.max(14, badgeText.implicitWidth + 6)
+        height: 14
+        radius: 7
+        color: btn.badgeColor
+        border.color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.9)
+        border.width: 1.5
+        scale: btn.badgeCount > 0 ? 1 : 0
+        Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+
+        Text {
+            id: badgeText
+            anchors.centerIn: parent
+            text: btn.badgeCount > 99 ? "99+" : btn.badgeCount
+            color: Colors.base
+            font.family: "JetBrainsMono Nerd Font Propo"
+            font.pixelSize: 8
+            font.weight: Font.Bold
+        }
+    }
+
     MouseArea {
         id: iconMa
         anchors.fill: parent
@@ -68,7 +97,7 @@ Item {
         id: panel
         width: btn.menuWidth
         height: body.implicitHeight + 24
-        radius: 14
+        radius: 18
         color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.92)
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1

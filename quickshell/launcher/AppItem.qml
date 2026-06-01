@@ -42,17 +42,30 @@ Item {
                 scale = 1
             }
 
+            // File results carry a nerd-font glyph instead of an image icon.
+            property bool useGlyph: !!root.app.glyph
+
             Image {
                 id: icon
                 anchors.fill: parent
-                source: app.icon ? "file://" + app.icon : ""
-                visible: status === Image.Ready
+                source: (!iconItem.useGlyph && app.icon) ? "file://" + app.icon : ""
+                visible: !iconItem.useGlyph && status === Image.Ready
             }
 
-            // Letter fallback when icon unavailable
+            // File-type glyph (file-search results)
+            Text {
+                anchors.centerIn: parent
+                visible: iconItem.useGlyph
+                text: root.app.glyph || ""
+                color: root.app.glyphColor || Colors.lavender
+                font.pixelSize: 32
+                font.family: "JetBrainsMono Nerd Font Propo"
+            }
+
+            // Letter fallback when an app icon is unavailable
             Rectangle {
                 anchors.fill: parent
-                visible: icon.status !== Image.Ready
+                visible: !iconItem.useGlyph && icon.status !== Image.Ready
                 color: Colors.mauve
                 radius: 8
 
