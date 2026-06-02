@@ -13,10 +13,12 @@ QtObject {
 
     property bool hdrOn: true
 
-    // Base alpha for a translucent surface. Flat (mode-independent) so the look is
-    // consistent across HDR/SDR. One knob per surface. Usage:
+    // Base alpha for a surface. Surfaces pass their own alpha, but this single knob
+    // overrides them all — currently forced to 1.0 so every Quickshell panel is fully
+    // opaque (matched to Nautilus/GTK apps) for maximum legibility of text and icons.
+    // To restore the clear-transparent glass look, return `a` instead of 1.0. Usage:
     //   color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.48))
-    function glass(a) { return a }
+    function glass(a) { return 1.0 }
 
     function refresh() { pollProc.running = true }
 

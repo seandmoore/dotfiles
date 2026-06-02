@@ -7,13 +7,13 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 | Component | Description |
 |-----------|-------------|
 | **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds, per-monitor HDR & wide-gamut color management. |
-| **Quickshell** | Centered translucent pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, home-folder (Places) menu, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
+| **Quickshell** | Centered opaque pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, home-folder (Places) menu, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
 | **Hyprlock** | Lock screen with blurred background and animated clock. |
 | **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
 | **Hyprpaper** | Wallpaper manager. |
 | **Hyprpolkitagent** | Authentication agent for privilege prompts. |
 | **SDDM** | Login screen themed with Catppuccin (Mocha/Latte); follows the active flavor via `sync-theme.sh`. |
-| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, a smooth cursor trail, and a translucent background. |
+| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, a smooth cursor trail, and a solid background matched to the GTK apps. |
 | **Starship** | Catppuccin powerline shell prompt; flavor follows the active Mocha/Latte theme. |
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
 | **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
@@ -21,7 +21,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 ## Status bar
 
-A single centered, fully-rounded translucent **pill** that gathers every widget into one island, left to right:
+A single centered, fully-rounded opaque **pill** that gathers every widget into one island, left to right:
 
 - **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved.
 - **Places** — a folder icon listing your home folders; click one to open it in the file manager (Nautilus). Folders are scanned once at startup so the menu opens instantly.
@@ -43,7 +43,7 @@ Color is managed per monitor in `hypr/hyprland.lua`:
 - **HDR displays** run the full HDR10 path — BT.2020 (Rec. 2020) primaries + PQ (ST. 2084) transfer at 10-bit. SDR content inside the HDR container is tunable via `sdrbrightness` / `sdrsaturation`, with panel peak and SDR-white levels set by `max_luminance` / `sdr_max_luminance`.
 - **SDR displays** use the `srgb` color space.
 
-The quickshell UI and Kitty use a flat **translucent** look (no compositor blur), so they render identically whether a display is in HDR or SDR — Hyprland can't blur a colour-managed HDR output, so a blur-based "frosted" look would only appear on SDR.
+The quickshell UI and Kitty use flat **opaque** surfaces (no compositor blur), matched to the GTK apps (e.g. Nautilus) for legibility — text and icons read cleanly with no wallpaper bleed-through. They also render identically whether a display is in HDR or SDR (Hyprland can't blur a colour-managed HDR output, so a blur-based "frosted" look would only appear on SDR). The opacity is a single knob: `Frost.glass()` in `quickshell/theme/Frost.qml` (return `a` instead of `1.0` to restore the translucent glass look) and Kitty's `background_opacity`.
 
 Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
 
