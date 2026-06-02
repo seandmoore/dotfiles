@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# screenshot-area.sh — select a region, save it to ~/Pictures AND copy to clipboard.
+# screenshot-area.sh — select a region, save it to ~/Pictures/Screenshots AND copy to clipboard.
 # HDR-safe: grim writes blank/corrupted PNGs directly on HDR (PQ) outputs, so we
 # capture the selected region to PPM first (raw pixels preserved) and convert to PNG
 # with ffmpeg — the same workaround screenshot-all.sh uses for full-monitor grabs.
 set -euo pipefail
 
-dir="${SCREENSHOT_DIR:-$HOME/Pictures}"
+dir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
 mkdir -p "$dir"
 stamp=$(date +%Y%m%d_%H%M%S)
 png="$dir/screenshot_${stamp}.png"

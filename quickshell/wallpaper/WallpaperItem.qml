@@ -10,6 +10,11 @@ Item {
     required property bool isSelected
     required property int itemWidth
     required property int itemHeight
+    // Decode size for the thumbnail. Defaults to ~2x the cell so it stays crisp;
+    // the switcher passes the SAME values to its background preloader so both share
+    // one entry in Qt's pixmap cache (cache hit => the grid paints instantly).
+    property int decodeW: itemWidth * 2
+    property int decodeH: itemHeight * 2
     signal activated(string path)
 
     width: itemWidth
@@ -45,6 +50,10 @@ Item {
                     id: img
                     anchors.fill: parent
                     source: "file://" + root.path
+                    // Decode at thumbnail size instead of full 4K — the single
+                    // biggest speedup; also keeps the cache entries tiny.
+                    sourceSize.width: root.decodeW
+                    sourceSize.height: root.decodeH
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     smooth: true

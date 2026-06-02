@@ -25,7 +25,7 @@ ColumnLayout {
         color: Colors.text
         font.family: "JetBrainsMono Nerd Font Propo"
         font.weight: Font.Bold
-        font.pixelSize: 15
+        font.pixelSize: 19
     }
 
     Text {
@@ -35,7 +35,7 @@ ColumnLayout {
         color: Colors.subtext0
         font.family: "JetBrainsMono Nerd Font Propo"
         font.weight: Font.Normal
-        font.pixelSize: 11
+        font.pixelSize: 14
     }
 
     Timer {

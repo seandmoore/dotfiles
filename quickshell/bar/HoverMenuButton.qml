@@ -15,7 +15,7 @@ Item {
     property string icon: ""
     property color iconColor: Colors.text
     property color iconActiveColor: Colors.sky
-    property real iconSize: 15
+    property real iconSize: 19
     property int menuWidth: 200
     property var ctrl: null
 
@@ -31,12 +31,12 @@ Item {
     readonly property bool menuOpen: btn.ctrl && btn.ctrl.openMenu === btn.name
 
     Layout.alignment: Qt.AlignVCenter
-    implicitWidth: 28
-    implicitHeight: 28
+    implicitWidth: 36
+    implicitHeight: 36
 
     Rectangle {
         anchors.centerIn: parent
-        width: 32; height: 32; radius: 8
+        width: 40; height: 40; radius: 10
         color: Colors.accentDim
         opacity: (iconMa.containsMouse || btn.menuOpen) ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 150 } }
@@ -96,14 +96,14 @@ Item {
     Rectangle {
         id: panel
         width: btn.menuWidth
-        height: body.implicitHeight + 24
+        height: body.implicitHeight + 40
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.92)
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.48))
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
 
         anchors.top: parent.bottom
-        anchors.topMargin: 12
+        anchors.topMargin: 14
         anchors.right: parent.right
 
         visible: btn.menuOpen
@@ -121,8 +121,8 @@ Item {
 
         ColumnLayout {
             id: body
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 12 }
-            spacing: 6
+            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 20 }
+            spacing: 8
         }
     }
 }

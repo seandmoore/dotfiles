@@ -9,6 +9,7 @@ import "../services"
 
 PanelWindow {
     id: root
+    // Top bar: a single centered pill of widgets (see pillRow below).
 
     anchors {
         top: true
@@ -16,8 +17,8 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: openMenu === "" ? 56 : 440
-    exclusiveZone: 56
+    implicitHeight: openMenu === "" ? barH : 640   // tall enough for the largest dropdown (scaled apps list) so it isn't clipped square at the bottom
+    exclusiveZone: barH
     margins.top: 0
     color: "transparent"
 
@@ -25,7 +26,7 @@ PanelWindow {
 
     // Scan the installed apps once at startup so the launcher / Apps dropdown open
     // instantly with icons already resolved (instead of re-resolving each time).
-    Component.onCompleted: AppList.ensureLoaded()
+    Component.onCompleted: { AppList.ensureLoaded(); Places.ensureLoaded() }
 
     // ── HOVER-MENU CONTROLLER ─────────────────────────────────────────────────
     // One menu open at a time; opens after a short hover, closes after a grace
@@ -78,25 +79,51 @@ PanelWindow {
     }
     Process { id: powerProc }
 
-    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     0.92)
+    // ── HDR / SDR (DP-1 colour management) ────────────────────────────────────
+    // hdrOn mirrors DP-1's live colorManagementPreset so the bar icon + menu reflect
+    // reality. The query runs at startup and again shortly after each switch.
+    // HDR/SDR state lives in the shared Frost singleton (theme/Frost.qml) so the pill,
+    // every dropdown and this HDR indicator all read one source. setHdr applies the
+    // switch and nudges Frost to re-read immediately (Frost also polls on its own).
+    readonly property bool hdrOn: Frost.hdrOn
+    function setHdr(on) {
+        hdrApplyProc.command = ["bash", "-c",
+            "\"$HOME/dotfiles/scripts/hdr-toggle.sh\" " + (on ? "hdr" : "sdr")]
+        hdrApplyProc.running = true
+        root.openMenu = ""
+    }
+    Process {
+        id: hdrApplyProc
+        onRunningChanged: if (!running) Frost.refresh()
+    }
+
+    // Clear transparent pill (shared transparency level via Frost.glass).
+    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     Frost.glass(0.45))
     readonly property color bubbleBorder: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.8)
-    readonly property int   bubbleH:      40
-    readonly property int   bubblePad:    16
+    readonly property int   barH:         84   // collapsed bar strip height
+    readonly property int   bubbleH:       66   // centered pill height (9px padding inside barH)
+    readonly property int   bubblePad:     16
 
     // Thin group separator used between widget clusters inside the pill.
     component Sep: Rectangle {
         width: 1
-        Layout.preferredHeight: 18
+        Layout.preferredHeight: 23
         Layout.alignment: Qt.AlignVCenter
         color: Colors.surface1
         opacity: 0.6
     }
 
+    // ── FROSTED GLASS BAR — the rounded pill IS the frosted surface ───────────
+    // The Hyprland layer_rule (namespace "quickshell") blurs wherever this layer has
+    // alpha, and ignore_alpha skips the transparent area, so the blur follows the
+    // pill's rounded shape and wraps around the bar instead of sitting in a sharp
+    // full-width rectangle. The pill's translucent fill (bubbleBg) is what reads as
+    // frosted glass.
     // ── CENTERED PILL — every widget in one rounded island ────────────────────
     Rectangle {
         id: pill
         anchors.horizontalCenter: parent.horizontalCenter
-        y: (56 - bubbleH) / 2
+        y: (barH - bubbleH) / 2
         height: root.bubbleH
         width: pillRow.implicitWidth + root.bubblePad * 2
         radius: root.bubbleH / 2            // fully rounded pill ends
@@ -104,6 +131,7 @@ PanelWindow {
         border.color: root.bubbleBorder
         border.width: 1
 
+        Behavior on color   { ColorAnimation  { duration: 250 } }
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
         Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
         Behavior on width   { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
@@ -116,13 +144,30 @@ PanelWindow {
 
             // ── Apps · Workspaces · Visualizer ───────────────────────────────
             HoverPanel {
-                name: "apps"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 300
+                name: "apps"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 375
                 trigger: AppMenuButton {}
                 menu: AppsMenu { onLaunched: root.openMenu = "" }
             }
 
+            // Places — home folders, opens in the file manager (Nautilus)
             HoverPanel {
-                name: "workspaces"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 240
+                name: "places"; ctrl: root; hAlign: Qt.AlignLeft; menuWidth: 300
+                trigger: Item {
+                    implicitWidth: 36; implicitHeight: 36
+                    Text {
+                        anchors.centerIn: parent
+                        text: "󰉋"
+                        font.family: "JetBrainsMono Nerd Font Propo"
+                        font.pixelSize: 19
+                        color: root.openMenu === "places" ? Colors.sky : Colors.yellow
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                }
+                menu: PlacesMenu { onOpened: root.openMenu = "" }
+            }
+
+            HoverPanel {
+                name: "workspaces"; ctrl: root; hAlign: Qt.AlignLeft; clickToggles: false; menuWidth: 300
                 trigger: Workspaces { screenName: root.screen ? root.screen.name : "" }
                 menu: WorkspacesMenu {
                     screenName: root.screen ? root.screen.name : ""
@@ -131,11 +176,11 @@ PanelWindow {
             }
 
             HoverPanel {
-                name: "visualizer"; ctrl: root; hAlign: Qt.AlignLeft; menuWidth: 360
+                name: "visualizer"; ctrl: root; hAlign: Qt.AlignLeft; menuWidth: 450
                 trigger: AudioVisualizer {}
                 menu: ColumnLayout {
                     spacing: 8
-                    AudioVisualizer { Layout.fillWidth: true; Layout.preferredHeight: 130 }
+                    AudioVisualizer { Layout.fillWidth: true; Layout.preferredHeight: 160 }
                     Text {
                         Layout.fillWidth: true
                         horizontalAlignment: Text.AlignHCenter
@@ -144,7 +189,7 @@ PanelWindow {
                             : "No output device"
                         color: Colors.overlay1
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 10
+                        font.pixelSize: 13
                         elide: Text.ElideRight
                     }
                 }
@@ -154,7 +199,7 @@ PanelWindow {
 
             // ── Clock · Calendar (center) ────────────────────────────────────
             HoverPanel {
-                name: "calendar"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 280
+                name: "calendar"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 440
                 trigger: Clock {}
                 menu: Calendar {}
             }
@@ -168,7 +213,7 @@ PanelWindow {
             }
 
             HoverPanel {
-                name: "system"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 300
+                name: "system"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 375
                 trigger: SystemStats {}
                 menu: SystemMenu {}
             }
@@ -179,7 +224,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "updates"
                 ctrl: root
-                menuWidth: 300
+                menuWidth: 375
                 icon: "󰚰"
                 iconColor: Updates.total > 0 ? Colors.peach : Colors.subtext1
                 iconActiveColor: Colors.sky
@@ -193,7 +238,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "notifications"
                 ctrl: root
-                menuWidth: 350
+                menuWidth: 440
                 icon: Notifications.dnd ? "󰂛" : "󰂚"
                 iconColor: Notifications.dnd ? Colors.red
                     : (Notifications.unread > 0 ? Colors.yellow : Colors.subtext1)
@@ -208,7 +253,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "clipboard"
                 ctrl: root
-                menuWidth: 320
+                menuWidth: 400
                 icon: "󰅎"
                 iconColor: Colors.teal
                 iconActiveColor: Colors.sky
@@ -223,7 +268,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "volume"
                 ctrl: root
-                menuWidth: 250
+                menuWidth: 310
                 icon: root.volumeIcon
                 iconColor: root.muted ? Colors.red : Colors.blue
                 iconActiveColor: root.muted ? Colors.red : Colors.sky
@@ -237,7 +282,7 @@ PanelWindow {
                     Text {
                         text: root.volumeIcon
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 18
+                        font.pixelSize: 22
                         color: root.muted ? Colors.red : Colors.blue
                         MouseArea {
                             anchors.fill: parent
@@ -290,7 +335,7 @@ PanelWindow {
                         text: Math.round(root.volume * 100) + "%"
                         color: Colors.subtext1
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 12
+                        font.pixelSize: 15
                         Layout.minimumWidth: 38
                         horizontalAlignment: Text.AlignRight
                     }
@@ -303,7 +348,7 @@ PanelWindow {
                         : "No output device"
                     color: Colors.overlay1
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 10
+                    font.pixelSize: 13
                     elide: Text.ElideRight
                 }
             }
@@ -312,7 +357,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "theme"
                 ctrl: root
-                menuWidth: 175
+                menuWidth: 220
                 icon: Colors.darkMode ? "󰖔" : "󰖨"
                 iconColor: Colors.darkMode ? Colors.lavender : Colors.yellow
                 iconActiveColor: Colors.darkMode ? Colors.lavender : Colors.yellow
@@ -328,7 +373,7 @@ PanelWindow {
                         required property var modelData
                         readonly property bool active: Colors.darkMode === modelData.dark
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 36
+                        Layout.preferredHeight: 45
                         radius: 8
                         color: active
                             ? Qt.rgba(Colors.mauve.r, Colors.mauve.g, Colors.mauve.b, 0.22)
@@ -341,27 +386,27 @@ PanelWindow {
                             Text {
                                 text: themeItem.modelData.icon
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 14
+                                font.pixelSize: 18
                                 color: themeItem.modelData.dark ? Colors.lavender : Colors.yellow
                             }
                             Text {
                                 text: themeItem.modelData.label
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 13
+                                font.pixelSize: 16
                                 color: Colors.text
                                 Layout.fillWidth: true
                             }
                             Text {
                                 text: themeItem.modelData.sub
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 10
+                                font.pixelSize: 13
                                 color: Colors.overlay1
                             }
                             Text {
                                 visible: themeItem.active
                                 text: "󰄬"
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 12
+                                font.pixelSize: 15
                                 color: Colors.mauve
                             }
                         }
@@ -377,11 +422,83 @@ PanelWindow {
                 }
             }
 
+            // ── HDR / SDR (DP-1) toggle ──────────────────────────────────────
+            HoverMenuButton {
+                name: "hdr"
+                ctrl: root
+                menuWidth: 230
+                icon: "󰍹"
+                iconColor: root.hdrOn ? Colors.peach : Colors.overlay1
+                iconActiveColor: Colors.peach
+                onClicked: root.setHdr(!root.hdrOn)
+                // Re-read DP-1's state each time the menu opens, so the icon/active
+                // row stay correct even if HDR was changed outside the bar.
+                onMenuOpenChanged: if (menuOpen) Frost.refresh()
+
+                Repeater {
+                    model: [
+                        { label: "HDR", sub: "HDR10", icon: "󰃠", on: true  },
+                        { label: "SDR", sub: "sRGB",  icon: "󰃞", on: false },
+                    ]
+                    delegate: Rectangle {
+                        id: hdrItem
+                        required property var modelData
+                        readonly property bool active: root.hdrOn === modelData.on
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 45
+                        radius: 8
+                        color: active
+                            ? Qt.rgba(Colors.peach.r, Colors.peach.g, Colors.peach.b, 0.22)
+                            : (hdrMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8) : "transparent")
+                        Behavior on color { ColorAnimation { duration: 100 } }
+
+                        RowLayout {
+                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
+                            spacing: 10
+                            Text {
+                                text: hdrItem.modelData.icon
+                                font.family: "JetBrainsMono Nerd Font Propo"
+                                font.pixelSize: 18
+                                color: Colors.peach
+                            }
+                            Text {
+                                text: hdrItem.modelData.label
+                                font.family: "JetBrainsMono Nerd Font Propo"
+                                font.pixelSize: 16
+                                color: Colors.text
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                text: hdrItem.modelData.sub
+                                font.family: "JetBrainsMono Nerd Font Propo"
+                                font.pixelSize: 13
+                                color: Colors.overlay1
+                            }
+                            Text {
+                                visible: hdrItem.active
+                                text: "󰄬"
+                                font.family: "JetBrainsMono Nerd Font Propo"
+                                font.pixelSize: 15
+                                color: Colors.peach
+                            }
+                        }
+
+                        MouseArea {
+                            id: hdrMa
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: { root.setHdr(hdrItem.modelData.on); root.openMenu = "" }
+                        }
+                    }
+                }
+            }
+
             // ── Wallpaper ────────────────────────────────────────────────────
             HoverMenuButton {
                 name: "wallpaper"
                 ctrl: root
-                menuWidth: 190
+                menuWidth: 240
                 icon: "󰋩"
                 iconColor: Colors.sky
                 iconActiveColor: Colors.sky
@@ -396,7 +513,7 @@ PanelWindow {
                         id: wpItem
                         required property var modelData
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 36
+                        Layout.preferredHeight: 45
                         radius: 8
                         color: wpMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8) : "transparent"
                         Behavior on color { ColorAnimation { duration: 100 } }
@@ -407,13 +524,13 @@ PanelWindow {
                             Text {
                                 text: wpItem.modelData.icon
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 14
+                                font.pixelSize: 18
                                 color: Colors.sky
                             }
                             Text {
                                 text: wpItem.modelData.label
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 13
+                                font.pixelSize: 16
                                 color: Colors.text
                                 Layout.fillWidth: true
                             }
@@ -438,7 +555,7 @@ PanelWindow {
             HoverMenuButton {
                 name: "power"
                 ctrl: root
-                menuWidth: 160
+                menuWidth: 200
                 icon: "⏻"
                 iconColor: Colors.mauve
                 iconActiveColor: Colors.red
@@ -454,7 +571,7 @@ PanelWindow {
                         id: pwItem
                         required property var modelData
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 36
+                        Layout.preferredHeight: 45
                         radius: 8
                         color: pwMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.9) : "transparent"
                         Behavior on color { ColorAnimation { duration: 100 } }
@@ -465,13 +582,13 @@ PanelWindow {
                             Text {
                                 text: pwItem.modelData.icon
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 14
+                                font.pixelSize: 18
                                 color: pwItem.modelData.color
                             }
                             Text {
                                 text: pwItem.modelData.label
                                 font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 13
+                                font.pixelSize: 16
                                 color: Colors.text
                                 Layout.fillWidth: true
                             }
@@ -492,7 +609,7 @@ PanelWindow {
 
     // Dismiss the open menu on a click anywhere below the bar.
     MouseArea {
-        anchors { top: parent.top; topMargin: 56; left: parent.left; right: parent.right; bottom: parent.bottom }
+        anchors { top: parent.top; topMargin: barH; left: parent.left; right: parent.right; bottom: parent.bottom }
         visible: root.openMenu !== ""
         onClicked: { root.openMenu = ""; root.hoveredMenu = "" }
         z: -1

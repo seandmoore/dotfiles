@@ -20,7 +20,7 @@ ColumnLayout {
         property int count: 0
 
         Layout.fillWidth: true
-        Layout.preferredHeight: 36
+        Layout.preferredHeight: 45
         radius: 10
         color: count > 0
             ? Qt.rgba(accent.r, accent.g, accent.b, 0.12)
@@ -33,14 +33,14 @@ ColumnLayout {
             Text {
                 text: icon
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 14
+                font.pixelSize: 18
                 color: accent
             }
             Text {
                 text: label
                 color: Colors.text
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 12
+                font.pixelSize: 15
                 Layout.fillWidth: true
             }
             // Count pill, or a check mark when nothing to do
@@ -48,7 +48,7 @@ ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
                 visible: count > 0
                 implicitWidth: cnt.implicitWidth + 14
-                height: 20
+                height: 25
                 radius: 10
                 color: Qt.rgba(parent.parent.accent.r, parent.parent.accent.g, parent.parent.accent.b, 0.9)
                 Text {
@@ -57,7 +57,7 @@ ColumnLayout {
                     text: count
                     color: Colors.base
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 10
+                    font.pixelSize: 13
                     font.weight: Font.Bold
                 }
             }
@@ -66,7 +66,7 @@ ColumnLayout {
                 text: "󰄬"
                 color: Colors.green
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 12
+                font.pixelSize: 15
             }
         }
     }
@@ -78,14 +78,14 @@ ColumnLayout {
         Text {
             text: "󰚰"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 14
+            font.pixelSize: 18
             color: Updates.total > 0 ? Colors.peach : Colors.green
             Behavior on color { ColorAnimation { duration: 150 } }
         }
         Text {
             text: "System Updates"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 12
+            font.pixelSize: 15
             font.weight: Font.Bold
             color: Colors.subtext1
             Layout.fillWidth: true
@@ -94,7 +94,7 @@ ColumnLayout {
         Text {
             text: "󰑐"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 13
+            font.pixelSize: 16
             color: refMa.containsMouse ? Colors.sky : Colors.overlay1
             Behavior on color { ColorAnimation { duration: 120 } }
             RotationAnimation on rotation {
@@ -130,7 +130,7 @@ ColumnLayout {
             : Updates.total + (Updates.total === 1 ? " update available" : " updates available")
         color: Updates.total > 0 ? Colors.peach : Colors.overlay1
         font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 11
+        font.pixelSize: 14
     }
 
     // ── Per-source breakdown ─────────────────────────────────────────────────
@@ -145,7 +145,7 @@ ColumnLayout {
     Rectangle {
         Layout.fillWidth: true
         Layout.topMargin: 2
-        Layout.preferredHeight: 38
+        Layout.preferredHeight: 47
         radius: 10
         enabled: !Updates.updating
         opacity: Updates.updating ? 0.6 : 1
@@ -161,7 +161,7 @@ ColumnLayout {
             Text {
                 text: Updates.updating ? "󰦖" : "󰓦"
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 13
+                font.pixelSize: 16
                 color: Colors.base
             }
             Text {
@@ -170,7 +170,7 @@ ColumnLayout {
                     : "Update / Sync"
                 color: Colors.base
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 12
+                font.pixelSize: 15
                 font.weight: Font.Bold
             }
         }

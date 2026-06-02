@@ -39,7 +39,7 @@ PanelWindow {
         anchors.centerIn: parent
         width:  Math.min(parent.width  * 0.84, 980)
         height: Math.min(parent.height * 0.84, 700)
-        color:  Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.62)
+        color:  Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.48))
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.45)
         border.width: 1
         radius: 20
@@ -103,9 +103,10 @@ PanelWindow {
                             { keys: "󰖳 + Return",       desc: "Terminal (kitty)" },
                             { keys: "󰖳 + Space",        desc: "App launcher" },
                             { keys: "󰖳 + E",            desc: "File manager (Nautilus)" },
-                            { keys: "󰖳 + B",            desc: "Browser (Zen)" },
+                            { keys: "󰖳 + B",            desc: "Browser (Firefox)" },
                             { keys: "󰖳 + W",            desc: "Wallpaper switcher" },
                             { keys: "󰖳 + G",            desc: "Theme picker" },
+                            { keys: "󰖳 + Shift + D",    desc: "HDR ⇄ SDR (DP-1)" },
                         ]
                     }
 
@@ -126,8 +127,8 @@ PanelWindow {
                         icon: "󰹑"
                         sectionColor: Colors.pink
                         binds: [
-                            { keys: "󰖳 + S",            desc: "Area → clipboard + Pictures" },
-                            { keys: "󰖳 + Shift + S",    desc: "All monitors → Pictures" },
+                            { keys: "󰖳 + S",            desc: "Area → clipboard + Screenshots" },
+                            { keys: "󰖳 + Shift + S",    desc: "All monitors → Screenshots" },
                         ]
                     }
 

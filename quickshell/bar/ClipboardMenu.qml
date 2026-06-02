@@ -21,13 +21,13 @@ ColumnLayout {
         Text {
             text: "󰅍"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 13
+            font.pixelSize: 16
             color: Colors.teal
         }
         Text {
             text: "Clipboard"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 12
+            font.pixelSize: 15
             font.weight: Font.Bold
             color: Colors.subtext1
             Layout.fillWidth: true
@@ -36,7 +36,7 @@ ColumnLayout {
             visible: Clipboard.entries.length > 0
             text: "󰩹 Clear"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 10
+            font.pixelSize: 13
             color: clearMa.containsMouse ? Colors.red : Colors.overlay1
             Behavior on color { ColorAnimation { duration: 120 } }
             MouseArea {
@@ -66,7 +66,7 @@ ColumnLayout {
         bottomPadding: 8
         color: Colors.overlay0
         font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 11
+        font.pixelSize: 14
     }
 
     // History list (capped height; scrolls when long)
@@ -74,7 +74,7 @@ ColumnLayout {
         id: clipList
         visible: Clipboard.entries.length > 0
         Layout.fillWidth: true
-        Layout.preferredHeight: Math.min(contentHeight, 280)
+        Layout.preferredHeight: Math.min(contentHeight, 350)
         clip: true
         spacing: 2
         model: Clipboard.entries
@@ -95,7 +95,7 @@ ColumnLayout {
         delegate: Rectangle {
             required property var modelData
             width: clipList.width
-            height: 34
+            height: 43
             radius: 8
             color: clipItemMa.containsMouse
                 ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.85)
@@ -108,7 +108,7 @@ ColumnLayout {
                 Text {
                     text: clipItemMa.containsMouse ? "󰆏" : "󰅍"
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 13
+                    font.pixelSize: 16
                     color: clipItemMa.containsMouse ? Colors.sky : Colors.overlay1
                 }
                 Text {
@@ -116,7 +116,7 @@ ColumnLayout {
                     text: modelData.preview
                     color: Colors.text
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 11
+                    font.pixelSize: 14
                     elide: Text.ElideRight
                 }
             }

@@ -29,14 +29,14 @@ ColumnLayout {
         color: Colors.text
         font.family: "JetBrainsMono Nerd Font Propo"
         font.weight: Font.Bold
-        font.pixelSize: 26
+        font.pixelSize: 33
     }
     Text {
         Layout.alignment: Qt.AlignHCenter
         text: Qt.formatDateTime(cal.now, "dddd, MMMM d, yyyy")
         color: Colors.subtext0
         font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 12
+        font.pixelSize: 15
     }
 
     Rectangle {
@@ -52,7 +52,7 @@ ColumnLayout {
         Text {
             text: "󰅁"
             color: navPrev.containsMouse ? Colors.mauve : Colors.overlay1
-            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 16
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 20
             MouseArea {
                 id: navPrev; anchors.fill: parent; anchors.margins: -6
                 hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -64,12 +64,12 @@ ColumnLayout {
             horizontalAlignment: Text.AlignHCenter
             text: Qt.formatDateTime(cal.viewDate, "MMMM yyyy")
             color: Colors.text
-            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 13; font.weight: Font.Medium
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 16; font.weight: Font.Medium
         }
         Text {
             text: "󰅂"
             color: navNext.containsMouse ? Colors.mauve : Colors.overlay1
-            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 16
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 20
             MouseArea {
                 id: navNext; anchors.fill: parent; anchors.margins: -6
                 hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -93,7 +93,7 @@ ColumnLayout {
                 horizontalAlignment: Text.AlignHCenter
                 text: modelData
                 color: Colors.overlay0
-                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 10; font.weight: Font.Bold
+                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 13; font.weight: Font.Bold
             }
         }
 
@@ -103,7 +103,7 @@ ColumnLayout {
             delegate: Item {
                 required property int index
                 Layout.fillWidth: true
-                Layout.preferredHeight: 26
+                Layout.preferredHeight: 33
 
                 readonly property int firstDow: new Date(cal.viewDate.getFullYear(), cal.viewDate.getMonth(), 1).getDay()
                 readonly property int dayNum: index - firstDow + 1
@@ -114,7 +114,7 @@ ColumnLayout {
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: 24; height: 24; radius: 12
+                    width: 30; height: 30; radius: 15
                     visible: parent.inMonth
                     color: parent.isToday ? Colors.mauve : "transparent"
 
@@ -123,7 +123,7 @@ ColumnLayout {
                         text: parent.parent.inMonth ? parent.parent.dayNum : ""
                         color: parent.parent.isToday ? Colors.base : Colors.subtext1
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 11
+                        font.pixelSize: 14
                         font.weight: parent.parent.isToday ? Font.Bold : Font.Normal
                     }
                 }

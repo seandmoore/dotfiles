@@ -56,16 +56,16 @@ RowLayout {
             text: sg.icon
             color: sg.tint
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 12
+            font.pixelSize: 15
             Layout.alignment: Qt.AlignVCenter
             Behavior on color { ColorAnimation { duration: 250 } }
         }
 
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
-            implicitWidth: 48
-            implicitHeight: 22
-            radius: 5
+            implicitWidth: 61
+            implicitHeight: 28
+            radius: 6
             color: Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.45)
 
             Canvas {
@@ -126,7 +126,7 @@ RowLayout {
             text: sg.label
             color: Colors.subtext1
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 11
+            font.pixelSize: 14
             Layout.alignment: Qt.AlignVCenter
         }
     }

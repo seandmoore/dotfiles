@@ -1,5 +1,6 @@
 AppMenuButton AppMenuButton.qml
 AppsMenu AppsMenu.qml
+PlacesMenu PlacesMenu.qml
 AudioVisualizer AudioVisualizer.qml
 Bar Bar.qml
 Calendar Calendar.qml

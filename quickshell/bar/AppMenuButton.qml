@@ -6,7 +6,7 @@ import "../theme"
 Item {
     id: root
     implicitWidth: row.implicitWidth
-    implicitHeight: 28
+    implicitHeight: 36
 
     Rectangle {
         anchors.fill: parent
@@ -25,7 +25,7 @@ Item {
         Text {
             text: "󰣇"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 16
+            font.pixelSize: 20
             color: ma.containsMouse ? Colors.mauve : Colors.overlay1
             Behavior on color { ColorAnimation { duration: 150 } }
         }
@@ -34,7 +34,7 @@ Item {
             text: "Apps"
             font.family: "JetBrainsMono Nerd Font Propo"
             font.weight: Font.Bold
-            font.pixelSize: 12
+            font.pixelSize: 15
             color: ma.containsMouse ? Colors.mauve : Colors.subtext1
             Behavior on color { ColorAnimation { duration: 150 } }
         }

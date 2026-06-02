@@ -45,14 +45,14 @@ ColumnLayout {
         Text {
             text: Notifications.dnd ? "󰂛" : "󰂚"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 14
+            font.pixelSize: 18
             color: Notifications.dnd ? Colors.red : Colors.yellow
             Behavior on color { ColorAnimation { duration: 150 } }
         }
         Text {
             text: "Notifications"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 12
+            font.pixelSize: 15
             font.weight: Font.Bold
             color: Colors.subtext1
             Layout.fillWidth: true
@@ -61,7 +61,7 @@ ColumnLayout {
             visible: Notifications.history.length > 0
             text: "󰩹 Clear"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 10
+            font.pixelSize: 13
             color: clearMa.containsMouse ? Colors.red : Colors.overlay1
             Behavior on color { ColorAnimation { duration: 120 } }
             MouseArea {
@@ -78,7 +78,7 @@ ColumnLayout {
     // ── Do Not Disturb row ───────────────────────────────────────────────────
     Rectangle {
         Layout.fillWidth: true
-        Layout.preferredHeight: 38
+        Layout.preferredHeight: 47
         radius: 10
         color: dndMa.containsMouse
             ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8)
@@ -92,7 +92,7 @@ ColumnLayout {
             Text {
                 text: "󰂛"
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 14
+                font.pixelSize: 18
                 color: Notifications.dnd ? Colors.red : Colors.overlay1
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
@@ -103,7 +103,7 @@ ColumnLayout {
                     text: "Do Not Disturb"
                     color: Colors.text
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 12
+                    font.pixelSize: 15
                 }
                 Text {
                     visible: Notifications.dnd
@@ -118,7 +118,7 @@ ColumnLayout {
             Text {
                 text: "󰅀"
                 font.family: "JetBrainsMono Nerd Font Propo"
-                font.pixelSize: 12
+                font.pixelSize: 15
                 color: chevMa.containsMouse ? Colors.mauve : Colors.overlay1
                 rotation: notifMenu.muteSubmenu ? -180 : 0
                 Behavior on rotation { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
@@ -192,7 +192,7 @@ ColumnLayout {
                     required property var modelData
                     Layout.fillWidth: true
                     Layout.leftMargin: 14
-                    Layout.preferredHeight: 30
+                    Layout.preferredHeight: 38
                     radius: 8
                     color: subMa.containsMouse
                         ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.85)
@@ -205,14 +205,14 @@ ColumnLayout {
                         Text {
                             text: "󰔚"
                             font.family: "JetBrainsMono Nerd Font Propo"
-                            font.pixelSize: 11
+                            font.pixelSize: 14
                             color: subMa.containsMouse ? Colors.mauve : Colors.overlay1
                         }
                         Text {
                             text: modelData.label
                             color: Colors.subtext1
                             font.family: "JetBrainsMono Nerd Font Propo"
-                            font.pixelSize: 11
+                            font.pixelSize: 14
                             Layout.fillWidth: true
                         }
                     }
@@ -258,7 +258,7 @@ ColumnLayout {
             text: "No notifications"
             color: Colors.overlay0
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 11
+            font.pixelSize: 14
         }
     }
 
@@ -327,7 +327,7 @@ ColumnLayout {
                         visible: histIcon.status !== Image.Ready
                         text: "󰂚"
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 14
+                        font.pixelSize: 18
                         color: Colors.overlay1
                     }
                 }
@@ -359,7 +359,7 @@ ColumnLayout {
                         text: modelData.summary || ""
                         color: Colors.text
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 11
+                        font.pixelSize: 14
                         font.weight: Font.Bold
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
@@ -371,7 +371,7 @@ ColumnLayout {
                         text: modelData.body || ""
                         color: Colors.subtext0
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 10
+                        font.pixelSize: 13
                         Layout.fillWidth: true
                         wrapMode: Text.WordWrap
                         maximumLineCount: 2
@@ -385,7 +385,7 @@ ColumnLayout {
                     text: "✕"
                     color: dismMa.containsMouse ? Colors.red : Colors.overlay1
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 11
+                    font.pixelSize: 14
                     Behavior on color { ColorAnimation { duration: 120 } }
                     MouseArea {
                         id: dismMa

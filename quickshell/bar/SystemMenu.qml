@@ -26,7 +26,7 @@ ColumnLayout {
         text: "System"
         color: Colors.subtext0
         font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 10; font.weight: Font.Bold
+        font.pixelSize: 13; font.weight: Font.Bold
     }
 
     // ── Per-core CPU ───────────────────────────────────────────────────────────
@@ -47,7 +47,7 @@ ColumnLayout {
                     text: "C" + modelData.name
                     color: Colors.overlay1
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 10
+                    font.pixelSize: 13
                     Layout.preferredWidth: 22
                 }
                 Rectangle {
@@ -65,7 +65,7 @@ ColumnLayout {
                     text: Math.round(modelData.pct) + "%"
                     color: Colors.subtext1
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 10
+                    font.pixelSize: 13
                     horizontalAlignment: Text.AlignRight
                     Layout.preferredWidth: 30
                 }
@@ -91,13 +91,13 @@ ColumnLayout {
             Layout.fillWidth: true
             Text {
                 text: label; color: Colors.subtext1
-                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 11
+                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 14
                 Layout.fillWidth: true
             }
             Text {
                 text: used.toFixed(1) + " / " + total.toFixed(1) + " GB"
                 color: Colors.overlay1
-                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 10
+                font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 13
             }
         }
         Rectangle {

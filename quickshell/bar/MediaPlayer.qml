@@ -32,7 +32,7 @@ RowLayout {
         font.underline: false
         font.italic: false
         font.strikeout: false
-        font.pixelSize: 14
+        font.pixelSize: 18
         visible: parent.hasMedia
         scale: ma1.containsMouse ? 1.15 : 1
         Behavior on color { ColorAnimation { duration: 200 } }
@@ -56,7 +56,7 @@ RowLayout {
         font.underline: false
         font.italic: false
         font.strikeout: false
-        font.pixelSize: 14
+        font.pixelSize: 18
         visible: parent.hasMedia
         scale: ma2.containsMouse ? 1.15 : 1
         Behavior on color { ColorAnimation { duration: 200 } }
@@ -80,7 +80,7 @@ RowLayout {
         font.underline: false
         font.italic: false
         font.strikeout: false
-        font.pixelSize: 14
+        font.pixelSize: 18
         visible: parent.hasMedia
         scale: ma3.containsMouse ? 1.15 : 1
         Behavior on color { ColorAnimation { duration: 200 } }
@@ -100,7 +100,7 @@ RowLayout {
         text: player ? (player.trackTitle || "Unknown Track") : ""
         color: Colors.subtext1
         font.family: "JetBrainsMono Nerd Font Propo"
-        font.pixelSize: 11
+        font.pixelSize: 14
         visible: parent.hasMedia
         elide: Text.ElideRight
         maximumLineCount: 1

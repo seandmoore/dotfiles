@@ -7,12 +7,13 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 | Component | Description |
 |-----------|-------------|
 | **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds, per-monitor HDR & wide-gamut color management. |
-| **Quickshell** | Centered frosted-glass pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
+| **Quickshell** | Centered translucent pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, home-folder (Places) menu, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
 | **Hyprlock** | Lock screen with blurred background and animated clock. |
 | **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
 | **Hyprpaper** | Wallpaper manager. |
 | **Hyprpolkitagent** | Authentication agent for privilege prompts. |
-| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, and a smooth cursor trail. |
+| **SDDM** | Login screen themed with Catppuccin (Mocha/Latte); follows the active flavor via `sync-theme.sh`. |
+| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, a smooth cursor trail, and a translucent background. |
 | **Starship** | Catppuccin powerline shell prompt; flavor follows the active Mocha/Latte theme. |
 | **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
 | **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
@@ -20,9 +21,10 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 ## Status bar
 
-A single centered, fully-rounded frosted-glass **pill** that gathers every widget into one island, left to right:
+A single centered, fully-rounded translucent **pill** that gathers every widget into one island, left to right:
 
 - **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved.
+- **Places** — a folder icon listing your home folders; click one to open it in the file manager (Nautilus). Folders are scanned once at startup so the menu opens instantly.
 - **Workspaces** — per-monitor indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen); the hover menu shows live per-workspace window counts.
 - **Visualizer** — a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
 - **Clock** — hover opens the calendar.
@@ -30,7 +32,7 @@ A single centered, fully-rounded frosted-glass **pill** that gathers every widge
 - **Updates** — package icon with a count badge; the dropdown breaks down official-repo, AUR, and Flatpak updates and offers **Update All** (opens an interactive terminal running `yay`/`paru -Syu` + `flatpak update`).
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history and a **Do-Not-Disturb** toggle plus a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to put it back on the clipboard.
-- **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper, and power.
+- **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper (thumbnails preload in the background so the switcher opens instantly), and power.
 
 Everything animates — menus spring open, lists cascade in, badges pop, and the bar follows the active Catppuccin flavor. The whole config hot-reloads on save.
 
@@ -40,6 +42,8 @@ Color is managed per monitor in `hypr/hyprland.lua`:
 
 - **HDR displays** run the full HDR10 path — BT.2020 (Rec. 2020) primaries + PQ (ST. 2084) transfer at 10-bit. SDR content inside the HDR container is tunable via `sdrbrightness` / `sdrsaturation`, with panel peak and SDR-white levels set by `max_luminance` / `sdr_max_luminance`.
 - **SDR displays** use the `srgb` color space.
+
+The quickshell UI and Kitty use a flat **translucent** look (no compositor blur), so they render identically whether a display is in HDR or SDR — Hyprland can't blur a colour-managed HDR output, so a blur-based "frosted" look would only appear on SDR.
 
 Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
 
@@ -62,10 +66,12 @@ The script will:
 3. Activate the Git pre-commit hook that lints staged files (`core.hooksPath` → `.githooks/`)
 4. Install all required packages via `pacman`
 5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
-6. Install Zen Browser via Flatpak and apply Catppuccin theme overrides
-7. Create all config symlinks under `~/.config/`
-8. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-9. Refresh the font cache
+6. Install Firefox (set as the default browser) and Zen Browser via Flatpak, and apply Catppuccin Flatpak theme overrides
+7. Install the Catppuccin **SDDM** login theme plus the helper that lets the Mocha/Latte toggle switch the login screen too
+8. Configure **ROCm** for AMD GPUs (graphical-session env + add you to the `render`/`video` groups)
+9. Create all config symlinks under `~/.config/`
+10. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+11. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -174,12 +180,14 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `nwg-look` | GTK theme picker (`SUPER+G`) |
 | `xsettingsd` | Live X11/XWayland theme broadcast |
 | `uwsm` | Session manager used for clean logout |
+| `sddm` | Login / display manager (Catppuccin themed) |
 
 **Apps**
 
 | Package | Purpose |
 |---------|---------|
 | `nautilus` | File manager (`SUPER+E`) |
+| Firefox *(Flatpak)* | Default web browser (themed with the Catppuccin add-on) |
 | Zen Browser *(Flatpak)* | Web browser (`SUPER+B`) |
 
 **Fonts**
@@ -231,7 +239,9 @@ The setup uses [Catppuccin](https://github.com/catppuccin/catppuccin) in two fla
 ~/dotfiles/scripts/sync-theme.sh mocha   # switch to dark
 ```
 
-`sync-theme.sh` propagates the flavor everywhere live — Hyprland borders, GTK/Qt, icons, cursors, Kitty, and the Starship prompt (its `palette` line is swapped so open shells re-color on the next prompt). The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login.
+`sync-theme.sh` propagates the flavor everywhere live — Hyprland borders, GTK/Qt, icons, cursors, Kitty, and the Starship prompt (its `palette` line is swapped so open shells re-color on the next prompt). The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login. `sync-theme.sh` also re-themes the **SDDM** login screen (Mocha ↔ Latte).
+
+**Firefox** keeps its default UI styling and is themed with the [Catppuccin browser add-on](https://github.com/catppuccin/firefox) rather than a custom userChrome.
 
 `nwg-look` changes are snapshotted per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget variant choices survive theme switches.
 

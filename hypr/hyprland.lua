@@ -150,6 +150,9 @@ hl.on("hyprland.start", function()
     -- often starts before the monitors are ready, so its conf `wallpaper=` line no-ops
     -- and the desktop comes up blank; this restore (with retry) makes it stick.
     hl.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/restore-wallpaper.sh")
+    -- DP-1 is the primary monitor (origin 0,0, workspaces 1-5, where the bar lives).
+    -- Focus it at login so the session starts on the primary, not the secondary.
+    hl.exec_cmd("hyprctl dispatch focusmonitor DP-1")
 end)
 
 -- Re-apply on every config reload (cursor resets to default on reload).
@@ -312,10 +315,11 @@ hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(launcher))
 hl.bind(mainMod .. " + C",      hl.dsp.window.close())
 hl.bind(mainMod .. " + M",      hl.dsp.exit())
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd("nautilus"))
-hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("flatpak run app.zen_browser.zen"))
+hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("flatpak run org.mozilla.firefox"))
 hl.bind(mainMod .. " + G",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/nwg-look-sync.sh"))
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call wallpaper toggle"))
 hl.bind(mainMod .. " + H",     hl.dsp.exec_cmd("qs -c config ipc call cheatsheet toggle"))
+hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/hdr-toggle.sh"))  -- HDR <-> SDR (DP-1)
 
 -- Window management
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
@@ -415,12 +419,15 @@ hl.window_rule({ match = { class = "blueman-manager"     }, float = true })
 hl.window_rule({ match = { title = "^Open File"          }, float = true })
 hl.window_rule({ match = { title = "^Save As"            }, float = true })
 
--- Kitty transparency
+-- Kitty: keep the window itself crisp (text fully opaque); the see-through + blur
+-- now comes from kitty's own background_opacity (kitty/kitty.conf), so text stays
+-- sharp instead of being dimmed by a whole-window opacity. A faint unfocused dim only.
 hl.window_rule({
     match   = { class = "kitty" },
-    opacity = "0.92 0.85",
+    opacity = "1.0 0.97",
 })
 
--- No blur on quickshell layer — blur only works on SDR monitors (not HDR/DP-1),
--- causing an asymmetric frosted effect on HDMI-A-1. Bar uses its own opacity instead.
+-- No blur on the quickshell layer: the bar/menus use a clear transparent look so the
+-- wallpaper shows through cleanly. (Blur can't render on the HDR output anyway, so a
+-- blurred SDR vs unblurred HDR was inconsistent — dropping it keeps both identical.)
 

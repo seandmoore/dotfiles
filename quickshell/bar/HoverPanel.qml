@@ -55,14 +55,14 @@ Item {
     Rectangle {
         id: dropdown
         width: panel.menuWidth
-        height: bodyLoader.item ? bodyLoader.item.implicitHeight + 24 : 0
+        height: bodyLoader.item ? bodyLoader.item.implicitHeight + 40 : 0
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, 0.94)
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.48))
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
 
         anchors.top: parent.bottom
-        anchors.topMargin: 16
+        anchors.topMargin: 18
         anchors.horizontalCenter: panel.hAlign === Qt.AlignHCenter ? parent.horizontalCenter : undefined
         anchors.left:            panel.hAlign === Qt.AlignLeft     ? parent.left            : undefined
         anchors.right:           panel.hAlign === Qt.AlignRight    ? parent.right           : undefined
@@ -84,7 +84,7 @@ Item {
 
         Loader {
             id: bodyLoader
-            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 12 }
+            anchors { top: parent.top; left: parent.left; right: parent.right; margins: 20 }
             active: panel.menuOpen || dropdown.opacity > 0.01
             sourceComponent: panel.menu
         }

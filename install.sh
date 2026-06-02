@@ -82,8 +82,11 @@ PACMAN_PKGS=(
     xorg-xwayland
     kitty
     neovim
+    lua-language-server
+    stylua
     starship
     wl-clipboard
+    unzip
     grim
     slurp
     ffmpeg
@@ -222,10 +225,24 @@ if command -v flatpak &>/dev/null; then
         || warn "Could not add Flathub remote (continuing)"
     ok "Flathub remote ready"
 
-    info "Installing Zen Browser ..."
+    info "Installing browsers (Firefox + Zen) ..."
+    flatpak install --user --noninteractive flathub org.mozilla.firefox \
+        || warn "Could not install Firefox (continuing)"
     flatpak install --user --noninteractive flathub app.zen_browser.zen \
         || warn "Could not install Zen Browser (continuing)"
-    ok "Zen Browser installed"
+    ok "Browsers installed"
+
+    # Firefox (flatpak) is the default browser; SUPER+B in hyprland.lua launches it too.
+    info "Setting Firefox as the default web browser ..."
+    xdg-settings set default-web-browser org.mozilla.firefox.desktop 2>/dev/null \
+        && xdg-mime default org.mozilla.firefox.desktop \
+            x-scheme-handler/http x-scheme-handler/https text/html 2>/dev/null \
+        && ok "Firefox set as default browser" \
+        || warn "Could not set default browser (continuing)"
+
+    # Firefox UI styling is intentionally left at Firefox's default — we use the
+    # Catppuccin browser theme EXTENSION (from addons.mozilla.org) instead of a
+    # manual userChrome.css. (Removed the old firefox-theme.sh userChrome deploy.)
 
     info "Applying Flatpak Catppuccin theme overrides ..."
     # Default to mocha (dark); sync-theme.sh flips env + portal on a light/dark switch.
@@ -281,6 +298,9 @@ done
 make_link "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 make_link "$DOTFILES_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
 
+# OpenCode — full-auto 'yolo' agent used by the `ocd` alias
+make_link "$DOTFILES_DIR/opencode/agent/yolo.md" "$HOME/.config/opencode/agent/yolo.md"
+
 # Qt theming (shortcut underlines off, Kvantum style, Papirus-Dark icons)
 make_link "$DOTFILES_DIR/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
 make_link "$DOTFILES_DIR/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
@@ -335,6 +355,19 @@ info "Configuring ROCm ..."
 # GUI apps launched from the uwsm/Hyprland session inherit this.
 make_link "$DOTFILES_DIR/environment.d/rocm.conf" "$HOME/.config/environment.d/rocm.conf"
 
+# GPU device access. /dev/kfd and /dev/dri/renderD* are owned by the render/video
+# groups; without membership ROCm only works while udev happens to leave the nodes
+# world-accessible, which is fragile across kernel/udev updates. Add the user once
+# (takes effect on next login). Idempotent: skips if already a member.
+for grp in render video; do
+    if getent group "$grp" >/dev/null && ! id -nG "$USER" | grep -qw "$grp"; then
+        sudo usermod -aG "$grp" "$USER" && ok "Added $USER to '$grp' (re-login required)" \
+            || warn "Could not add $USER to '$grp'"
+    else
+        ok "$USER already in '$grp' (or group absent)"
+    fi
+done
+
 # Interactive shells source shell/rocm.sh (covers bare TTY/SSH logins). Append the
 # source line once per rc file; the grep guard keeps re-runs idempotent.
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
@@ -343,6 +376,16 @@ for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
         ok "Wired ROCm into $rc"
     else
         ok "ROCm already wired into $rc (or rc absent)"
+    fi
+done
+
+# ── Shell aliases (cc/ccd Claude Code, oc/ocd OpenCode) ────────────────────────
+for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/aliases.sh' "$rc"; then
+        printf '\n# Aliases (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/aliases.sh" ]] && . "$HOME/dotfiles/shell/aliases.sh"\n' >> "$rc"
+        ok "Wired aliases into $rc"
+    else
+        ok "Aliases already wired into $rc (or rc absent)"
     fi
 done
 
@@ -358,11 +401,25 @@ if command -v ollama &>/dev/null; then
     fi
 fi
 
+# ── SDDM login theme (Catppuccin) ──────────────────────────────────────────────
+# Installs the Catppuccin Mocha + Latte SDDM themes, the sddm-set-theme helper and a
+# NOPASSWD sudoers rule so the Mocha<->Latte toggle (sync-theme.sh) also flips the
+# login screen. Idempotent; needs root for /usr/share, /usr/local/bin and /etc.
+info "Configuring SDDM Catppuccin theme ..."
+if sudo bash "$DOTFILES_DIR/scripts/sddm-install.sh"; then
+    ok "SDDM Catppuccin theme installed"
+else
+    warn "Could not configure SDDM Catppuccin theme (continuing)"
+fi
+
 # ── XDG user directories ─────────────────────────────────────────────────────
 
 info "Setting up home folders ..."
 xdg-user-dirs-update
-ok "Home folders ready (Documents, Downloads, Music, Pictures, Videos, etc.)"
+# Screenshots land here (see scripts/screenshot-*.sh); create it up front so it
+# exists on a fresh install before the first screenshot.
+mkdir -p "$HOME/Pictures/Screenshots"
+ok "Home folders ready (Documents, Downloads, Music, Pictures, Pictures/Screenshots, Videos, etc.)"
 
 # ── Systemd user services ─────────────────────────────────────────────────────
 
@@ -371,6 +428,15 @@ systemctl --user enable --now pipewire wireplumber pipewire-pulse \
     || warn "Could not enable PipeWire services (may need an active user session)"
 systemctl --user enable --now xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
     || warn "Could not enable XDG portal services"
+
+# Hyprland session daemons. These ship WantedBy=graphical-session.target but are
+# disabled by default — without enabling them the target never pulls them in, so the
+# desktop comes up with no wallpaper (hyprpaper), no idle/lock (hypridle) and no
+# polkit auth prompts (hyprpolkitagent). hyprland.lua assumes systemd starts them.
+# Enable only (no --now): they're session-bound (ConditionEnvironment=WAYLAND_DISPLAY)
+# and get started at the next login; starting them outside a graphical session no-ops.
+systemctl --user enable hyprpaper.service hypridle.service hyprpolkitagent.service \
+    || warn "Could not enable Hyprland session services"
 ok "Systemd user services enabled"
 
 # Enable bluetooth system service

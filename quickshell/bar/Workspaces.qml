@@ -71,14 +71,14 @@ Item {
             delegate: Item {
                 required property var modelData
                 visible: !root.screenName || (modelData.monitor && modelData.monitor.name === root.screenName)
-                width: 16
-                height: 28
+                width: 20
+                height: 36
                 Layout.alignment: Qt.AlignVCenter
 
                 Rectangle {
                     id: dot
                     anchors.centerIn: parent
-                    width: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id ? 10 : 7
+                    width: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id ? 13 : 9
                     height: width
                     radius: width / 2
                     color: Hyprland.focusedWorkspace && modelData.id === Hyprland.focusedWorkspace.id

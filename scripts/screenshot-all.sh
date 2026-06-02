@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dir="${SCREENSHOT_DIR:-$HOME/Pictures}"
+dir="${SCREENSHOT_DIR:-$HOME/Pictures/Screenshots}"
 mkdir -p "$dir"
 stamp=$(date +%Y%m%d_%H%M%S)
 

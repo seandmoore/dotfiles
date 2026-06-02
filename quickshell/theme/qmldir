@@ -1,2 +1,3 @@
 module Theme
 singleton Colors Colors.qml
+singleton Frost Frost.qml

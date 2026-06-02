@@ -15,8 +15,8 @@ Item {
     property bool hasSound: false
     property real phase: 0         // idle-motion phase
 
-    implicitWidth: 96
-    implicitHeight: 30
+    implicitWidth: 122
+    implicitHeight: 38
 
     // color → "#rrggbb" (Canvas gradients reject the ARGB form)
     function hx(v) {

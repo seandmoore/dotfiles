@@ -2,4 +2,5 @@ module Services
 singleton AppList AppList.qml
 singleton Clipboard Clipboard.qml
 singleton Notifications Notifications.qml
+singleton Places Places.qml
 singleton Updates Updates.qml

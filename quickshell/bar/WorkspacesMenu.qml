@@ -34,14 +34,14 @@ ColumnLayout {
         Text {
             text: "󰕰"
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 13
+            font.pixelSize: 16
             color: Colors.mauve
         }
         Text {
             text: "Workspaces"
             color: Colors.subtext1
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 12
+            font.pixelSize: 15
             font.weight: Font.Bold
             Layout.fillWidth: true
         }
@@ -49,7 +49,7 @@ ColumnLayout {
             text: wsMenu.screenName
             color: Colors.overlay0
             font.family: "JetBrainsMono Nerd Font Propo"
-            font.pixelSize: 10
+            font.pixelSize: 13
         }
     }
 
@@ -72,7 +72,7 @@ ColumnLayout {
             readonly property int windows: wsMenu.winCount(modelData)
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 38
+            Layout.preferredHeight: 47
             radius: 10
             color: wsRow.active
                 ? Qt.rgba(Colors.mauve.r, Colors.mauve.g, Colors.mauve.b, 0.18)
@@ -96,7 +96,7 @@ ColumnLayout {
                 // Index badge
                 Rectangle {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 24; height: 24; radius: 7
+                    width: 30; height: 30; radius: 9
                     color: wsRow.active
                         ? Colors.mauve
                         : Qt.rgba(Colors.surface1.r, Colors.surface1.g, Colors.surface1.b, 0.7)
@@ -106,7 +106,7 @@ ColumnLayout {
                         text: wsRow.modelData.id
                         color: wsRow.active ? Colors.base : Colors.subtext1
                         font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 11
+                        font.pixelSize: 14
                         font.weight: Font.Bold
                     }
                 }
@@ -115,7 +115,7 @@ ColumnLayout {
                     text: "Workspace " + wsRow.modelData.id
                     color: wsRow.active ? Colors.text : Colors.subtext1
                     font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 12
+                    font.pixelSize: 15
                     Layout.fillWidth: true
                 }
 
@@ -134,14 +134,14 @@ ColumnLayout {
                         Text {
                             text: "󰖲"
                             font.family: "JetBrainsMono Nerd Font Propo"
-                            font.pixelSize: 10
+                            font.pixelSize: 13
                             color: Colors.overlay2
                         }
                         Text {
                             text: wsRow.windows
                             color: Colors.subtext0
                             font.family: "JetBrainsMono Nerd Font Propo"
-                            font.pixelSize: 10
+                            font.pixelSize: 13
                             font.weight: Font.Medium
                         }
                     }

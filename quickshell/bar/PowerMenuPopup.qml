@@ -45,9 +45,9 @@ PanelWindow {
     // Menu panel — top-right corner
     Rectangle {
         id: menu
-        width: 160
-        height: col.implicitHeight + 16
-        radius: 14
+        width: 200
+        height: col.implicitHeight + 20
+        radius: 18
         color: Qt.rgba(Colors.mantle.r, Colors.mantle.g, Colors.mantle.b, 0.97)
         border.color: Colors.surface1
         border.width: 1
@@ -80,7 +80,7 @@ PanelWindow {
 
                 delegate: Rectangle {
                     Layout.fillWidth: true
-                    height: 38
+                    height: 47
                     radius: 8
                     color: ma.containsMouse
                         ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.9)
@@ -94,12 +94,12 @@ PanelWindow {
                         Text {
                             text: modelData.icon
                             font.family: "JetBrainsMono Nerd Font Propo"
-                            font.pixelSize: 14
+                            font.pixelSize: 18
                             color: modelData.color
                         }
                         Text {
                             text: modelData.label
-                            font.pixelSize: 13
+                            font.pixelSize: 16
                             color: Colors.text
                             Layout.fillWidth: true
                         }
