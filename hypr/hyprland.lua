@@ -337,6 +337,7 @@ hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call w
 hl.bind(mainMod .. " + H",     hl.dsp.exec_cmd("qs -c config ipc call cheatsheet toggle"))
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/hdr-toggle.sh"))  -- HDR <-> SDR (DP-1)
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/color-accuracy-toggle.sh"))  -- Vibrant <-> Accurate sRGB (DP-1)
+hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/night-shift.sh toggle"))  -- Night shift on/off (hyprsunset)
 
 -- Window management
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())

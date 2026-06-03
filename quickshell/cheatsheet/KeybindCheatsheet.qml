@@ -106,7 +106,6 @@ PanelWindow {
                             { keys: "󰖳 + B",            desc: "Browser (Firefox)" },
                             { keys: "󰖳 + W",            desc: "Wallpaper switcher" },
                             { keys: "󰖳 + G",            desc: "Theme picker" },
-                            { keys: "󰖳 + Shift + D",    desc: "HDR ⇄ SDR (DP-1)" },
                         ]
                     }
 
@@ -179,6 +178,17 @@ PanelWindow {
                         binds: [
                             { keys: "󰖳 + M",            desc: "Exit Hyprland" },
                             { keys: "󰖳 + H",            desc: "Keybind cheat sheet" },
+                        ]
+                    }
+
+                    BindSection {
+                        title: "Display"
+                        icon: "󰍹"
+                        sectionColor: Colors.peach
+                        binds: [
+                            { keys: "󰖳 + Shift + D",    desc: "HDR ⇄ SDR (DP-1)" },
+                            { keys: "󰖳 + Shift + A",    desc: "Vibrant ⇄ Standard" },
+                            { keys: "󰖳 + Shift + N",    desc: "Night shift toggle" },
                         ]
                     }
 
