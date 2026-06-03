@@ -32,6 +32,7 @@ A single centered, fully-rounded opaque **pill** that gathers every widget into 
 - **Updates** — package icon with a count badge; the dropdown breaks down official-repo, AUR, and Flatpak updates and offers **Update All** (opens an interactive terminal running `yay`/`paru -Syu` + `flatpak update`).
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history and a **Do-Not-Disturb** toggle plus a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to put it back on the clipboard.
+- **Display** — DP-1 color controls: HDR ↔ SDR and vibrant ↔ accurate-sRGB toggles plus a night-shift toggle and color-temperature slider, all driving the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
 - **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper (thumbnails preload in the background so the switcher opens instantly), and power.
 
 Everything animates — menus spring open, lists cascade in, badges pop, and the bar follows the active Catppuccin flavor. The whole config hot-reloads on save.
@@ -46,6 +47,14 @@ Color is managed per monitor in `hypr/hyprland.lua`:
 The quickshell UI and Kitty use flat **opaque** surfaces (no compositor blur), matched to the GTK apps (e.g. Nautilus) for legibility — text and icons read cleanly with no wallpaper bleed-through. They also render identically whether a display is in HDR or SDR (Hyprland can't blur a colour-managed HDR output, so a blur-based "frosted" look would only appear on SDR). The opacity is a single knob: `Frost.glass()` in `quickshell/theme/Frost.qml` (return `a` instead of `1.0` to restore the translucent glass look) and Kitty's `background_opacity`.
 
 Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
+
+These modes are also switchable at runtime — both from the keybinds (`SUPER+SHIFT+D` HDR↔SDR, `SUPER+SHIFT+A` vibrant↔accurate sRGB, `SUPER+SHIFT+N` night shift) and from the bar's **Display** dropdown, which adds a color-temperature slider for night shift. State is seeded to the login defaults on startup and persisted under `~/.cache/hypr/`. The toggles are driven by `scripts/{display-color,hdr-toggle,color-accuracy-toggle,night-shift}.sh`; night shift uses `hyprsunset`.
+
+## VRAM foreground boosting (dmemcg)
+
+Gives the **focused** window priority on real GPU VRAM, pushing background apps into slower system RAM (GTT) first when VRAM is contended — the Hyprland counterpart to KDE's `plasma-foreground-booster`. It is built on the DRM device-memory cgroup controller (`CONFIG_CGROUP_DMEM`, mainline since Linux 6.14, a.k.a. "Valve's VRAM patch").
+
+A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, on every focus change, raises `dmem.low` on the focused window's cgroup while releasing the previous one. The AUR `dmemcg-booster` package enables the controller tree-wide and sets the baseline protection on `app.slice`; a custom `steam.desktop` launches Steam directly under `app.slice` so the boost actually applies. `install.sh` symlinks these, enables the `hypr-dmemcg-foreground.service`, and installs a pacman hook (`scripts/check-dmem-config.sh`) that verifies `CONFIG_CGROUP_DMEM` survives each kernel update. See [`vram/README.md`](vram/README.md) for details.
 
 ## Screenshots
 
@@ -65,13 +74,14 @@ The script will:
 2. Clone or update the dotfiles repo to `~/dotfiles`
 3. Activate the Git pre-commit hook that lints staged files (`core.hooksPath` → `.githooks/`)
 4. Install all required packages via `pacman`
-5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, etc.)
+5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, `dmemcg-booster`, etc.)
 6. Install Firefox (set as the default browser) and Zen Browser via Flatpak, and apply Catppuccin Flatpak theme overrides
 7. Install the Catppuccin **SDDM** login theme plus the helper that lets the Mocha/Latte toggle switch the login screen too
 8. Configure **ROCm** for AMD GPUs (graphical-session env + add you to the `render`/`video` groups)
-9. Create all config symlinks under `~/.config/`
-10. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
-11. Refresh the font cache
+9. Set up **VRAM foreground boosting** (dmemcg) — symlink the focus daemon + Steam launcher and install the `CONFIG_CGROUP_DMEM` kernel-check pacman hook
+10. Create all config symlinks under `~/.config/`
+11. Enable systemd user services (PipeWire, XDG portals, the VRAM focus daemon) and the bluetooth service
+12. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -181,6 +191,8 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `xsettingsd` | Live X11/XWayland theme broadcast |
 | `uwsm` | Session manager used for clean logout |
 | `sddm` | Login / display manager (Catppuccin themed) |
+| `hyprsunset` | Night-shift color-temperature daemon (`SUPER+SHIFT+N`) |
+| `dmemcg-booster` *(AUR)* | Enables the `dmem` cgroup controller + baseline VRAM protection for foreground boosting |
 
 **Apps**
 
@@ -223,6 +235,9 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + T` | Toggle split (dwindle) |
 | `SUPER + S` | Screenshot a region → clipboard **and** `~/Pictures` |
 | `SUPER + SHIFT + S` | Screenshot every monitor → `~/Pictures` |
+| `SUPER + SHIFT + D` | Toggle HDR ↔ SDR (DP-1) |
+| `SUPER + SHIFT + A` | Toggle vibrant ↔ accurate sRGB color (DP-1) |
+| `SUPER + SHIFT + N` | Toggle night shift (warm color temperature) |
 | `XF86AudioRaiseVolume/LowerVolume/Mute` | Volume control |
 | `XF86AudioPlay/Next/Prev` | Media control |
 | `XF86MonBrightnessUp/Down` | Brightness control |
