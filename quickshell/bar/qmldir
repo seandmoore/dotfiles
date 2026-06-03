@@ -5,6 +5,7 @@ AudioVisualizer AudioVisualizer.qml
 Bar Bar.qml
 Calendar Calendar.qml
 ClipboardMenu ClipboardMenu.qml
+DisplayMenu DisplayMenu.qml
 NotificationMenu NotificationMenu.qml
 UpdatesMenu UpdatesMenu.qml
 HoverMenuButton HoverMenuButton.qml

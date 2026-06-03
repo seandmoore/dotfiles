@@ -161,6 +161,14 @@ hl.on("hyprland.start", function()
     -- DP-1 is the primary monitor (origin 0,0, workspaces 1-5, where the bar lives).
     -- Focus it at login so the session starts on the primary, not the secondary.
     hl.exec_cmd("hyprctl dispatch focusmonitor DP-1")
+    -- Seed DP-1 colour-mode + night-shift state to the login defaults so the bar's
+    -- Display menu and the keybinds agree with the monitor block above (HDR + vibrant,
+    -- night shift off). SUPER+SHIFT+D toggles HDR<->SDR; SUPER+SHIFT+A toggles
+    -- vibrant<->standard; the bar's Display dropdown has the night-shift slider too.
+    hl.exec_cmd("sh -c 'mkdir -p ~/.cache/hypr; echo hdr > ~/.cache/hypr/color-hdr; echo vibrant > ~/.cache/hypr/color-vibrant; echo 0 > ~/.cache/hypr/nightshift-on'")
+    -- Night-shift daemon (hyprsunset), started neutral (6500K = no shift); night-shift.sh
+    -- drives it over IPC. No-op if hyprsunset isn't installed yet (sudo pacman -S hyprsunset).
+    hl.exec_cmd("hyprsunset -t 6500")
 end)
 
 -- Re-apply on every config reload (cursor resets to default on reload).
@@ -328,6 +336,7 @@ hl.bind(mainMod .. " + G",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call wallpaper toggle"))
 hl.bind(mainMod .. " + H",     hl.dsp.exec_cmd("qs -c config ipc call cheatsheet toggle"))
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/hdr-toggle.sh"))  -- HDR <-> SDR (DP-1)
+hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/color-accuracy-toggle.sh"))  -- Vibrant <-> Accurate sRGB (DP-1)
 
 -- Window management
 hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())

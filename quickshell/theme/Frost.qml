@@ -3,21 +3,22 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Shared transparency helper for every Quickshell surface, plus DP-1's HDR state for
-// the bar's HDR indicator. The desktop uses a flat clear-transparent look (no blur),
-// so glass() returns the alpha unchanged — the result is identical in HDR and SDR
-// (Hyprland can't blur a colour-managed HDR output anyway, so there's nothing to
-// compensate for). Still polls DP-1 every 2s so the bar's HDR toggle icon stays live.
+// Shared transparency helper for every Quickshell surface, plus DP-1's live colour
+// state (HDR/SDR, vibrant/standard, night shift) for the bar's Display menu/indicator.
+// The desktop uses a flat clear-transparent look (no blur), so glass() returns the
+// alpha unchanged. Polls DP-1 + the ~/.cache/hypr state files every 2s so the bar
+// stays in sync even when colour is changed via keybinds outside the bar.
 QtObject {
     id: frost
 
+    // colorManagementPreset: "hdr" => HDR; "wide" => vibrant SDR; else accurate SDR.
     property bool hdrOn: true
+    // vibrant axis (saturation 1.3 vs 1.0 in HDR; cm=wide vs srgb in SDR).
+    property bool vibrant: true
+    // Night shift (hyprsunset).
+    property bool nightOn: false
+    property int  nightTemp: 4000
 
-    // Base alpha for a surface. Surfaces pass their own alpha, but this single knob
-    // overrides them all — currently forced to 1.0 so every Quickshell panel is fully
-    // opaque (matched to Nautilus/GTK apps) for maximum legibility of text and icons.
-    // To restore the clear-transparent glass look, return `a` instead of 1.0. Usage:
-    //   color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.48))
     function glass(a) { return 1.0 }
 
     function refresh() { pollProc.running = true }
@@ -30,15 +31,25 @@ QtObject {
         onTriggered: pollProc.running = true
     }
 
+    // One shot reads DP-1's preset plus the vibrant/night state files, emitting a
+    // single "preset|vibrant|on|temp" line for the parser below.
     property Process pollProc: Process {
         id: pollProc
         command: ["bash", "-c",
-            "hyprctl monitors all -j | jq -r '.[]|select(.name==\"DP-1\")|.colorManagementPreset // \"srgb\"'"]
+            "c=\"${XDG_CACHE_HOME:-$HOME/.cache}/hypr\"; " +
+            "p=$(hyprctl monitors all -j | jq -r '.[]|select(.name==\"DP-1\")|.colorManagementPreset // \"srgb\"'); " +
+            "v=$(cat \"$c/color-vibrant\" 2>/dev/null || echo vibrant); " +
+            "n=$(cat \"$c/nightshift-on\" 2>/dev/null || echo 0); " +
+            "t=$(cat \"$c/nightshift-temp\" 2>/dev/null || echo 4000); " +
+            "echo \"$p|$v|$n|$t\""]
         stdout: SplitParser {
             onRead: line => {
-                const v = line.trim()
-                if (v === "hdr") frost.hdrOn = true
-                else if (v !== "") frost.hdrOn = false
+                const p = line.trim().split("|")
+                if (p.length < 4) return
+                frost.hdrOn = (p[0] === "hdr")
+                frost.vibrant = (p[1] === "vibrant")
+                frost.nightOn = (p[2] === "1")
+                const t = parseInt(p[3]); if (!isNaN(t)) frost.nightTemp = t
             }
         }
     }

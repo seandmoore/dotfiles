@@ -422,76 +422,23 @@ PanelWindow {
                 }
             }
 
-            // ── HDR / SDR (DP-1) toggle ──────────────────────────────────────
+            // ── Display (DP-1): night shift + HDR/SDR colour modes ───────────
             HoverMenuButton {
-                name: "hdr"
+                name: "display"
                 ctrl: root
-                menuWidth: 230
+                menuWidth: 300
                 icon: "󰍹"
-                iconColor: root.hdrOn ? Colors.peach : Colors.overlay1
+                iconColor: Frost.nightOn ? Colors.peach
+                    : (root.hdrOn ? Colors.peach : Colors.overlay1)
                 iconActiveColor: Colors.peach
+                // Quick action: click toggles HDR<->SDR; the dropdown has full controls
+                // (night shift toggle + temperature slider, HDR/SDR vibrant/standard).
                 onClicked: root.setHdr(!root.hdrOn)
-                // Re-read DP-1's state each time the menu opens, so the icon/active
-                // row stay correct even if HDR was changed outside the bar.
+                // Re-read DP-1 state when the menu opens so everything is live even if
+                // colour/night shift was changed via keybinds outside the bar.
                 onMenuOpenChanged: if (menuOpen) Frost.refresh()
 
-                Repeater {
-                    model: [
-                        { label: "HDR", sub: "HDR10", icon: "󰃠", on: true  },
-                        { label: "SDR", sub: "sRGB",  icon: "󰃞", on: false },
-                    ]
-                    delegate: Rectangle {
-                        id: hdrItem
-                        required property var modelData
-                        readonly property bool active: root.hdrOn === modelData.on
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        radius: 8
-                        color: active
-                            ? Qt.rgba(Colors.peach.r, Colors.peach.g, Colors.peach.b, 0.22)
-                            : (hdrMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8) : "transparent")
-                        Behavior on color { ColorAnimation { duration: 100 } }
-
-                        RowLayout {
-                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-                            spacing: 10
-                            Text {
-                                text: hdrItem.modelData.icon
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 18
-                                color: Colors.peach
-                            }
-                            Text {
-                                text: hdrItem.modelData.label
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 16
-                                color: Colors.text
-                                Layout.fillWidth: true
-                            }
-                            Text {
-                                text: hdrItem.modelData.sub
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 13
-                                color: Colors.overlay1
-                            }
-                            Text {
-                                visible: hdrItem.active
-                                text: "󰄬"
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 15
-                                color: Colors.peach
-                            }
-                        }
-
-                        MouseArea {
-                            id: hdrMa
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: { root.setHdr(hdrItem.modelData.on); root.openMenu = "" }
-                        }
-                    }
-                }
+                DisplayMenu {}
             }
 
             // ── Wallpaper ────────────────────────────────────────────────────

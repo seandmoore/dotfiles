@@ -76,6 +76,7 @@ PACMAN_PKGS=(
     hyprlock
     hypridle
     hyprpolkitagent
+    hyprsunset
     xdg-desktop-portal
     xdg-desktop-portal-hyprland
     xdg-desktop-portal-gtk
