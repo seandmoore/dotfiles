@@ -18,10 +18,7 @@ require("lazy").setup({
     { import = "lazyvim.plugins.extras.lang.git" },
     { import = "lazyvim.plugins.extras.lang.json" },
     { import = "lazyvim.plugins.extras.lang.kotlin" },
-    -- Lua language layer: lua_ls LSP, lazydev.nvim (Neovim API/plugin types),
-    -- stylua formatting and the Lua treesitter parser.
-    { import = "lazyvim.plugins.extras.lang.lua" },
-    { import = "lazyvim.plugins.extras.lang.rust" },
+{ import = "lazyvim.plugins.extras.lang.rust" },
     { import = "lazyvim.plugins.extras.lang.tailwind" },
     { import = "lazyvim.plugins.extras.lang.typescript" },
     { import = "lazyvim.plugins.extras.lang.zig" },
