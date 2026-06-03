@@ -1,0 +1,168 @@
+#!/usr/bin/env python3
+"""hypr-dmemcg-foreground — Hyprland equivalent of plasma-foreground-booster (dmemcg).
+
+Listens to Hyprland's socket2 event stream and, on focus changes, raises the
+focused window's GPU VRAM reclaim-protection by writing ``dmem.low = capacity``
+on its cgroup, while resetting the previously-focused window's cgroup back to
+``dmem.low = 0``. Under VRAM pressure the kernel then evicts the un-boosted
+(background) apps first, keeping the foreground game's textures in real VRAM
+instead of spilling to slow GTT/system RAM.
+
+This mirrors the behaviour of pixelcluster/kcgroups ForegroundBooster, but for
+Hyprland instead of KDE Plasma. VRAM only (it does not touch cpu.weight).
+
+The companion ``dmemcg-booster`` system/user services must be running first:
+they enable the ``dmem`` cgroup controller across the hierarchy and set the
+baseline protection. If a focused window's cgroup has no writable ``dmem.low``
+file, this daemon silently skips it (e.g. apps not isolated in their own scope).
+"""
+
+import json
+import os
+import socket
+import subprocess
+import sys
+
+CGROOT = "/sys/fs/cgroup"
+CAP_FILE = os.path.join(CGROOT, "dmem.capacity")
+
+
+def read_caps():
+    """Return {device_region: total_bytes} from /sys/fs/cgroup/dmem.capacity."""
+    caps = {}
+    try:
+        with open(CAP_FILE) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) == 2 and parts[1].isdigit():
+                    caps[parts[0]] = int(parts[1])
+    except OSError as e:
+        sys.exit(f"cannot read {CAP_FILE}: {e}\n"
+                 "Is the kernel dmem controller active and dmemcg-booster running?")
+    if not caps:
+        sys.exit(f"{CAP_FILE} lists no devices; dmem controller not active.")
+    return caps
+
+
+def low_body(caps, boost):
+    """Render a dmem.low file body: full capacity when boosting, else 0, per device."""
+    return "".join(f"{dev} {cap if boost else 0}\n" for dev, cap in caps.items())
+
+
+def cgroup_of_pid(pid):
+    """Return the unified (v2) cgroup path for a pid, e.g. /user.slice/.../app-x.scope."""
+    try:
+        with open(f"/proc/{pid}/cgroup") as f:
+            line = f.readline().strip()
+    except OSError:
+        return None
+    # cgroup v2 unified hierarchy: a single line "0::<path>"
+    return line.split("::", 1)[1] if "::" in line else None
+
+
+def write_low(cgrel, body):
+    """Write dmem.low for a cgroup. Returns True on success, False if absent/denied."""
+    path = f"{CGROOT}{cgrel}/dmem.low"
+    try:
+        with open(path, "w") as f:
+            f.write(body)
+        return True
+    except OSError:
+        return False
+
+
+def focused_pid():
+    """PID of the currently focused Hyprland window, or None."""
+    try:
+        out = subprocess.run(["hyprctl", "activewindow", "-j"],
+                             capture_output=True, text=True, timeout=2)
+        data = json.loads(out.stdout or "{}")
+    except Exception:
+        return None
+    pid = data.get("pid")
+    return pid if isinstance(pid, int) and pid > 0 else None
+
+
+def find_socket():
+    """Locate Hyprland's socket2, preferring the signature in the environment.
+
+    Also returns the instance signature so we can hand it to hyprctl, which is
+    important when running as a systemd user service that didn't inherit it.
+    """
+    rt = os.environ.get("XDG_RUNTIME_DIR") or f"/run/user/{os.getuid()}"
+    base = os.path.join(rt, "hypr")
+    sig = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+    if sig:
+        p = os.path.join(base, sig, ".socket2.sock")
+        if os.path.exists(p):
+            return p, sig
+    # Fallback: newest .socket2.sock under hypr/ (handles missing/changed env).
+    best = None
+    try:
+        for d in os.listdir(base):
+            p = os.path.join(base, d, ".socket2.sock")
+            if os.path.exists(p):
+                mtime = os.path.getmtime(p)
+                if best is None or mtime > best[0]:
+                    best = (mtime, p, d)
+    except OSError:
+        pass
+    if best:
+        return best[1], best[2]
+    return None, None
+
+
+def main():
+    caps = read_caps()
+    boost_body = low_body(caps, boost=True)
+    reset_body = low_body(caps, boost=False)
+
+    sock_path, sig = find_socket()
+    if not sock_path:
+        sys.exit("Hyprland socket2 not found; run inside a Hyprland session.")
+    if sig:
+        # Ensure hyprctl talks to this instance even without inherited env.
+        os.environ["HYPRLAND_INSTANCE_SIGNATURE"] = sig
+
+    current = {"cg": None}
+
+    def apply():
+        pid = focused_pid()
+        if not pid:
+            return
+        cg = cgroup_of_pid(pid)
+        if not cg or cg == current["cg"]:
+            return
+        if current["cg"]:
+            write_low(current["cg"], reset_body)
+        if write_low(cg, boost_body):
+            current["cg"] = cg
+            print(f"[boost] {cg} (pid {pid})", flush=True)
+        else:
+            # No writable dmem.low here (app not in an isolated/controlled cgroup).
+            # Forget the previous so the next real switch re-applies cleanly.
+            current["cg"] = None
+
+    # Events that can change which window is focused.
+    triggers = ("activewindowv2>>", "fullscreen>>", "focusedmon>>",
+                "closewindow>>", "movewindow>>", "workspace>>", "workspacev2>>")
+
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.connect(sock_path)
+    apply()  # boost whatever is focused right now
+    buf = b""
+    with s:
+        while True:
+            chunk = s.recv(4096)
+            if not chunk:
+                break  # Hyprland exited; let systemd restart/stop us
+            buf += chunk
+            while b"\n" in buf:
+                line, buf = buf.split(b"\n", 1)
+                ev = line.decode("utf-8", "replace")
+                if ev.startswith(triggers):
+                    apply()
+
+
+if __name__ == "__main__":
+    main()

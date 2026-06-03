@@ -1,0 +1,15 @@
+[Unit]
+Description=Hyprland dmemcg foreground VRAM booster
+Documentation=https://github.com/pixelcluster/kcgroups
+# Run after the dmemcg-booster user service has enabled the controller + baseline.
+After=graphical-session.target dmemcg-booster-user.service
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/hypr-dmemcg-foreground
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=graphical-session.target

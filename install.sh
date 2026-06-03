@@ -176,6 +176,7 @@ AUR_PKGS=(
     catppuccin-gtk-theme-latte
     catppuccin-cursors-mocha
     catppuccin-cursors-latte
+    dmemcg-booster
 )
 
 if command -v yay &>/dev/null; then
@@ -301,6 +302,13 @@ make_link "$DOTFILES_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
 # OpenCode — full-auto 'yolo' agent used by the `ocd` alias
 make_link "$DOTFILES_DIR/opencode/agent/yolo.md" "$HOME/.config/opencode/agent/yolo.md"
 
+# VRAM foreground boosting (dmemcg) — see vram/README.md. The Hyprland counterpart to
+# KDE's plasma-foreground-booster; needs AUR dmemcg-booster + CONFIG_CGROUP_DMEM kernel.
+make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground"         "$HOME/.local/bin/hypr-dmemcg-foreground"
+make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground.service" "$HOME/.config/systemd/user/hypr-dmemcg-foreground.service"
+# Launch Steam directly under app.slice (the dmem-protected branch) so the boost applies.
+make_link "$DOTFILES_DIR/vram/steam.desktop"                  "$HOME/.local/share/applications/steam.desktop"
+
 # Qt theming (shortcut underlines off, Kvantum style, Papirus-Dark icons)
 make_link "$DOTFILES_DIR/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
 make_link "$DOTFILES_DIR/qt6ct/qt6ct.conf" "$HOME/.config/qt6ct/qt6ct.conf"
@@ -389,6 +397,19 @@ for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
     fi
 done
 
+# ── Rust (rustup) PATH ─────────────────────────────────────────────────────────
+# rustup installs proxies under ~/.cargo/bin; shell/rust.sh sources ~/.cargo/env so
+# they're on PATH in interactive shells. (Install rustup with: pacman -S rustup &&
+# rustup default stable — or the official rustup-init.)
+for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rust.sh' "$rc"; then
+        printf '\n# Rust (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rust.sh" ]] && . "$HOME/dotfiles/shell/rust.sh"\n' >> "$rc"
+        ok "Wired Rust into $rc"
+    else
+        ok "Rust already wired into $rc (or rc absent)"
+    fi
+done
+
 # Ollama: hide the iGPU from GPU discovery (bundled rocBLAS crashes probing gfx1036).
 if command -v ollama &>/dev/null; then
     if sudo install -Dm644 "$DOTFILES_DIR/etc/systemd/system/ollama.service.d/rocm.conf" \
@@ -399,6 +420,17 @@ if command -v ollama &>/dev/null; then
     else
         warn "Could not install Ollama ROCm drop-in"
     fi
+fi
+
+# ── VRAM patch (dmem cgroup) kernel-check hook ─────────────────────────────────
+# Verify CONFIG_CGROUP_DMEM ("Valve's VRAM patch") stays enabled across kernel
+# updates. Advisory pacman hook; the helper exits 0 so it never blocks an upgrade.
+info "Installing dmem (VRAM patch) kernel-check pacman hook ..."
+if sudo install -Dm755 "$DOTFILES_DIR/scripts/check-dmem-config.sh" /usr/local/bin/check-dmem-config.sh \
+    && sudo install -Dm644 "$DOTFILES_DIR/etc/pacman.d/hooks/95-vram-dmem-check.hook" /etc/pacman.d/hooks/95-vram-dmem-check.hook; then
+    ok "Installed dmem kernel-check hook"
+else
+    warn "Could not install dmem kernel-check hook"
 fi
 
 # ── SDDM login theme (Catppuccin) ──────────────────────────────────────────────
@@ -437,6 +469,11 @@ systemctl --user enable --now xdg-desktop-portal xdg-desktop-portal-hyprland xdg
 # and get started at the next login; starting them outside a graphical session no-ops.
 systemctl --user enable hyprpaper.service hypridle.service hyprpolkitagent.service \
     || warn "Could not enable Hyprland session services"
+
+# VRAM foreground booster (requires AUR dmemcg-booster, whose own system+user
+# services are enabled by its package). Enable the Hyprland focus daemon here.
+systemctl --user enable hypr-dmemcg-foreground.service \
+    || warn "Could not enable hypr-dmemcg-foreground (is AUR dmemcg-booster installed?)"
 ok "Systemd user services enabled"
 
 # Enable bluetooth system service

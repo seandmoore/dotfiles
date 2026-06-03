@@ -1,0 +1,15 @@
+# Verify the DRM dmem cgroup controller (CONFIG_CGROUP_DMEM — "Valve's VRAM patch")
+# is present in every kernel pacman installs or upgrades. Advisory only; the helper
+# always exits 0 so it never blocks a transaction. Deployed to
+# /etc/pacman.d/hooks/ by install.sh (the script goes to /usr/local/bin).
+[Trigger]
+Type = Path
+Operation = Install
+Operation = Upgrade
+Target = usr/lib/modules/*/vmlinuz
+
+[Action]
+Description = Checking DRM dmem cgroup (Valve VRAM patch) in new kernel(s)...
+When = PostTransaction
+Exec = /usr/local/bin/check-dmem-config.sh
+NeedsTargets
