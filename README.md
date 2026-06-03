@@ -80,8 +80,9 @@ The script will:
 8. Configure **ROCm** for AMD GPUs (graphical-session env + add you to the `render`/`video` groups)
 9. Set up **VRAM foreground boosting** (dmemcg) — symlink the focus daemon + Steam launcher and install the `CONFIG_CGROUP_DMEM` kernel-check pacman hook
 10. Create all config symlinks under `~/.config/`
-11. Enable systemd user services (PipeWire, XDG portals, the VRAM focus daemon) and the bluetooth service
-12. Refresh the font cache
+11. Seed the active Catppuccin flavor via `sync-theme.sh` (the same path the bar toggle uses) — generates the libadwaita `gtk.css`, kitty colors, Starship palette and Qt/Kvantum themes
+12. Enable systemd user services (PipeWire, XDG portals, the VRAM focus daemon) and the bluetooth service
+13. Refresh the font cache
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
