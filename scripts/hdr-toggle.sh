@@ -12,7 +12,10 @@
 set -euo pipefail
 
 out="DP-1"
-hdr_lua="hl.monitor({ output=\"$out\", mode=\"2560x1440@240\", position=\"0x0\", scale=1, bitdepth=10, cm=\"hdr\", sdrbrightness=1.2, sdrsaturation=1.1 })"
+# Keep in sync with the DP-1 block in hypr/hyprland.lua.
+# All five SDR-in-HDR params must be present here; omitting any reverts it to Hyprland's
+# built-in default (e.g. sdrMaxLuminance drops to 80, max_luminance loses the 1000-nit cap).
+hdr_lua="hl.monitor({ output=\"$out\", mode=\"2560x1440@240\", position=\"0x0\", scale=1, bitdepth=10, cm=\"hdr\", sdrbrightness=1.0, sdrsaturation=1.3, sdr_min_luminance=0, sdr_max_luminance=600, max_luminance=1000 })"
 sdr_lua="hl.monitor({ output=\"$out\", mode=\"2560x1440@240\", position=\"0x0\", scale=1, bitdepth=8, cm=\"srgb\" })"
 
 action="${1:-toggle}"

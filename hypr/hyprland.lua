@@ -48,31 +48,39 @@ hl.monitor({
     -- Generate with DisplayCAL + a colorimeter, then point this at the resulting .icc file.
     -- icc_profile = os.getenv("HOME") .. "/.local/share/icc/msi-dp1.icc",
 
-    -- SDR content handling inside the HDR (BT.2020 + PQ) container. 1.0 / 1.0 is the
-    -- accurate / neutral setting (SDR apps keep authored colours); the values below
-    -- deliberately push a brighter, slightly more vivid "KDE-punchy" look instead.
-    -- sdrbrightness: luminance multiplier for SDR apps (1.0 = reference SDR white).
-    --   1.2 = +20% → desktop/apps read brighter inside the HDR container.
-    -- sdrsaturation: saturation multiplier for SDR apps (1.0 = accurate). 1.1 = +10%,
-    --   ≈ KDE "SDR color intensity" ~10% — a gentle pop (1.25/+25% looked over-saturated).
-    sdrbrightness = 1.2,
-    sdrsaturation = 1.1,
+    -- SDR-content handling inside the HDR (BT.2020 + PQ) container. Source defaults
+    -- (Hyprland SMonitorRule): sdrbrightness 1.0, sdrsaturation 1.0, sdr_min 0.2, sdr_max
+    -- 80 nits. SDR brightness is driven by ONE knob here — sdr_max_luminance in nits —
+    -- exactly mirroring KDE's single "Maximum SDR Brightness" slider. sdrbrightness stays
+    -- neutral so the two don't compound into a muddy value.
+    --
+    -- sdrbrightness: 1.0-2.0 multiplier on SDR luminance. KEPT AT 1.0 (neutral) so nits are
+    --   the single source of truth. (Raising it once greyed OLED blacks — issue #9716, fixed
+    --   in PR #10623, well before this 0.55.2 build — but a neutral multiplier avoids that
+    --   path entirely regardless. Bump toward 2.0 only if you want extra gain on top.)
+    sdrbrightness = 1.0,
 
-    -- Two DIFFERENT luminance concepts, don't conflate them:
-    --  • sdr_*_luminance = how SDR/desktop content is mapped INTO the HDR container.
-    --  • max_luminance   = the PANEL's own HDR peak, used to tone-map HDR content.
-    -- sdr_min_luminance: floor SDR content maps to (default 0.2; fine for OLED near-black).
-    -- sdr_max_luminance: SDR white level in nits. 250 = this QD-OLED's full-field (100%
-    --   window) accurate ceiling; 300 deliberately overshoots it for a brighter desktop —
-    --   full-screen white still ABL-caps near 250, but smaller/windowed bright UI pops
-    --   higher. (203 = BT.2408 reference white; 80 = spec-dim default. The old 1000 was the
-    --   WRONG knob — that's panel peak, not SDR white.) Higher pumps harder + risks burn-in.
-    sdr_min_luminance = 0.2,
-    sdr_max_luminance = 300,
+    -- sdrsaturation: saturation multiplier for SDR apps. 1.3 ≈ KDE "SDR color intensity"
+    --   pushed high — stretches sRGB content toward the QD-OLED's native gamut for a vivid
+    --   look. 1.0 = accurate; raise to ~1.5 for more pop, lower if skin tones look off.
+    sdrsaturation = 1.3,
 
-    -- Panel HDR peak = 1000 nits (this QD-OLED's "peak 1000" mode). Stating it explicitly
-    -- keeps HDR-content tone-mapping correct even if the EDID is incomplete. Black point and
-    -- MaxFALL stay auto (min_luminance / max_avg_luminance unset = -1 = read from EDID).
+    -- sdr_min_luminance: SDR black floor in nits. 0 = true black (OLED pixels fully off) for
+    --   maximum contrast — no LCD-style crush risk on this panel.
+    -- sdr_max_luminance: SDR white level in nits — THE SDR brightness control, the direct
+    --   equivalent of KDE's "Maximum SDR Brightness". 600 is aggressive / max-usable: small
+    --   and windowed white UI drives toward 600 nits, while full-field (100%) white still
+    --   ABL-caps near this panel's ~250-nit sustained ceiling. HDR content is NOT affected —
+    --   it still tone-maps to the full 1000 below; a high SDR white only makes HDR highlights
+    --   feel less dramatic next to the bright desktop. (203 = BT.2408 reference; 80 = dim
+    --   default.) NOTE: a 600-nit SDR desktop raises OLED burn-in risk for static UI over
+    --   time — drop to ~300-400 if that concerns you.
+    sdr_min_luminance = 0,
+    sdr_max_luminance = 600,
+
+    -- Panel HDR peak = 1000 nits (MAG 271QPX E2 "peak 1000" OSD mode). HDR content tone-maps
+    -- to this cap. Black point (min_luminance) and MaxFALL (max_avg_luminance) stay auto from
+    -- EDID (-1); this QD-OLED reports near-0 black, which is exactly what we want.
     max_luminance = 1000,
 
     -- VRR mode 3: adaptive sync enabled automatically for fullscreen game/video content
