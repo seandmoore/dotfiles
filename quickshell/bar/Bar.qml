@@ -509,6 +509,8 @@ PanelWindow {
 
                 Repeater {
                     model: [
+                        // Lock routes through hypridle's lock_cmd (pidof-guards hyprlock).
+                        { icon: "󰌾", label: "Lock",     color: Colors.teal,   cmd: ["loginctl", "lock-session"] },
                         { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"]  },
                         { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["uwsm", "stop"]          },
                         { icon: "󰜉", label: "Restart",  color: Colors.green,  cmd: ["systemctl", "reboot"]   },

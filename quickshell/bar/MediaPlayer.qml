@@ -20,8 +20,18 @@ RowLayout {
         scale = 1
     }
 
-    property bool hasMedia: Mpris.players.length > 0
-    property var player: hasMedia ? Mpris.players[0] : null
+    // Mpris.players is an ObjectModel, not a JS array — its list lives in
+    // `.values` (plain .length/[0] silently come back undefined).
+    readonly property var playerList: Mpris.players.values
+    property bool hasMedia: playerList.length > 0
+    // Prefer the player that's actually playing so the controls follow the
+    // active app when several players are registered (browser + music app).
+    property var player: {
+        for (let i = 0; i < playerList.length; i++)
+            if (playerList[i].playbackState === MprisPlaybackState.Playing)
+                return playerList[i]
+        return playerList.length > 0 ? playerList[0] : null
+    }
 
     // Prev
     Text {

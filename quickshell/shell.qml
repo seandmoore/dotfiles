@@ -92,10 +92,10 @@ ShellRoot {
     // IPC-triggered syncs run sync-theme.sh directly
     Process {
         id: ipcSyncMocha
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh mocha"]
+        command: ["bash", "-c", "\"$HOME/dotfiles/scripts/sync-theme.sh\" mocha"]
     }
     Process {
         id: ipcSyncLatte
-        command: ["bash", "-c", "/home/seanmoore/dotfiles/scripts/sync-theme.sh latte"]
+        command: ["bash", "-c", "\"$HOME/dotfiles/scripts/sync-theme.sh\" latte"]
     }
 }

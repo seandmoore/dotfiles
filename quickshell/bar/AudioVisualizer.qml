@@ -106,7 +106,7 @@ Item {
 
     Process {
         id: cava
-        command: ["cava", "-p", "/home/seanmoore/dotfiles/quickshell/bar/cava.conf"]
+        command: ["bash", "-c", "exec cava -p \"$HOME/dotfiles/quickshell/bar/cava.conf\""]
         running: true
         stdout: SplitParser {
             onRead: line => {

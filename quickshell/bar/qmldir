@@ -15,8 +15,5 @@ WorkspacesMenu WorkspacesMenu.qml
 Clock Clock.qml
 MediaPlayer MediaPlayer.qml
 SystemStats SystemStats.qml
-ThemeToggle ThemeToggle.qml
 ThemeTransition ThemeTransition.qml
 Workspaces Workspaces.qml
-PowerMenu PowerMenu.qml
-PowerMenuPopup PowerMenuPopup.qml

@@ -133,6 +133,27 @@ ColumnLayout {
         font.pixelSize: 14
     }
 
+    // "Checked Xm ago" — ticks once a minute so the age stays honest.
+    property double _now: Date.now()
+    property Timer _ageTick: Timer {
+        interval: 60000; repeat: true; running: Updates.lastChecked > 0
+        onTriggered: upMenu._now = Date.now()
+    }
+    Text {
+        Layout.fillWidth: true
+        horizontalAlignment: Text.AlignHCenter
+        visible: Updates.lastChecked > 0 && !Updates.checking
+        text: {
+            const mins = Math.floor((upMenu._now - Updates.lastChecked) / 60000)
+            return "checked " + (mins < 1 ? "just now"
+                : mins < 60 ? mins + "m ago"
+                : Math.floor(mins / 60) + "h ago")
+        }
+        color: Colors.overlay0
+        font.family: "JetBrainsMono Nerd Font Propo"
+        font.pixelSize: 11
+    }
+
     // ── Per-source breakdown ─────────────────────────────────────────────────
     SourceRow { label: "Official repos"; icon: "󰏖"; accent: Colors.blue; count: Updates.repo }
     SourceRow {

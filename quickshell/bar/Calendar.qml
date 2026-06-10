@@ -63,8 +63,15 @@ ColumnLayout {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             text: Qt.formatDateTime(cal.viewDate, "MMMM yyyy")
-            color: Colors.text
+            color: titleMa.containsMouse ? Colors.mauve : Colors.text
             font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 16; font.weight: Font.Medium
+            Behavior on color { ColorAnimation { duration: 120 } }
+            // Click the title to jump back to the current month after paging.
+            MouseArea {
+                id: titleMa; anchors.fill: parent
+                hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                onClicked: cal.viewDate = new Date()
+            }
         }
         Text {
             text: "󰅂"

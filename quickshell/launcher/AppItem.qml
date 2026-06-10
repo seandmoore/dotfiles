@@ -7,6 +7,7 @@ Item {
     id: root
 
     required property var app
+    property bool selected: false      // keyboard selection (GridView currentItem)
     signal activated()
 
     width: 96
@@ -15,9 +16,13 @@ Item {
     Rectangle {
         id: bg
         anchors.fill: parent
-        color: ma.containsMouse ? Colors.accentDim : "transparent"
+        color: (root.selected || ma.containsMouse) ? Colors.accentDim : "transparent"
+        border.color: root.selected
+            ? Qt.rgba(Colors.mauve.r, Colors.mauve.g, Colors.mauve.b, 0.65)
+            : "transparent"
+        border.width: root.selected ? 1 : 0
         radius: 12
-        scale: ma.containsMouse ? 1.05 : 1
+        scale: (root.selected || ma.containsMouse) ? 1.05 : 1
         Behavior on color { ColorAnimation { duration: 120 } }
         Behavior on scale { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
     }

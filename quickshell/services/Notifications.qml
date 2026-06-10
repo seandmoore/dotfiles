@@ -19,10 +19,20 @@ QtObject {
     property double muteUntil: 0
     property int _nextId: 1
 
+    // Ticks while a timed mute is active so muteLabel counts down live instead
+    // of freezing at the value computed when the mute was set.
+    property double _now: Date.now()
+    property Timer _muteTick: Timer {
+        interval: 30000; repeat: true
+        running: svc.dnd && svc.muteUntil > 0
+        triggeredOnStart: true
+        onTriggered: svc._now = Date.now()
+    }
+
     readonly property string muteLabel: {
         if (!dnd) return ""
         if (muteUntil === 0) return "On"
-        const mins = Math.max(0, Math.round((muteUntil - Date.now()) / 60000))
+        const mins = Math.max(0, Math.round((muteUntil - _now) / 60000))
         if (mins >= 60) return "for " + Math.round(mins / 60) + "h"
         return "for " + mins + "m"
     }

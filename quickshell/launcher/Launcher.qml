@@ -32,7 +32,18 @@ PanelWindow {
             searchField.forceActiveFocus()
             appsModel.refresh()
             categoryList.currentIndex = 0
+            grid.currentIndex = 0
         }
+    }
+
+    // Launch the keyboard-selected (or first) grid entry — Enter from the search
+    // field or the grid both land here.
+    function launchCurrent() {
+        const m = grid.model
+        if (!m || m.length === 0) return
+        const i = (grid.currentIndex >= 0 && grid.currentIndex < m.length) ? grid.currentIndex : 0
+        appsModel.launch(m[i])
+        root.visible = false
     }
 
     // Scrim
@@ -178,6 +189,8 @@ PanelWindow {
 
                         Repeater {
                             model: [
+                                // Lock routes through hypridle's lock_cmd (pidof-guards hyprlock).
+                                { icon: "󰌾", color: Colors.teal,   cmd: ["loginctl", "lock-session"] },
                                 { icon: "󰒲", color: Colors.blue,   cmd: ["systemctl", "suspend"]  },
                                 { icon: "󰍃", color: Colors.yellow, cmd: ["uwsm", "stop"]          },
                                 { icon: "󰜉", color: Colors.green,  cmd: ["systemctl", "reboot"]   },
@@ -259,13 +272,23 @@ PanelWindow {
                             selectedTextColor: Colors.base
                             clip: true
                             Keys.onEscapePressed: root.visible = false
+                            Keys.onReturnPressed: root.launchCurrent()
+                            Keys.onEnterPressed: root.launchCurrent()
+                            // ↓ hands focus to the grid for full arrow-key browsing.
+                            Keys.onDownPressed: {
+                                if (grid.count > 0) {
+                                    if (grid.currentIndex < 0) grid.currentIndex = 0
+                                    grid.forceActiveFocus()
+                                }
+                            }
                             onTextChanged: appsModel.filterText = text
                         }
 
                         Text {
-                            text: "⌘K"
+                            text: "↵ launch · ↓ browse"
                             color: Colors.overlay0
                             font.pixelSize: 10
+                            font.family: "JetBrainsMono Nerd Font Propo"
                             visible: searchField.text === ""
                         }
                     }
@@ -280,6 +303,34 @@ PanelWindow {
                     cellWidth: 96
                     cellHeight: 100
                     model: appsModel.filesMode ? appsModel.fileResults : appsModel.filteredApps
+
+                    // Pin the keyboard selection to the first result as the filter
+                    // changes, so ↵ in the search field always launches the top hit.
+                    onModelChanged: currentIndex = count > 0 ? 0 : -1
+
+                    Keys.onReturnPressed: root.launchCurrent()
+                    Keys.onEnterPressed: root.launchCurrent()
+                    Keys.onEscapePressed: root.visible = false
+                    // ↑ from the first row returns to the search field; deeper rows
+                    // fall through to GridView's own arrow navigation.
+                    Keys.onUpPressed: (event) => {
+                        const cols = Math.max(1, Math.floor(width / cellWidth))
+                        if (currentIndex < cols) searchField.forceActiveFocus()
+                        else event.accepted = false
+                    }
+                    // Typing (or Backspace) while browsing returns to the search field
+                    // with the keystroke applied — no reaching for the mouse.
+                    Keys.onPressed: (event) => {
+                        if (event.key === Qt.Key_Backspace) {
+                            searchField.forceActiveFocus()
+                            searchField.text = searchField.text.slice(0, -1)
+                            event.accepted = true
+                        } else if (event.text.length === 1 && event.text.charCodeAt(0) >= 32) {
+                            searchField.forceActiveFocus()
+                            searchField.insert(searchField.length, event.text)
+                            event.accepted = true
+                        }
+                    }
 
                     // Cascade in on open; smoothly reflow as the filter changes.
                     populate: Transition {
@@ -297,6 +348,9 @@ PanelWindow {
                     delegate: AppItem {
                         required property var modelData
                         app: modelData
+                        // Always visible (not just when the grid has focus) so the
+                        // top hit shows what ↵ in the search field will launch.
+                        selected: GridView.isCurrentItem
                         onActivated: {
                             appsModel.launch(modelData)
                             root.visible = false
