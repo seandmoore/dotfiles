@@ -1,0 +1,8 @@
+# Atuin self-hosted sync server (systemd: atuin-server.service).
+# Localhost-only; the service runs as the 'atuin' user with
+# ATUIN_CONFIG_DIR=/etc/atuin, so the SQLite DB lives there too.
+host = "127.0.0.1"
+port = 8888
+# Registration left open: the server is only reachable from this machine.
+open_registration = true
+db_uri = "sqlite:///etc/atuin/server.db"

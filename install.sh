@@ -472,6 +472,19 @@ if is_full; then
         fi
     done
 
+    # ── Atuin self-hosted sync server (localhost-only) ─────────────────────────
+    # Server config + DB live in /etc/atuin (the package's hardened unit sets
+    # ATUIN_CONFIG_DIR=/etc/atuin and runs as the 'atuin' sysuser).
+    if command -v atuin-server &>/dev/null; then
+        if sudo install -Dm644 "$DOTFILES_DIR/etc/atuin/server.toml" /etc/atuin/server.toml \
+            && sudo chown -R atuin:atuin /etc/atuin \
+            && sudo systemctl enable --now atuin-server; then
+            ok "Installed atuin-server config and enabled service"
+        else
+            warn "Could not set up atuin-server"
+        fi
+    fi
+
     # Ollama: hide the iGPU from GPU discovery (bundled rocBLAS crashes probing gfx1036).
     if command -v ollama &>/dev/null; then
         if sudo install -Dm644 "$DOTFILES_DIR/etc/systemd/system/ollama.service.d/rocm.conf" \

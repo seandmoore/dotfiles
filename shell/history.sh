@@ -18,9 +18,9 @@ if [[ -f /usr/share/fzf/key-bindings.bash ]]; then
 fi
 
 # atuin: richer history menu (exit codes, durations, per-dir filters) takes over
-# Ctrl+R; fzf keeps Ctrl+T / Alt+C. Up-arrow stays plain bash. Must come after
-# the fzf block so atuin wins the Ctrl+R binding; falls back to fzf if absent.
+# Ctrl+R and up-arrow; fzf keeps Ctrl+T / Alt+C. Must come after the fzf block
+# so atuin wins the Ctrl+R binding; falls back to fzf if absent.
 if command -v atuin &>/dev/null; then
   [[ -f /usr/share/bash-preexec/bash-preexec.sh ]] && . /usr/share/bash-preexec/bash-preexec.sh
-  eval "$(atuin init bash --disable-up-arrow)"
+  eval "$(atuin init bash)"
 fi
