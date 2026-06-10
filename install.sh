@@ -133,6 +133,8 @@ PACMAN_PKGS=(
     stylua
     starship
     fzf
+    atuin
+    bash-preexec
     wl-clipboard
     unzip
     grim
