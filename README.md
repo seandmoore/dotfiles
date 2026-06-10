@@ -74,7 +74,7 @@ The script will:
 2. Clone or update the dotfiles repo to `~/dotfiles`
 3. Activate the Git pre-commit hook that lints staged files (`core.hooksPath` → `.githooks/`)
 4. Install all required packages via `pacman`
-5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (`quickshell-git`, Catppuccin themes/cursors, `dmemcg-booster`, etc.)
+5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (Catppuccin themes/cursors, `dmemcg-booster`, etc.)
 6. Install Firefox (set as the default browser) and Zen Browser via Flatpak, and apply Catppuccin Flatpak theme overrides
 7. Install the Catppuccin **SDDM** login theme plus the helper that lets the Mocha/Latte toggle switch the login screen too
 8. Configure **ROCm** for AMD GPUs (graphical-session env + add you to the `render`/`video` groups)
@@ -142,7 +142,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 
 | Package | Purpose |
 |---------|---------|
-| `quickshell-git` *(AUR)* | Status bar, launcher, notifications, OSD |
+| `quickshell` *(repo)* | Status bar, launcher, notifications, OSD |
 | `qt5-wayland` / `qt6-wayland` | Native Wayland backend for Qt apps |
 | `pacman-contrib` | `checkupdates` — repo update counts for the bar's update menu |
 | `yay` *(AUR helper)* | Drives repo + AUR upgrades from the update menu (`paru` also supported) |

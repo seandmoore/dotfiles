@@ -113,6 +113,7 @@ PACMAN_PKGS=(
     wireplumber
     pipewire-pulse
     inotify-tools
+    quickshell
     qt5-wayland
     qt6-wayland
     qt5ct
@@ -163,14 +164,13 @@ if ! command -v yay &>/dev/null; then
         rm -rf "$TMP_YAY"
         ok "yay installed"
     else
-        warn "Skipping yay. AUR packages (quickshell, grimblast) must be installed manually."
+        warn "Skipping yay. AUR packages (grimblast, themes) must be installed manually."
     fi
 fi
 
 # ── AUR packages ──────────────────────────────────────────────────────────────
 
 AUR_PKGS=(
-    quickshell-git
     grimblast-git
     kvantum-theme-catppuccin-git
     catppuccin-gtk-theme-mocha
@@ -484,6 +484,15 @@ systemctl --user enable hyprpaper.service hypridle.service hyprpolkitagent.servi
 # services are enabled by its package). Enable the Hyprland focus daemon here.
 systemctl --user enable hypr-dmemcg-foreground.service \
     || warn "Could not enable hypr-dmemcg-foreground (is AUR dmemcg-booster installed?)"
+
+# Notifications are served by quickshell's own org.freedesktop.Notifications
+# implementation (quickshell/notifications/NotificationServer.qml). dunst and mako
+# both ship D-Bus activation files (SystemdService=dunst/mako.service) that would
+# otherwise race quickshell for that bus name. Mask their user units so D-Bus can
+# never auto-start them, leaving the name free for quickshell to claim on launch.
+# (Masking a unit that isn't installed is harmless and still blocks future activation.)
+systemctl --user mask dunst.service mako.service \
+    || warn "Could not mask dunst/mako (quickshell may not own notifications)"
 ok "Systemd user services enabled"
 
 # Enable bluetooth system service
