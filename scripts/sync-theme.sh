@@ -75,21 +75,31 @@ else
     sed -i "s/^gtk-application-prefer-dark-theme[[:space:]]*=[[:space:]]*.*/gtk-application-prefer-dark-theme=$PREFER_DARK/" "$GTK4_SETTINGS"
 fi
 
+# ── Mirror themes for Flatpak sandboxes ────────────────────────────────────────
+# Sandboxes can't read /usr/share/themes; they only see ~/.local/share/themes via
+# the xdg-data/themes:ro grant. Mirror BOTH flavors IN FULL — gtk-3.0, gtk-4.0 and
+# their assets/ — not just gtk-4.0/gtk.css: GTK3 Flatpaks (e.g. Firefox) need
+# gtk-3.0/ to render the theme at all, and the css references assets/ relatively.
+# Mirroring the inactive flavor too means the next toggle's theme is already in
+# place when an app launches right after switching. Skip when /usr lacks a flavor
+# (e.g. install.sh's prebuilt fallback already populated the local copy in full).
+for _flavor in latte mocha; do
+    _name="catppuccin-${_flavor}-mauve-standard+default"
+    _src="/usr/share/themes/$_name"
+    _dst="$HOME/.local/share/themes/$_name"
+    if [[ -f "$_src/gtk-4.0/gtk.css" ]]; then
+        rm -rf "$_dst"
+        mkdir -p "$_dst"
+        cp -r --no-preserve=ownership "$_src/gtk-3.0" "$_src/gtk-4.0" "$_dst/" 2>/dev/null || true
+        cp --no-preserve=ownership "$_src/index.theme" "$_dst/" 2>/dev/null || true
+    fi
+done
+
 # ── GTK4 / libadwaita CSS ──────────────────────────────────────────────────────
 GTK4_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/gtk-4.0"
 THEME_DIR="/usr/share/themes/${GTK_THEME}/gtk-4.0"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 LOCAL_THEME_DIR="$HOME/.local/share/themes/${GTK_THEME}/gtk-4.0"
-
-# Refresh the local user theme from /usr ONLY when /usr actually ships this flavor.
-# (latte is local-only — a pure libadwaita :root file — so guard the copy, otherwise
-#  it errors and could clobber the local :root.) Flatpak sandboxes read this dir via
-# the xdg-data/themes:ro grant.
-mkdir -p "$LOCAL_THEME_DIR"
-if [[ -f "$THEME_DIR/gtk.css" ]]; then
-    cp "$THEME_DIR/gtk.css"      "$LOCAL_THEME_DIR/gtk.css"
-    cp "$THEME_DIR/gtk-dark.css" "$LOCAL_THEME_DIR/gtk-dark.css" 2>/dev/null || cp "$THEME_DIR/gtk.css" "$LOCAL_THEME_DIR/gtk-dark.css"
-fi
 
 # ~/.config/gtk-4.0/gtk.css is the USER css read by native GTK4 apps AND bind-mounted
 # into every Flatpak sandbox (xdg-config/gtk-4.0:ro). libadwaita recolors its OWN
@@ -198,20 +208,44 @@ if command -v flatpak &>/dev/null; then
         --filesystem=~/.icons:ro 2>/dev/null || true
 fi
 
-# ── Flatpak — notify (do NOT auto-restart) ────────────────────────────────────
-# The :root palette in gtk.css and GTK_THEME only take effect at launch (GTK does
-# not live-reload the bind-mounted user css inside the sandbox), so running Flatpak
-# apps keep the OLD flavor until they're relaunched. We deliberately DON'T kill +
-# relaunch them here — force-restarting apps mid-use is disruptive. Instead, just
-# tell the user which running apps still show the old theme so they can restart
-# them on their own schedule. New launches already pick up the new flavor.
+# ── Flatpak — restart running windowed apps so they match the new flavor ──────
+# GTK cannot live-reload theme css inside a sandbox: GTK_THEME and the imported
+# gtk.css are read once at launch, so a running app keeps the OLD flavor forever.
+# The only way running apps switch "live" is a relaunch, so kill + relaunch each
+# running app that has a mapped Hyprland window (class == flatpak app id). Apps
+# WITHOUT a window are left alone — they're background daemons (e.g. Bazaar) and
+# `flatpak run` would pop a window up on every toggle. Exclusions, where a forced
+# restart is harmful or useless:
+#   - Discord: self-themed (ignores GTK), and a restart drops active calls
+#   - Bottles: may be supervising running Windows apps/games
+#   - Firefox: chrome follows the portal color-scheme live already; a restart
+#     would reshuffle the whole session for marginal widget gains
+FLATPAK_RESTART_EXCLUDE="com.discordapp.Discord com.usebottles.bottles org.mozilla.firefox"
 if command -v flatpak &>/dev/null; then
-    running_flatpaks=$(flatpak ps --columns=application 2>/dev/null | sort -u | grep -v '^$' || true)
-    if [[ -n "$running_flatpaks" ]]; then
-        count=$(printf '%s\n' "$running_flatpaks" | wc -l)
-        notify-send -a "Theme" "Theme switched to $MODE" \
-            "$count running Flatpak app(s) still show the old theme. Restart them when convenient:
-$(printf '%s\n' "$running_flatpaks" | sed 's/^/• /')" 2>/dev/null || true
+    window_classes=$(hyprctl clients -j 2>/dev/null | jq -r '.[].class' 2>/dev/null | sort -u || true)
+    restarted=""
+    manual=""
+    while IFS= read -r app; do
+        [[ -z "$app" ]] && continue
+        if [[ " $FLATPAK_RESTART_EXCLUDE " == *" $app "* ]]; then
+            manual+="• $app (excluded)"$'\n'
+            continue
+        fi
+        if ! grep -qxF "$app" <<< "$window_classes"; then
+            manual+="• $app (no window — daemon?)"$'\n'
+            continue
+        fi
+        flatpak kill "$app" 2>/dev/null || true
+        # Detach the relaunch so it survives this script (and its caller) exiting.
+        (sleep 0.5; exec nohup flatpak run "$app" >/dev/null 2>&1) &
+        disown
+        restarted+="• $app"$'\n'
+    done <<< "$(flatpak ps --columns=application 2>/dev/null | sort -u)"
+    body=""
+    [[ -n "$restarted" ]] && body+="Restarted to apply $MODE:"$'\n'"$restarted"
+    [[ -n "$manual" ]] && body+="Still on the old flavor (restart manually if needed):"$'\n'"$manual"
+    if [[ -n "$body" ]]; then
+        notify-send -a "Theme" "Theme switched to $MODE" "$body" 2>/dev/null || true
     fi
 fi
 
