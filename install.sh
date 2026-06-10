@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # install.sh — Arch Linux Hyprland dotfiles setup
-# Run with: bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh)
+#
+# Full setup (everything, including hardware-specific extras):
+#   bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh)
+# Minimal setup (just the desktop — recommended on machines that aren't mine):
+#   bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh) --minimal
 
 set -euo pipefail
 
@@ -41,6 +45,48 @@ seed_file() {
         ok "Seeded $dest <- $src"
     fi
 }
+
+# ── Install profile ────────────────────────────────────────────────────────────
+# full    — everything, including hardware-/workflow-specific extras: ROCm (AMD
+#           GPU compute), VRAM foreground boosting (dmemcg + Steam launcher),
+#           the Ollama ROCm drop-in, AI-CLI aliases, Rust PATH wiring, and the
+#           Zen second browser.
+# minimal — the complete desktop without those extras: Hyprland + the quickshell
+#           bar/launcher/notifications, full Catppuccin theming (GTK/Qt/SDDM),
+#           Kitty, Neovim, Starship, audio, screenshots, Firefox. The right
+#           starting point for anyone who isn't me.
+# Pick with --minimal / --full, the DOTFILES_PROFILE env var, or the prompt below.
+PROFILE="${DOTFILES_PROFILE:-}"
+for arg in "$@"; do
+    case "$arg" in
+        --minimal) PROFILE="minimal" ;;
+        --full)    PROFILE="full" ;;
+        -h|--help)
+            printf 'usage: install.sh [--minimal|--full]\n'
+            printf '  --minimal  core desktop only (skips ROCm, VRAM boosting, AI/dev extras)\n'
+            printf '  --full     everything (default)\n'
+            exit 0 ;;
+        *) die "Unknown option: $arg (use --minimal or --full)" ;;
+    esac
+done
+if [[ -z "$PROFILE" ]]; then
+    # stdin may be a pipe when run via curl — default safely to full (matches
+    # the historical behaviour of this script).
+    if [[ -t 0 ]]; then
+        printf '\nChoose an install profile:\n'
+        printf '  [1] full    — everything, incl. ROCm (AMD), VRAM foreground boosting,\n'
+        printf '                Ollama/AI-CLI extras (default)\n'
+        printf '  [2] minimal — just the desktop: Hyprland, bar, theming, terminal, editor\n'
+        read -r -p 'Profile [1/2]: ' reply
+        if [[ "$reply" == "2" ]]; then PROFILE="minimal"; else PROFILE="full"; fi
+    else
+        PROFILE="full"
+    fi
+fi
+[[ "$PROFILE" == "full" || "$PROFILE" == "minimal" ]] \
+    || die "Invalid DOTFILES_PROFILE: $PROFILE (use full or minimal)"
+is_full() { [[ "$PROFILE" == "full" ]]; }
+info "Install profile: $PROFILE"
 
 # ── Arch Linux detection ───────────────────────────────────────────────────────
 
@@ -177,8 +223,9 @@ AUR_PKGS=(
     catppuccin-gtk-theme-latte
     catppuccin-cursors-mocha
     catppuccin-cursors-latte
-    dmemcg-booster
 )
+# dmemcg-booster underpins VRAM foreground boosting (full profile only).
+is_full && AUR_PKGS+=(dmemcg-booster)
 
 if command -v yay &>/dev/null; then
     info "Checking AUR packages ..."
@@ -227,12 +274,18 @@ if command -v flatpak &>/dev/null; then
         || warn "Could not add Flathub remote (continuing)"
     ok "Flathub remote ready"
 
-    info "Installing browsers (Firefox + Zen) ..."
+    if is_full; then
+        info "Installing browsers (Firefox + Zen) ..."
+    else
+        info "Installing browser (Firefox) ..."
+    fi
     flatpak install --user --noninteractive flathub org.mozilla.firefox \
         || warn "Could not install Firefox (continuing)"
-    flatpak install --user --noninteractive flathub app.zen_browser.zen \
-        || warn "Could not install Zen Browser (continuing)"
-    ok "Browsers installed"
+    if is_full; then
+        flatpak install --user --noninteractive flathub app.zen_browser.zen \
+            || warn "Could not install Zen Browser (continuing)"
+    fi
+    ok "Browser(s) installed"
 
     # Firefox (flatpak) is the default browser; SUPER+B in hyprland.lua launches it too.
     info "Setting Firefox as the default web browser ..."
@@ -300,15 +353,17 @@ done
 make_link "$DOTFILES_DIR/nvim/init.lua" "$HOME/.config/nvim/init.lua"
 make_link "$DOTFILES_DIR/nvim/lua"      "$HOME/.config/nvim/lua"
 
-# OpenCode — full-auto 'yolo' agent used by the `ocd` alias
-make_link "$DOTFILES_DIR/opencode/agent/yolo.md" "$HOME/.config/opencode/agent/yolo.md"
+if is_full; then
+    # OpenCode — full-auto 'yolo' agent used by the `ocd` alias
+    make_link "$DOTFILES_DIR/opencode/agent/yolo.md" "$HOME/.config/opencode/agent/yolo.md"
 
-# VRAM foreground boosting (dmemcg) — see vram/README.md. The Hyprland counterpart to
-# KDE's plasma-foreground-booster; needs AUR dmemcg-booster + CONFIG_CGROUP_DMEM kernel.
-make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground"         "$HOME/.local/bin/hypr-dmemcg-foreground"
-make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground.service" "$HOME/.config/systemd/user/hypr-dmemcg-foreground.service"
-# Launch Steam directly under app.slice (the dmem-protected branch) so the boost applies.
-make_link "$DOTFILES_DIR/vram/steam.desktop"                  "$HOME/.local/share/applications/steam.desktop"
+    # VRAM foreground boosting (dmemcg) — see vram/README.md. The Hyprland counterpart to
+    # KDE's plasma-foreground-booster; needs AUR dmemcg-booster + CONFIG_CGROUP_DMEM kernel.
+    make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground"         "$HOME/.local/bin/hypr-dmemcg-foreground"
+    make_link "$DOTFILES_DIR/vram/hypr-dmemcg-foreground.service" "$HOME/.config/systemd/user/hypr-dmemcg-foreground.service"
+    # Launch Steam directly under app.slice (the dmem-protected branch) so the boost applies.
+    make_link "$DOTFILES_DIR/vram/steam.desktop"                  "$HOME/.local/share/applications/steam.desktop"
+fi
 
 # Qt theming (shortcut underlines off, Kvantum style, Papirus-Dark icons)
 make_link "$DOTFILES_DIR/qt5ct/qt5ct.conf" "$HOME/.config/qt5ct/qt5ct.conf"
@@ -349,82 +404,86 @@ fi
 # sync-theme.sh call near the end of this script, from the symlinked colors-<mode>.conf —
 # no separate bootstrap needed.
 
-# ── ROCm (AMD GPU compute) ─────────────────────────────────────────────────────
-# Exposes ROCm to the graphical session (environment.d) and interactive shells,
-# and hides the unsupported Raphael iGPU so compute only sees the discrete GPU.
-info "Configuring ROCm ..."
+if is_full; then
+    # ── ROCm (AMD GPU compute) ─────────────────────────────────────────────────
+    # Exposes ROCm to the graphical session (environment.d) and interactive shells,
+    # and hides the unsupported Raphael iGPU so compute only sees the discrete GPU.
+    info "Configuring ROCm ..."
 
-# GUI apps launched from the uwsm/Hyprland session inherit this.
-make_link "$DOTFILES_DIR/environment.d/rocm.conf" "$HOME/.config/environment.d/rocm.conf"
+    # GUI apps launched from the uwsm/Hyprland session inherit this.
+    make_link "$DOTFILES_DIR/environment.d/rocm.conf" "$HOME/.config/environment.d/rocm.conf"
 
-# GPU device access. /dev/kfd and /dev/dri/renderD* are owned by the render/video
-# groups; without membership ROCm only works while udev happens to leave the nodes
-# world-accessible, which is fragile across kernel/udev updates. Add the user once
-# (takes effect on next login). Idempotent: skips if already a member.
-for grp in render video; do
-    if getent group "$grp" >/dev/null && ! id -nG "$USER" | grep -qw "$grp"; then
-        sudo usermod -aG "$grp" "$USER" && ok "Added $USER to '$grp' (re-login required)" \
-            || warn "Could not add $USER to '$grp'"
-    else
-        ok "$USER already in '$grp' (or group absent)"
+    # GPU device access. /dev/kfd and /dev/dri/renderD* are owned by the render/video
+    # groups; without membership ROCm only works while udev happens to leave the nodes
+    # world-accessible, which is fragile across kernel/udev updates. Add the user once
+    # (takes effect on next login). Idempotent: skips if already a member.
+    for grp in render video; do
+        if getent group "$grp" >/dev/null && ! id -nG "$USER" | grep -qw "$grp"; then
+            sudo usermod -aG "$grp" "$USER" && ok "Added $USER to '$grp' (re-login required)" \
+                || warn "Could not add $USER to '$grp'"
+        else
+            ok "$USER already in '$grp' (or group absent)"
+        fi
+    done
+
+    # Interactive shells source shell/rocm.sh (covers bare TTY/SSH logins). Append the
+    # source line once per rc file; the grep guard keeps re-runs idempotent.
+    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rocm.sh' "$rc"; then
+            printf '\n# ROCm (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rocm.sh" ]] && . "$HOME/dotfiles/shell/rocm.sh"\n' >> "$rc"
+            ok "Wired ROCm into $rc"
+        else
+            ok "ROCm already wired into $rc (or rc absent)"
+        fi
+    done
+
+    # ── Shell aliases (cc/ccd Claude Code, oc/ocd OpenCode) ────────────────────
+    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/aliases.sh' "$rc"; then
+            printf '\n# Aliases (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/aliases.sh" ]] && . "$HOME/dotfiles/shell/aliases.sh"\n' >> "$rc"
+            ok "Wired aliases into $rc"
+        else
+            ok "Aliases already wired into $rc (or rc absent)"
+        fi
+    done
+
+    # ── Rust (rustup) PATH ─────────────────────────────────────────────────────
+    # rustup installs proxies under ~/.cargo/bin; shell/rust.sh sources ~/.cargo/env so
+    # they're on PATH in interactive shells. (Install rustup with: pacman -S rustup &&
+    # rustup default stable — or the official rustup-init.)
+    for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
+        if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rust.sh' "$rc"; then
+            printf '\n# Rust (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rust.sh" ]] && . "$HOME/dotfiles/shell/rust.sh"\n' >> "$rc"
+            ok "Wired Rust into $rc"
+        else
+            ok "Rust already wired into $rc (or rc absent)"
+        fi
+    done
+
+    # Ollama: hide the iGPU from GPU discovery (bundled rocBLAS crashes probing gfx1036).
+    if command -v ollama &>/dev/null; then
+        if sudo install -Dm644 "$DOTFILES_DIR/etc/systemd/system/ollama.service.d/rocm.conf" \
+                /etc/systemd/system/ollama.service.d/rocm.conf \
+            && sudo systemctl daemon-reload \
+            && sudo systemctl try-restart ollama; then
+            ok "Installed Ollama ROCm drop-in"
+        else
+            warn "Could not install Ollama ROCm drop-in"
+        fi
     fi
-done
 
-# Interactive shells source shell/rocm.sh (covers bare TTY/SSH logins). Append the
-# source line once per rc file; the grep guard keeps re-runs idempotent.
-for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rocm.sh' "$rc"; then
-        printf '\n# ROCm (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rocm.sh" ]] && . "$HOME/dotfiles/shell/rocm.sh"\n' >> "$rc"
-        ok "Wired ROCm into $rc"
+    # ── VRAM patch (dmem cgroup) kernel-check hook ─────────────────────────────
+    # Verify CONFIG_CGROUP_DMEM ("Valve's VRAM patch") stays enabled across kernel
+    # updates. Advisory pacman hook; the helper exits 0 so it never blocks an upgrade.
+    info "Installing dmem (VRAM patch) kernel-check pacman hook ..."
+    if sudo install -Dm755 "$DOTFILES_DIR/scripts/check-dmem-config.sh" /usr/local/bin/check-dmem-config.sh \
+        && sudo install -Dm644 "$DOTFILES_DIR/etc/pacman.d/hooks/95-vram-dmem-check.hook" /etc/pacman.d/hooks/95-vram-dmem-check.hook; then
+        ok "Installed dmem kernel-check hook"
     else
-        ok "ROCm already wired into $rc (or rc absent)"
+        warn "Could not install dmem kernel-check hook"
     fi
-done
-
-# ── Shell aliases (cc/ccd Claude Code, oc/ocd OpenCode) ────────────────────────
-for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/aliases.sh' "$rc"; then
-        printf '\n# Aliases (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/aliases.sh" ]] && . "$HOME/dotfiles/shell/aliases.sh"\n' >> "$rc"
-        ok "Wired aliases into $rc"
-    else
-        ok "Aliases already wired into $rc (or rc absent)"
-    fi
-done
-
-# ── Rust (rustup) PATH ─────────────────────────────────────────────────────────
-# rustup installs proxies under ~/.cargo/bin; shell/rust.sh sources ~/.cargo/env so
-# they're on PATH in interactive shells. (Install rustup with: pacman -S rustup &&
-# rustup default stable — or the official rustup-init.)
-for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [[ -f "$rc" ]] && ! grep -qF 'dotfiles/shell/rust.sh' "$rc"; then
-        printf '\n# Rust (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/rust.sh" ]] && . "$HOME/dotfiles/shell/rust.sh"\n' >> "$rc"
-        ok "Wired Rust into $rc"
-    else
-        ok "Rust already wired into $rc (or rc absent)"
-    fi
-done
-
-# Ollama: hide the iGPU from GPU discovery (bundled rocBLAS crashes probing gfx1036).
-if command -v ollama &>/dev/null; then
-    if sudo install -Dm644 "$DOTFILES_DIR/etc/systemd/system/ollama.service.d/rocm.conf" \
-            /etc/systemd/system/ollama.service.d/rocm.conf \
-        && sudo systemctl daemon-reload \
-        && sudo systemctl try-restart ollama; then
-        ok "Installed Ollama ROCm drop-in"
-    else
-        warn "Could not install Ollama ROCm drop-in"
-    fi
-fi
-
-# ── VRAM patch (dmem cgroup) kernel-check hook ─────────────────────────────────
-# Verify CONFIG_CGROUP_DMEM ("Valve's VRAM patch") stays enabled across kernel
-# updates. Advisory pacman hook; the helper exits 0 so it never blocks an upgrade.
-info "Installing dmem (VRAM patch) kernel-check pacman hook ..."
-if sudo install -Dm755 "$DOTFILES_DIR/scripts/check-dmem-config.sh" /usr/local/bin/check-dmem-config.sh \
-    && sudo install -Dm644 "$DOTFILES_DIR/etc/pacman.d/hooks/95-vram-dmem-check.hook" /etc/pacman.d/hooks/95-vram-dmem-check.hook; then
-    ok "Installed dmem kernel-check hook"
 else
-    warn "Could not install dmem kernel-check hook"
+    info "Minimal profile: skipping ROCm, AI-CLI aliases, Rust wiring, Ollama and VRAM extras"
 fi
 
 # ── SDDM login theme (Catppuccin) ──────────────────────────────────────────────
@@ -482,8 +541,10 @@ systemctl --user enable hyprpaper.service hypridle.service hyprpolkitagent.servi
 
 # VRAM foreground booster (requires AUR dmemcg-booster, whose own system+user
 # services are enabled by its package). Enable the Hyprland focus daemon here.
-systemctl --user enable hypr-dmemcg-foreground.service \
-    || warn "Could not enable hypr-dmemcg-foreground (is AUR dmemcg-booster installed?)"
+if is_full; then
+    systemctl --user enable hypr-dmemcg-foreground.service \
+        || warn "Could not enable hypr-dmemcg-foreground (is AUR dmemcg-booster installed?)"
+fi
 
 # Notifications are served by quickshell's own org.freedesktop.Notifications
 # implementation (quickshell/notifications/NotificationServer.qml). dunst and mako
@@ -510,7 +571,11 @@ ok "Font cache refreshed"
 # ── Done ──────────────────────────────────────────────────────────────────────
 
 printf '\n'
-ok "Dotfiles installed successfully!"
+ok "Dotfiles installed successfully! (profile: $PROFILE)"
+if ! is_full; then
+    info "Skipped (full profile only): ROCm, VRAM foreground boosting, Ollama drop-in,"
+    info "AI-CLI aliases, Rust wiring, Zen Browser. Re-run with --full to add them."
+fi
 printf '\n'
 printf '  Next steps:\n'
 printf '  1. Place a wallpaper in ~/Pictures/ and update\n'

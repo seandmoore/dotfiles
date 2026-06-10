@@ -23,7 +23,7 @@ A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/ca
 
 A single centered, fully-rounded opaque **pill** that gathers every widget into one island, left to right:
 
-- **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved.
+- **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved — and the list refreshes itself automatically when apps are installed or removed (pacman, AUR, Flatpak, or a manual `.desktop` drop).
 - **Places** — a folder icon listing your home folders; click one to open it in the file manager (Nautilus). Folders are scanned once at startup so the menu opens instantly.
 - **Workspaces** — per-monitor indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen); the hover menu shows live per-workspace window counts.
 - **Visualizer** — a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
@@ -32,7 +32,7 @@ A single centered, fully-rounded opaque **pill** that gathers every widget into 
 - **Updates** — package icon with a count badge; the dropdown breaks down official-repo, AUR, and Flatpak updates and offers **Update All** (opens an interactive terminal running `yay`/`paru -Syu` + `flatpak update`).
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history and a **Do-Not-Disturb** toggle plus a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to put it back on the clipboard.
-- **Display** — DP-1 color controls: HDR ↔ SDR and vibrant ↔ accurate-sRGB toggles plus a night-shift toggle and color-temperature slider, all driving the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
+- **Display** — DP-1 color controls: HDR ↔ SDR and vibrant ↔ accurate-sRGB toggles plus a night-shift toggle, an **Auto (sunset → sunrise)** schedule, and a color-temperature slider, all driving the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
 - **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper (thumbnails preload in the background so the switcher opens instantly), and power.
 
 Everything animates — menus spring open, lists cascade in, badges pop, and the bar follows the active Catppuccin flavor. The whole config hot-reloads on save.
@@ -48,13 +48,13 @@ The quickshell UI and Kitty use flat **opaque** surfaces (no compositor blur), m
 
 Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
 
-These modes are also switchable at runtime — both from the keybinds (`SUPER+SHIFT+D` HDR↔SDR, `SUPER+SHIFT+A` vibrant↔accurate sRGB, `SUPER+SHIFT+N` night shift) and from the bar's **Display** dropdown, which adds a color-temperature slider for night shift. State is seeded to the login defaults on startup and persisted under `~/.cache/hypr/`. The toggles are driven by `scripts/{display-color,hdr-toggle,color-accuracy-toggle,night-shift}.sh`; night shift uses `hyprsunset`.
+These modes are also switchable at runtime — both from the keybinds (`SUPER+SHIFT+D` HDR↔SDR, `SUPER+SHIFT+A` vibrant↔accurate sRGB, `SUPER+SHIFT+N` night shift) and from the bar's **Display** dropdown, which adds a color-temperature slider and an **Auto** night-shift schedule that turns the warm shift on at sunset and off at sunrise. Sun position is computed locally from a cached latitude/longitude (IP-geolocated once on first enable; override with `scripts/night-shift.sh location <lat> <lon>`), and taking manual control of the toggle or slider cleanly drops out of Auto. State is seeded to the login defaults on startup and persisted under `~/.cache/hypr/`; Auto mode resumes across logins. The toggles are driven by `scripts/{display-color,hdr-toggle,color-accuracy-toggle,night-shift}.sh`; night shift uses `hyprsunset`.
 
 ## VRAM foreground boosting (dmemcg)
 
 Gives the **focused** window priority on real GPU VRAM, pushing background apps into slower system RAM (GTT) first when VRAM is contended — the Hyprland counterpart to KDE's `plasma-foreground-booster`. It is built on the DRM device-memory cgroup controller (`CONFIG_CGROUP_DMEM`, mainline since Linux 6.14, a.k.a. "Valve's VRAM patch").
 
-A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, on every focus change, raises `dmem.low` on the focused window's cgroup while releasing the previous one. The AUR `dmemcg-booster` package enables the controller tree-wide and sets the baseline protection on `app.slice`; a custom `steam.desktop` launches Steam directly under `app.slice` so the boost actually applies. `install.sh` symlinks these, enables the `hypr-dmemcg-foreground.service`, and installs a pacman hook (`scripts/check-dmem-config.sh`) that verifies `CONFIG_CGROUP_DMEM` survives each kernel update. See [`vram/README.md`](vram/README.md) for details.
+A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, on every focus change, raises `dmem.low` on the focused window's cgroup while releasing the previous one. The AUR `dmemcg-booster` package enables the controller tree-wide and sets the baseline protection on `app.slice`; a custom `steam.desktop` launches Steam directly under `app.slice` so the boost actually applies. `install.sh` (full profile) symlinks these, enables the `hypr-dmemcg-foreground.service`, and installs a pacman hook (`scripts/check-dmem-config.sh`) that verifies `CONFIG_CGROUP_DMEM` survives each kernel update. See [`vram/README.md`](vram/README.md) for details.
 
 ## Screenshots
 
@@ -62,27 +62,39 @@ A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, 
 
 ## Installation (Arch Linux)
 
-Run the install script — it handles packages, symlinks, and services automatically:
+The install script handles packages, symlinks, and services automatically, and comes in two profiles:
+
+**Minimal** — recommended if you're installing these dotfiles on your own machine. The complete desktop (Hyprland + the quickshell bar/launcher/notifications, full Catppuccin theming incl. SDDM, Kitty, Neovim, Starship, audio, screenshots, Firefox) without my hardware-/workflow-specific extras:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh) --minimal
+```
+
+**Full** — everything, including the extras tuned for my machine (ROCm for AMD GPU compute, VRAM foreground boosting, the Ollama ROCm drop-in, AI-CLI shell aliases, Rust PATH wiring, Zen Browser):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh)
 ```
 
-The script will:
+Run interactively with no flag and it asks which profile you want (you can also preset it with `DOTFILES_PROFILE=minimal`). Either profile will:
 
 1. Verify you are on Arch Linux
 2. Clone or update the dotfiles repo to `~/dotfiles`
 3. Activate the Git pre-commit hook that lints staged files (`core.hooksPath` → `.githooks/`)
 4. Install all required packages via `pacman`
-5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (Catppuccin themes/cursors, `dmemcg-booster`, etc.)
-6. Install Firefox (set as the default browser) and Zen Browser via Flatpak, and apply Catppuccin Flatpak theme overrides
+5. Prompt to install [yay](https://github.com/Jguer/yay) and AUR packages (Catppuccin themes/cursors)
+6. Install Firefox via Flatpak (set as the default browser) and apply Catppuccin Flatpak theme overrides
 7. Install the Catppuccin **SDDM** login theme plus the helper that lets the Mocha/Latte toggle switch the login screen too
-8. Configure **ROCm** for AMD GPUs (graphical-session env + add you to the `render`/`video` groups)
-9. Set up **VRAM foreground boosting** (dmemcg) — symlink the focus daemon + Steam launcher and install the `CONFIG_CGROUP_DMEM` kernel-check pacman hook
-10. Create all config symlinks under `~/.config/`
-11. Seed the active Catppuccin flavor via `sync-theme.sh` (the same path the bar toggle uses) — generates the libadwaita `gtk.css`, kitty colors, Starship palette and Qt/Kvantum themes
-12. Enable systemd user services (PipeWire, XDG portals, the VRAM focus daemon) and the bluetooth service
-13. Refresh the font cache
+8. Create all config symlinks under `~/.config/`
+9. Seed the active Catppuccin flavor via `sync-theme.sh` (the same path the bar toggle uses) — generates the libadwaita `gtk.css`, kitty colors, Starship palette and Qt/Kvantum themes
+10. Enable systemd user services (PipeWire, XDG portals) and the bluetooth service
+11. Refresh the font cache
+
+The **full** profile additionally:
+
+- Configures **ROCm** for AMD GPUs (graphical-session env + adds you to the `render`/`video` groups) and installs the Ollama ROCm drop-in
+- Sets up **VRAM foreground boosting** (dmemcg) — the `dmemcg-booster` AUR package, focus daemon + Steam launcher, its systemd user service, and the `CONFIG_CGROUP_DMEM` kernel-check pacman hook
+- Installs **Zen Browser** (Flatpak) and wires AI-CLI shell aliases (Claude Code / OpenCode) and Rust (`~/.cargo`) into your shell rc files
 
 After the script finishes, place a wallpaper at `~/Pictures/` and update `~/dotfiles/hypr/hyprpaper.conf` with its path, then run `Hyprland`.
 
@@ -193,15 +205,15 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `uwsm` | Session manager used for clean logout |
 | `sddm` | Login / display manager (Catppuccin themed) |
 | `hyprsunset` | Night-shift color-temperature daemon (`SUPER+SHIFT+N`) |
-| `dmemcg-booster` *(AUR)* | Enables the `dmem` cgroup controller + baseline VRAM protection for foreground boosting |
+| `dmemcg-booster` *(AUR)* | Enables the `dmem` cgroup controller + baseline VRAM protection for foreground boosting — full profile only |
 
 **Apps**
 
 | Package | Purpose |
 |---------|---------|
 | `nautilus` | File manager (`SUPER+E`) |
-| Firefox *(Flatpak)* | Default web browser (themed with the Catppuccin add-on) |
-| Zen Browser *(Flatpak)* | Web browser (`SUPER+B`) |
+| Firefox *(Flatpak)* | Default web browser, `SUPER+B` (themed with the Catppuccin add-on) |
+| Zen Browser *(Flatpak)* | Secondary web browser — full profile only |
 
 **Fonts**
 
@@ -218,7 +230,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + SPACE` | Toggle app launcher |
 | `SUPER + C` | Close window |
 | `SUPER + E` | File manager (Nautilus) |
-| `SUPER + B` | Browser (Zen) |
+| `SUPER + B` | Browser (Firefox) |
 | `SUPER + G` | GTK theme picker (nwg-look) |
 | `SUPER + W` | Wallpaper switcher |
 | `SUPER + H` | Keybind cheat sheet |
