@@ -53,12 +53,17 @@ ColumnLayout {
             Text {
                 text: orow.label
                 font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 15
-                color: Colors.text; Layout.fillWidth: true
+                color: Colors.text
             }
+            // fillWidth + right-align so the sub gets exactly the leftover space
+            // and elides instead of painting past the panel edge.
             Text {
                 text: orow.sub
                 font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 12
                 color: Colors.overlay1
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignRight
+                elide: Text.ElideRight
             }
             Text {
                 visible: orow.active
@@ -106,12 +111,15 @@ ColumnLayout {
                 Text {
                     text: sect.title
                     font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 16
-                    color: Colors.text; Layout.fillWidth: true
+                    color: Colors.text
                 }
                 Text {
                     text: sect.subtitle
                     font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 12
                     color: Colors.overlay1
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignRight
+                    elide: Text.ElideRight
                 }
                 Text {
                     text: "󰅂"                     // chevron, rotates when expanded
@@ -131,7 +139,7 @@ ColumnLayout {
         OptionRow {
             visible: sect.expanded
             label: "Vibrant"
-            sub: sect.keyword === "hdr" ? "KDE-max saturation (1.35)" : "wide gamut"
+            sub: sect.keyword === "hdr" ? "max saturation (1.35)" : "wide gamut"
             active: sect.isActiveGroup && Frost.vibrant
             onChosen: dm.setMode(sect.keyword, "vibrant")
         }

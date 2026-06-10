@@ -426,7 +426,9 @@ PanelWindow {
             HoverMenuButton {
                 name: "display"
                 ctrl: root
-                menuWidth: 300
+                // 360 fits the longest option sub ("max saturation (1.35)")
+                // next to its label without eliding.
+                menuWidth: 360
                 icon: "󰍹"
                 iconColor: Frost.nightOn ? Colors.peach
                     : (root.hdrOn ? Colors.peach : Colors.overlay1)
