@@ -132,6 +132,7 @@ PACMAN_PKGS=(
     lua-language-server
     stylua
     starship
+    fzf
     wl-clipboard
     unzip
     grim
@@ -446,6 +447,15 @@ if is_full; then
             ok "Aliases already wired into $rc (or rc absent)"
         fi
     done
+
+    # ── History + fzf menu (Ctrl+R) ────────────────────────────────────────────
+    # Bash-only: shell/history.sh uses shopt/PROMPT_COMMAND and fzf's bash bindings.
+    if [[ -f "$HOME/.bashrc" ]] && ! grep -qF 'dotfiles/shell/history.sh' "$HOME/.bashrc"; then
+        printf '\n# History + fzf menu (managed by dotfiles)\n[[ -f "$HOME/dotfiles/shell/history.sh" ]] && . "$HOME/dotfiles/shell/history.sh"\n' >> "$HOME/.bashrc"
+        ok "Wired history/fzf into $HOME/.bashrc"
+    else
+        ok "History/fzf already wired into $HOME/.bashrc (or rc absent)"
+    fi
 
     # ── Rust (rustup) PATH ─────────────────────────────────────────────────────
     # rustup installs proxies under ~/.cargo/bin; shell/rust.sh sources ~/.cargo/env so

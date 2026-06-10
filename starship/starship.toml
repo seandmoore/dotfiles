@@ -16,6 +16,7 @@ $directory\
 [](fg:surface1 bg:surface2)\
 $git_branch\
 $git_status\
+$git_state\
 [](fg:surface2)\
 $nodejs\
 $rust\
@@ -26,6 +27,7 @@ $c\
 $java\
 $docker_context\
 $cmd_duration\
+$jobs\
 $line_break\
 $character"""
 
@@ -85,6 +87,18 @@ stashed = "$${count} "
 modified = "!${count} "
 staged = "+${count} "
 deleted = "✘${count} "
+
+[git_state]
+style = "fg:red bg:surface2"
+format = '[$state( $progress_current/$progress_total) ]($style)'
+rebase = "REBASING"
+merge = "MERGING"
+cherry_pick = "CHERRY-PICKING"
+
+[jobs]
+symbol = ""
+style = "fg:teal"
+format = '[ $symbol $number ]($style)'
 
 [nodejs]
 symbol = " "
