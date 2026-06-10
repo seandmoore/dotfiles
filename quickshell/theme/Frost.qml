@@ -18,6 +18,8 @@ QtObject {
     // Night shift (hyprsunset).
     property bool nightOn: false
     property int  nightTemp: 4000
+    // Auto sunset→sunrise scheduling on? (night-shift.sh auto)
+    property bool nightAuto: false
 
     function glass(a) { return 1.0 }
 
@@ -32,7 +34,7 @@ QtObject {
     }
 
     // One shot reads DP-1's preset plus the vibrant/night state files, emitting a
-    // single "preset|vibrant|on|temp" line for the parser below.
+    // single "preset|vibrant|on|temp|auto" line for the parser below.
     property Process pollProc: Process {
         id: pollProc
         command: ["bash", "-c",
@@ -41,15 +43,17 @@ QtObject {
             "v=$(cat \"$c/color-vibrant\" 2>/dev/null || echo vibrant); " +
             "n=$(cat \"$c/nightshift-on\" 2>/dev/null || echo 0); " +
             "t=$(cat \"$c/nightshift-temp\" 2>/dev/null || echo 4000); " +
-            "echo \"$p|$v|$n|$t\""]
+            "a=$(cat \"$c/nightshift-auto\" 2>/dev/null || echo 0); " +
+            "echo \"$p|$v|$n|$t|$a\""]
         stdout: SplitParser {
             onRead: line => {
                 const p = line.trim().split("|")
-                if (p.length < 4) return
+                if (p.length < 5) return
                 frost.hdrOn = (p[0] === "hdr")
                 frost.vibrant = (p[1] === "vibrant")
                 frost.nightOn = (p[2] === "1")
                 const t = parseInt(p[3]); if (!isNaN(t)) frost.nightTemp = t
+                frost.nightAuto = (p[4] === "1")
             }
         }
     }

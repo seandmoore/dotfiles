@@ -183,6 +183,48 @@ ColumnLayout {
         }
     }
 
+    // auto schedule: shift on at sunset, off at sunrise (drops to manual if you
+    // touch the toggle/slider above). Driven by night-shift.sh's auto daemon.
+    // Mirrors the manual row above so the two switches stack flush.
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: 10
+        Text {
+            text: "󰃡"
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 17
+            color: Frost.nightAuto ? Colors.peach : Colors.overlay1
+        }
+        Text {
+            text: "Auto"
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 15
+            color: Colors.text; Layout.fillWidth: true
+        }
+        Text {
+            text: "sunset → sunrise"
+            font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 12
+            color: Colors.overlay1
+        }
+        // toggle switch
+        Rectangle {
+            width: 42; height: 22; radius: 11
+            Layout.alignment: Qt.AlignVCenter
+            color: Frost.nightAuto ? Colors.peach : Colors.surface1
+            Behavior on color { ColorAnimation { duration: 150 } }
+            Rectangle {
+                width: 16; height: 16; radius: 8; color: Colors.base
+                anchors.verticalCenter: parent.verticalCenter
+                x: Frost.nightAuto ? parent.width - width - 3 : 3
+                Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+            }
+            MouseArea {
+                anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                // explicit on/off (not a relative toggle) so the action always
+                // matches the switch you see, even if the poll lags a tick.
+                onClicked: dm.night(Frost.nightAuto ? "auto off" : "auto on")
+            }
+        }
+    }
+
     // temperature slider (warmer = lower Kelvin)
     Item {
         id: tempSlider

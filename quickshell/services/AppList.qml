@@ -44,6 +44,36 @@ QtObject {
     // Preload as soon as the singleton is instantiated (Bar.qml touches it at startup).
     Component.onCompleted: ensureLoaded()
 
+    // Live updates: watch the application directories so installing or removing
+    // an app (pacman, yay, flatpak, or a manual .desktop drop) refreshes the
+    // list without restarting quickshell. A package op touches many files at
+    // once, so we debounce and rebuild once the filesystem settles.
+    property Timer refreshDebounce: Timer {
+        interval: 1500
+        onTriggered: {
+            if (appList.loading) { restart(); return }  // wait out an in-flight scan
+            appList.reload()
+        }
+    }
+
+    property Process watcher: Process {
+        running: true
+        // Only watch dirs that exist (inotifywait errors on a missing path),
+        // then monitor for entries appearing, disappearing, or being rewritten.
+        command: ["bash", "-c",
+            "dirs=(); for d in /usr/share/applications " +
+            "\"$HOME/.local/share/applications\" " +
+            "/var/lib/flatpak/exports/share/applications " +
+            "\"${XDG_DATA_HOME:-$HOME/.local/share}/flatpak/exports/share/applications\"; do " +
+            "[ -d \"$d\" ] && dirs+=(\"$d\"); done; " +
+            "[ ${#dirs[@]} -eq 0 ] && exit 0; " +
+            "exec inotifywait -mq -e create -e delete -e moved_to -e moved_from -e close_write \"${dirs[@]}\""
+        ]
+        stdout: SplitParser {
+            onRead: appList.refreshDebounce.restart()
+        }
+    }
+
     property Process loader: Process {
         id: loader
         property var parsed: []

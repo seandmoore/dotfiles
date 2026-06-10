@@ -169,6 +169,9 @@ hl.on("hyprland.start", function()
     -- Night-shift daemon (hyprsunset), started neutral (6500K = no shift); night-shift.sh
     -- drives it over IPC. No-op if hyprsunset isn't installed yet (sudo pacman -S hyprsunset).
     hl.exec_cmd("hyprsunset -t 6500")
+    -- Resume automatic sunset→sunrise night shift if it was left on. No-op otherwise;
+    -- the daemon re-evaluates the sun on its first tick and corrects the seed above.
+    hl.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/night-shift.sh auto-resume")
 end)
 
 -- Re-apply on every config reload (cursor resets to default on reload).
