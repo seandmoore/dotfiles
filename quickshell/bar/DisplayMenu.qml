@@ -131,7 +131,7 @@ ColumnLayout {
         OptionRow {
             visible: sect.expanded
             label: "Vibrant"
-            sub: sect.keyword === "hdr" ? "saturation 1.3" : "wide gamut"
+            sub: sect.keyword === "hdr" ? "KDE-max saturation (1.35)" : "wide gamut"
             active: sect.isActiveGroup && Frost.vibrant
             onChosen: dm.setMode(sect.keyword, "vibrant")
         }

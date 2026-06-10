@@ -13,7 +13,8 @@ QtObject {
 
     // colorManagementPreset: "hdr" => HDR; "wide" => vibrant SDR; else accurate SDR.
     property bool hdrOn: true
-    // vibrant axis (saturation 1.3 vs 1.0 in HDR; cm=wide vs srgb in SDR).
+    // vibrant axis (saturation 1.35 ≈ KDE "SDR Color Intensity" @ 100% vs 1.0 in HDR;
+    // cm=wide vs srgb in SDR).
     property bool vibrant: true
     // Night shift (hyprsunset).
     property bool nightOn: false

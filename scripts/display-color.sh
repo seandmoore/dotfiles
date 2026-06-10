@@ -7,7 +7,7 @@
 #   color-vibrant  : vibrant | standard (default vibrant)
 #
 # The 2x2 matrix:
-#   HDR + vibrant  -> cm=hdr,  sdrsaturation 1.3   (sRGB pushed toward native gamut)
+#   HDR + vibrant  -> cm=hdr,  sdrsaturation 1.35  (≈ KDE "SDR Color Intensity" @ 100%)
 #   HDR + standard -> cm=hdr,  sdrsaturation 1.0   (true sRGB inside HDR)
 #   SDR + vibrant  -> cm=wide                      (native wide gamut, punchy SDR)
 #   SDR + standard -> cm=srgb                      (accurate sRGB)
@@ -38,7 +38,10 @@ vib="$(read_state "$vib_state")";  vib="${vib:-vibrant}"
 apply() {
     local rule
     if [[ "$hdr" == "hdr" ]]; then
-        local sat=1.0; [[ "$vib" == "vibrant" ]] && sat=1.3
+        # 1.35 ≈ KDE Plasma's "SDR Color Intensity" maxed (100%): KDE at max stretches sRGB
+        # fully to BT.2020 (panel-clipped to native ~P3); 1.35 is the least-error fit of
+        # Hyprland's PQ-space saturation to that target on this QD-OLED.
+        local sat=1.0; [[ "$vib" == "vibrant" ]] && sat=1.35
         rule="hl.monitor({ output=\"$out\", mode=\"2560x1440@240\", position=\"0x0\", scale=1, bitdepth=10, cm=\"hdr\", sdrbrightness=1.0, sdrsaturation=${sat}, sdr_min_luminance=0, sdr_max_luminance=600, max_luminance=1000 })"
     else
         if [[ "$vib" == "vibrant" ]]; then

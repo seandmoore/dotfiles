@@ -60,10 +60,16 @@ hl.monitor({
     --   path entirely regardless. Bump toward 2.0 only if you want extra gain on top.)
     sdrbrightness = 1.0,
 
-    -- sdrsaturation: saturation multiplier for SDR apps. 1.3 ≈ KDE "SDR color intensity"
-    --   pushed high — stretches sRGB content toward the QD-OLED's native gamut for a vivid
-    --   look. 1.0 = accurate; raise to ~1.5 for more pop, lower if skin tones look off.
-    sdrsaturation = 1.3,
+    -- sdrsaturation: saturation multiplier for SDR apps. 1.35 ≈ KDE Plasma's "SDR Color
+    --   Intensity" slider MAXED (100%). KDE at 100% reinterprets sRGB content with full
+    --   BT.2020 primaries (sdrGamutWideness = 1.0), which this QD-OLED clips to its native
+    --   ~P3 gamut — the strongest stretch the panel can show. Hyprland's knob is different
+    --   math (a luma-anchored chroma extrapolation on PQ-encoded values, cm_helpers.glsl),
+    --   so no single value matches exactly; 1.35 is the least-error fit against the KDE
+    --   target (mean ΔE_ITP over the sRGB cube, clipped to P3 — ICtCp optimum 1.34, Oklab
+    --   1.28, in-gamut-only 1.42). 1.0 = accurate sRGB; much above ~1.4 saturated blues
+    --   over-brighten (PQ-space artifact) and hues start drifting.
+    sdrsaturation = 1.35,
 
     -- sdr_min_luminance: SDR black floor in nits. 0 = true black (OLED pixels fully off) for
     --   maximum contrast — no LCD-style crush risk on this panel.
