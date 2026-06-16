@@ -188,7 +188,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `ffmpeg` | HDR-safe screenshot conversion (PPM → PNG) |
 | `jq` | Per-monitor screenshot enumeration |
 | `libnotify` | Desktop notifications (`notify-send`) |
-| `grimblast-git` *(AUR)* | Screenshot helper |
+| `grimblast` *(AUR)* | Screenshot helper |
 | `inotify-tools` | Brightness change monitoring |
 
 **Network & Bluetooth**
