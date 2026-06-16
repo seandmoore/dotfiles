@@ -220,7 +220,7 @@ fi
 # ── AUR packages ──────────────────────────────────────────────────────────────
 
 AUR_PKGS=(
-    grimblast-git
+    grimblast
     kvantum-theme-catppuccin-git
     catppuccin-gtk-theme-mocha
     catppuccin-gtk-theme-latte
