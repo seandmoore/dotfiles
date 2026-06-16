@@ -1,62 +1,62 @@
 # dotfiles
 
-A stylish Hyprland dotfiles setup themed with [Catppuccin](https://github.com/catppuccin/catppuccin) (Mocha dark / Latte light).
+A Hyprland desktop configuration themed with [Catppuccin](https://github.com/catppuccin/catppuccin) (Mocha dark / Latte light).
 
 ## Components
 
 | Component | Description |
 |-----------|-------------|
-| **Hyprland** | Dynamic tiling Wayland compositor — Lua config (0.55+), animations, borders, keybinds, per-monitor HDR & wide-gamut color management. |
-| **Quickshell** | Centered opaque pill bar (live audio visualizer, CPU/RAM graphs, media controls, hover menus), app launcher with file search, home-folder (Places) menu, notification center with Do-Not-Disturb, clipboard history, system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, keybind cheat sheet. |
-| **Hyprlock** | Lock screen with blurred background and animated clock. |
-| **Hypridle** | Idle daemon — dim → lock → display off → suspend. |
+| **Hyprland** | Tiling Wayland compositor — Lua config (0.55+) covering animations, borders, keybinds, and per-monitor HDR and wide-gamut color management. |
+| **Quickshell** | Status bar with audio visualizer, CPU/RAM graphs, and media controls, plus an app launcher with file search, a Places menu, a notification center with Do-Not-Disturb, clipboard history, a system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, and a keybind cheat sheet. |
+| **Hyprlock** | Lock screen with a blurred background and clock. |
+| **Hypridle** | Idle daemon (dim, lock, display off, suspend). |
 | **Hyprpaper** | Wallpaper manager. |
 | **Hyprpolkitagent** | Authentication agent for privilege prompts. |
-| **SDDM** | Login screen themed with Catppuccin (Mocha/Latte); follows the active flavor via `sync-theme.sh`. |
-| **Kitty** | Terminal emulator with Catppuccin theme, powerline tabs, a smooth cursor trail, and a solid background matched to the GTK apps. |
-| **Starship** | Catppuccin powerline shell prompt; flavor follows the active Mocha/Latte theme. |
-| **Neovim** | Editor with lazy.nvim, Telescope, Treesitter, Lualine, and more. |
-| **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps live. |
-| **nwg-look** | GTK theme picker — changes are snapshotted per mode and restored on theme switch. |
+| **SDDM** | Catppuccin-themed login screen; follows the active flavor via `sync-theme.sh`. |
+| **Kitty** | Terminal emulator with Catppuccin colors, powerline tabs, a cursor trail, and a background matched to the GTK apps. |
+| **Starship** | Catppuccin powerline shell prompt; follows the active flavor. |
+| **Neovim** | Editor configured with lazy.nvim, Telescope, Treesitter, and Lualine. |
+| **xsettingsd** | Broadcasts GTK/cursor theme changes to XWayland apps. |
+| **nwg-look** | GTK theme picker; selections are saved per mode and restored on theme switch. |
 
 ## Status bar
 
-A single centered, fully-rounded opaque **pill** that gathers every widget into one island, left to right:
+A single centered bar that groups every widget into one element, left to right:
 
-- **App menu** — click for the full launcher (with a Files mode that searches `~` live), hover for the installed-app list. Apps are scanned once at startup and cached, so the menus open instantly with icons already resolved — and the list refreshes itself automatically when apps are installed or removed (pacman, AUR, Flatpak, or a manual `.desktop` drop).
-- **Places** — a folder icon listing your home folders; click one to open it in the file manager (Nautilus). Folders are scanned once at startup so the menu opens instantly.
-- **Workspaces** — per-monitor indicator (scroll over the dots to cycle that monitor's own workspaces, keeping focus on-screen); the hover menu shows live per-workspace window counts.
-- **Visualizer** — a fluid waveform driven by [`cava`](https://github.com/karlstav/cava).
+- **App menu** — click for the launcher (with a Files mode that searches `~`), hover for the installed-app list. Apps are scanned and cached at startup, and the list refreshes automatically when apps are installed or removed (pacman, AUR, Flatpak, or a manual `.desktop` drop).
+- **Places** — a folder icon listing your home folders; click one to open it in Nautilus. Folders are scanned at startup.
+- **Workspaces** — per-monitor indicator; scroll the dots to cycle that monitor's workspaces. The hover menu shows per-workspace window counts.
+- **Visualizer** — a waveform driven by [`cava`](https://github.com/karlstav/cava).
 - **Clock** — hover opens the calendar.
-- **System** — live CPU & RAM usage graphs (hover for per-core / memory detail) and the MPRIS media player.
-- **Updates** — package icon with a count badge; the dropdown breaks down official-repo, AUR, and Flatpak updates and offers **Update All** (opens an interactive terminal running `yay`/`paru -Syu` + `flatpak update`).
-- **Notifications** — bell with an unread badge; the dropdown is a notification center with history and a **Do-Not-Disturb** toggle plus a *"Mute for…"* submenu.
-- **Clipboard** — recent text copies; click one to put it back on the clipboard.
-- **Display** — DP-1 color controls: HDR ↔ SDR and vibrant ↔ accurate-sRGB toggles plus a night-shift toggle, an **Auto (sunset → sunrise)** schedule, and a color-temperature slider, all driving the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
-- **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper (thumbnails preload in the background so the switcher opens instantly), and power.
+- **System** — CPU and RAM usage graphs (hover for per-core and memory detail) and the MPRIS media player.
+- **Updates** — package icon with a count badge; the dropdown lists official-repo, AUR, and Flatpak updates and offers **Update All**, which opens a terminal running `yay`/`paru -Syu` and `flatpak update`.
+- **Notifications** — bell with an unread badge; the dropdown is a notification center with history, a **Do-Not-Disturb** toggle, and a *"Mute for…"* submenu.
+- **Clipboard** — recent text copies; click one to restore it to the clipboard.
+- **Display** — DP-1 color controls: HDR/SDR and vibrant/accurate-sRGB toggles, a night-shift toggle, an **Auto (sunset → sunrise)** schedule, and a color-temperature slider. These drive the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
+- **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper switcher, and power.
 
-Everything animates — menus spring open, lists cascade in, badges pop, and the bar follows the active Catppuccin flavor. The whole config hot-reloads on save.
+Widgets are animated, and the bar follows the active Catppuccin flavor. The config hot-reloads on save.
 
 ## HDR & color management
 
 Color is managed per monitor in `hypr/hyprland.lua`:
 
-- **HDR displays** run the full HDR10 path — BT.2020 (Rec. 2020) primaries + PQ (ST. 2084) transfer at 10-bit. SDR content inside the HDR container is tunable via `sdrbrightness` / `sdrsaturation`, with panel peak and SDR-white levels set by `max_luminance` / `sdr_max_luminance`.
+- **HDR displays** use the HDR10 path: BT.2020 (Rec. 2020) primaries with PQ (ST. 2084) transfer at 10-bit. SDR content inside the HDR container is adjusted via `sdrbrightness` / `sdrsaturation`, and panel peak and SDR-white levels via `max_luminance` / `sdr_max_luminance`.
 - **SDR displays** use the `srgb` color space.
 
-**HDR + vibrant** (the login default) is tuned to reproduce KDE Plasma's *SDR Color Intensity* slider **maxed out (100%)** as closely as Hyprland allows. KDE at 100% reinterprets sRGB content with full BT.2020 primaries ([`sdrGamutWideness = 1.0`](https://zamundaaa.github.io/wayland/2023/12/18/update-on-hdr-and-colormanagement-in-plasma.html)), which a QD-OLED clips to its native ~P3 gamut — the strongest stretch the panel can display. Hyprland's `sdrsaturation` is different math (a luma-anchored chroma extrapolation on PQ-encoded values in `cm_helpers.glsl`), so no value matches exactly; **`sdrsaturation = 1.35`** is the numerically fitted least-error match (minimum mean ΔE\_ITP over the sRGB cube against the KDE target, cross-checked in Oklab). Vibrant **SDR** mode (`cm = "wide"`) achieves the same stretch natively, since wide-gamut mode renders sRGB values with the panel's native primaries directly.
+**HDR + vibrant** (the login default) approximates KDE Plasma's *SDR Color Intensity* slider at 100%. At that setting KDE reinterprets sRGB content with full BT.2020 primaries ([`sdrGamutWideness = 1.0`](https://zamundaaa.github.io/wayland/2023/12/18/update-on-hdr-and-colormanagement-in-plasma.html)), which a QD-OLED panel clips to its native P3 gamut. Hyprland's `sdrsaturation` uses different math (a luma-anchored chroma extrapolation on PQ-encoded values in `cm_helpers.glsl`), so no value matches exactly. **`sdrsaturation = 1.35`** is the least-error fit (minimum mean ΔE\_ITP over the sRGB cube against the KDE target, cross-checked in Oklab). Vibrant **SDR** mode (`cm = "wide"`) produces the same result natively, since wide-gamut mode renders sRGB values with the panel's primaries directly.
 
-The quickshell UI and Kitty use flat **opaque** surfaces (no compositor blur), matched to the GTK apps (e.g. Nautilus) for legibility — text and icons read cleanly with no wallpaper bleed-through. They also render identically whether a display is in HDR or SDR (Hyprland can't blur a colour-managed HDR output, so a blur-based "frosted" look would only appear on SDR). The opacity is a single knob: `Frost.glass()` in `quickshell/theme/Frost.qml` (return `a` instead of `1.0` to restore the translucent glass look) and Kitty's `background_opacity`.
+The Quickshell UI and Kitty use opaque surfaces (no compositor blur), matched to the GTK apps such as Nautilus for legibility. This also keeps them consistent across HDR and SDR, since Hyprland cannot blur a color-managed HDR output. Opacity is controlled by `Frost.glass()` in `quickshell/theme/Frost.qml` (return `a` instead of `1.0` for a translucent look) and Kitty's `background_opacity`.
 
-Each `hl.monitor({ … })` block is commented with what every knob does and how it maps to KDE's *maximum SDR brightness* / *SDR color intensity* settings.
+Each `hl.monitor({ … })` block is commented with what each setting does and how it maps to KDE's *maximum SDR brightness* and *SDR color intensity* settings.
 
-These modes are also switchable at runtime — both from the keybinds (`SUPER+SHIFT+D` HDR↔SDR, `SUPER+SHIFT+A` vibrant↔accurate sRGB, `SUPER+SHIFT+N` night shift) and from the bar's **Display** dropdown, which adds a color-temperature slider and an **Auto** night-shift schedule that turns the warm shift on at sunset and off at sunrise. Sun position is computed locally from a cached latitude/longitude (IP-geolocated once on first enable; override with `scripts/night-shift.sh location <lat> <lon>`), and taking manual control of the toggle or slider cleanly drops out of Auto. State is seeded to the login defaults on startup and persisted under `~/.cache/hypr/`; Auto mode resumes across logins. The toggles are driven by `scripts/{display-color,hdr-toggle,color-accuracy-toggle,night-shift}.sh`; night shift uses `hyprsunset`.
+These modes are switchable at runtime, both from the keybinds (`SUPER+SHIFT+D` HDR/SDR, `SUPER+SHIFT+A` vibrant/accurate sRGB, `SUPER+SHIFT+N` night shift) and from the bar's **Display** dropdown, which adds a color-temperature slider and an **Auto** night-shift schedule (warm shift on at sunset, off at sunrise). Sun position is computed locally from a cached latitude/longitude (IP-geolocated on first enable; override with `scripts/night-shift.sh location <lat> <lon>`). Taking manual control of the toggle or slider exits Auto mode. State is seeded to the login defaults on startup and persisted under `~/.cache/hypr/`, so Auto mode resumes across logins. The toggles are driven by `scripts/{display-color,hdr-toggle,color-accuracy-toggle,night-shift}.sh`; night shift uses `hyprsunset`.
 
 ## VRAM foreground boosting (dmemcg)
 
-Gives the **focused** window priority on real GPU VRAM, pushing background apps into slower system RAM (GTT) first when VRAM is contended — the Hyprland counterpart to KDE's `plasma-foreground-booster`. It is built on the DRM device-memory cgroup controller (`CONFIG_CGROUP_DMEM`, mainline since Linux 6.14, a.k.a. "Valve's VRAM patch").
+Gives the focused window priority on GPU VRAM, evicting background apps to slower system RAM (GTT) first when VRAM is contended — the Hyprland counterpart to KDE's `plasma-foreground-booster`. It builds on the DRM device-memory cgroup controller (`CONFIG_CGROUP_DMEM`, mainline since Linux 6.14, also known as "Valve's VRAM patch").
 
-A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, on every focus change, raises `dmem.low` on the focused window's cgroup while releasing the previous one. The AUR `dmemcg-booster` package enables the controller tree-wide and sets the baseline protection on `app.slice`; a custom `steam.desktop` launches Steam directly under `app.slice` so the boost actually applies. `install.sh` (full profile) symlinks these, enables the `hypr-dmemcg-foreground.service`, and installs a pacman hook (`scripts/check-dmem-config.sh`) that verifies `CONFIG_CGROUP_DMEM` survives each kernel update. See [`vram/README.md`](vram/README.md) for details.
+A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, on each focus change, raises `dmem.low` on the focused window's cgroup and releases the previous one. The AUR `dmemcg-booster` package enables the controller tree-wide and sets baseline protection on `app.slice`; a custom `steam.desktop` launches Steam under `app.slice` so the boost applies to it. The full profile of `install.sh` symlinks these files, enables `hypr-dmemcg-foreground.service`, and installs a pacman hook (`scripts/check-dmem-config.sh`) that verifies `CONFIG_CGROUP_DMEM` is present after each kernel update. See [`vram/README.md`](vram/README.md) for details.
 
 ## Screenshots
 
@@ -64,21 +64,21 @@ A user daemon (`vram/hypr-dmemcg-foreground`) watches Hyprland's `socket2` and, 
 
 ## Installation (Arch Linux)
 
-The install script handles packages, symlinks, and services automatically, and comes in two profiles:
+The install script handles packages, symlinks, and services, and offers two profiles:
 
-**Minimal** — recommended if you're installing these dotfiles on your own machine. The complete desktop (Hyprland + the quickshell bar/launcher/notifications, full Catppuccin theming incl. SDDM, Kitty, Neovim, Starship, audio, screenshots, Firefox) without my hardware-/workflow-specific extras:
+**Minimal** — recommended for installing these dotfiles on your own machine. Provides the complete desktop (Hyprland, the Quickshell bar/launcher/notifications, Catppuccin theming including SDDM, Kitty, Neovim, Starship, audio, screenshots, and Firefox) without the hardware- and workflow-specific extras:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh) --minimal
 ```
 
-**Full** — everything, including the extras tuned for my machine (ROCm for AMD GPU compute, VRAM foreground boosting, the Ollama ROCm drop-in, AI-CLI shell aliases, Rust PATH wiring, Zen Browser):
+**Full** — everything in Minimal plus extras tuned for the author's machine (ROCm for AMD GPU compute, VRAM foreground boosting, the Ollama ROCm drop-in, AI-CLI shell aliases, Rust PATH wiring, and Zen Browser):
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/seandmoore/dotfiles/main/install.sh)
 ```
 
-Run interactively with no flag and it asks which profile you want (you can also preset it with `DOTFILES_PROFILE=minimal`). Either profile will:
+Run with no flag to select a profile interactively, or preset it with `DOTFILES_PROFILE=minimal`. Either profile will:
 
 1. Verify you are on Arch Linux
 2. Clone or update the dotfiles repo to `~/dotfiles`
@@ -269,11 +269,11 @@ The setup uses [Catppuccin](https://github.com/catppuccin/catppuccin) in two fla
 ~/dotfiles/scripts/sync-theme.sh mocha   # switch to dark
 ```
 
-`sync-theme.sh` propagates the flavor everywhere live — Hyprland borders, GTK/Qt, icons, cursors, Kitty, and the Starship prompt (its `palette` line is swapped so open shells re-color on the next prompt). The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login. `sync-theme.sh` also re-themes the **SDDM** login screen (Mocha ↔ Latte).
+`sync-theme.sh` applies the flavor across Hyprland borders, GTK/Qt, icons, cursors, Kitty, and the Starship prompt (its `palette` line is swapped so open shells re-color on the next prompt). The selected theme is persisted to `$XDG_CACHE_HOME/catppuccin-mode` and restored on next login. It also re-themes the **SDDM** login screen.
 
-**Firefox** keeps its default UI styling and is themed with the [Catppuccin browser add-on](https://github.com/catppuccin/firefox) rather than a custom userChrome.
+**Firefox** keeps its default UI and is themed with the [Catppuccin browser add-on](https://github.com/catppuccin/firefox) rather than a custom userChrome.
 
-`nwg-look` changes are snapshotted per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget variant choices survive theme switches.
+`nwg-look` changes are saved per mode to `~/.local/share/catppuccin/gtk-{3,4}.0-{mode}.ini` so that font, cursor, and widget choices survive theme switches.
 
 ## Development
 
