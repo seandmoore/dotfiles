@@ -218,9 +218,14 @@ PanelWindow {
                 menu: SystemMenu {}
             }
 
-            // Battery — self-hides on machines without one (desktop), so it only
-            // shows up on a laptop. Sits alongside the system stats.
-            Battery {}
+            // Battery — hover for the charge breakdown. The whole panel hides on
+            // machines without a battery (desktop), so it only shows on a laptop.
+            HoverPanel {
+                name: "battery"; ctrl: root; hAlign: Qt.AlignHCenter; menuWidth: 260
+                visible: Battery.present
+                trigger: BatteryIndicator {}
+                menu: BatteryMenu {}
+            }
 
             Sep {}
 

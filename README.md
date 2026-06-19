@@ -29,7 +29,7 @@ A single centered bar that groups every widget into one element, left to right:
 - **Visualizer** — a waveform driven by [`cava`](https://github.com/karlstav/cava).
 - **Clock** — hover opens the calendar.
 - **System** — CPU and RAM usage graphs (hover for per-core and memory detail) and the MPRIS media player.
-- **Battery** — charge level and an icon that reflects the charging state. Shown only on machines that have a battery (laptops); it hides itself on the desktop.
+- **Battery** — charge percentage and an icon that reflects the charging state; hover for a dropdown with a charge bar, time-to-full/empty, power draw, and battery health. Shown only on machines that have a battery (laptops); it hides itself on the desktop.
 - **Updates** — package icon with a count badge; the dropdown lists official-repo, AUR, and Flatpak updates and offers **Update All**, which opens a terminal running `yay`/`paru -Syu` and `flatpak update`.
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history, a **Do-Not-Disturb** toggle, and a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to restore it to the clipboard.
