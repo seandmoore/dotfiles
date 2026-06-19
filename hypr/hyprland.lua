@@ -390,6 +390,7 @@ hl.bind(mainMod .. " + B",      hl.dsp.exec_cmd("flatpak run org.mozilla.firefox
 hl.bind(mainMod .. " + G",      hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/nwg-look-sync.sh"))
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("quickshell -c config ipc call wallpaper toggle"))
 hl.bind(mainMod .. " + H",     hl.dsp.exec_cmd("qs -c config ipc call cheatsheet toggle"))
+hl.bind(mainMod .. " + Q",     hl.dsp.exec_cmd("qs -c config ipc call quicksettings toggle"))
 hl.bind(mainMod .. " + SHIFT + D", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/hdr-toggle.sh"))  -- HDR <-> SDR (DP-1)
 hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/color-accuracy-toggle.sh"))  -- Vibrant <-> Accurate sRGB (DP-1)
 hl.bind(mainMod .. " + SHIFT + N", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/night-shift.sh toggle"))  -- Night shift on/off (hyprsunset)
@@ -506,9 +507,9 @@ hl.window_rule({ match = { class = "blueman-manager"     }, float = true })
 hl.window_rule({ match = { title = "^Open File"          }, float = true })
 hl.window_rule({ match = { title = "^Save As"            }, float = true })
 
--- Kitty: clear transparent (NOT frosted), to match the quickshell panels. The
+-- Kitty: clear transparent (NOT blurred), to match the quickshell panels. The
 -- see-through comes from kitty's own background_opacity (kitty/kitty.conf, 0.48).
--- no_blur stops Hyprland's global window blur from frosting it — quickshell has no
+-- no_blur stops Hyprland's global window blur from blurring it — quickshell has no
 -- blur either, so the terminal and the bar/menus read the same. opacity keeps text
 -- crisp (no whole-window dimming) with only a faint unfocused fade.
 hl.window_rule({

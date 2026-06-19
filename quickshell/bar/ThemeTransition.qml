@@ -61,7 +61,7 @@ PanelWindow {
         opacity: root.anim * 0.28
     }
 
-    // Centered frosted pill
+    // Centered pill
     Rectangle {
         anchors.centerIn: parent
         width: 248

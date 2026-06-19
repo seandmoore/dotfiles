@@ -44,6 +44,14 @@ PanelWindow {
     Timer { id: menuOpenTimer;  interval: 160; onTriggered: if (root.hoveredMenu !== "") root.openMenu = root.hoveredMenu }
     Timer { id: menuCloseTimer; interval: 320; onTriggered: if (root.hoveredMenu === "") root.openMenu = "" }
 
+    // IPC: toggle the Quick Settings dropdown from a keybind (SUPER+Q), the way
+    // the launcher and cheat sheet open from theirs.
+    //   qs -c config ipc call quicksettings toggle
+    IpcHandler {
+        target: "quicksettings"
+        function toggle() { root.openMenu = (root.openMenu === "quicksettings" ? "" : "quicksettings") }
+    }
+
     // ── AUDIO (Pipewire) ──────────────────────────────────────────────────────
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
 
@@ -82,10 +90,10 @@ PanelWindow {
     // ── HDR / SDR (DP-1 colour management) ────────────────────────────────────
     // hdrOn mirrors DP-1's live colorManagementPreset so the bar icon + menu reflect
     // reality. The query runs at startup and again shortly after each switch.
-    // HDR/SDR state lives in the shared Frost singleton (theme/Frost.qml) so the pill,
+    // HDR/SDR state lives in the shared Surface singleton (theme/Surface.qml) so the pill,
     // every dropdown and this HDR indicator all read one source. setHdr applies the
-    // switch and nudges Frost to re-read immediately (Frost also polls on its own).
-    readonly property bool hdrOn: Frost.hdrOn
+    // switch and nudges Surface to re-read immediately (Surface also polls on its own).
+    readonly property bool hdrOn: Surface.hdrOn
     function setHdr(on) {
         hdrApplyProc.command = ["bash", "-c",
             "\"$HOME/dotfiles/scripts/hdr-toggle.sh\" " + (on ? "hdr" : "sdr")]
@@ -94,11 +102,11 @@ PanelWindow {
     }
     Process {
         id: hdrApplyProc
-        onRunningChanged: if (!running) Frost.refresh()
+        onRunningChanged: if (!running) Surface.refresh()
     }
 
-    // Clear transparent pill (shared transparency level via Frost.glass).
-    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     Frost.glass(0.45))
+    // Pill background (shared opacity level via Surface.opacity).
+    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     Surface.opacity(0.45))
     readonly property color bubbleBorder: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.8)
     readonly property int   barH:         84   // collapsed bar strip height
     readonly property int   bubbleH:       66   // centered pill height (9px padding inside barH)
@@ -113,12 +121,11 @@ PanelWindow {
         opacity: 0.6
     }
 
-    // ── FROSTED GLASS BAR — the rounded pill IS the frosted surface ───────────
+    // ── BAR SURFACE — the rounded pill is the bar's background panel ───────────
     // The Hyprland layer_rule (namespace "quickshell") blurs wherever this layer has
-    // alpha, and ignore_alpha skips the transparent area, so the blur follows the
+    // alpha, and ignore_alpha skips the transparent area, so any blur follows the
     // pill's rounded shape and wraps around the bar instead of sitting in a sharp
-    // full-width rectangle. The pill's translucent fill (bubbleBg) is what reads as
-    // frosted glass.
+    // full-width rectangle. The pill's fill (bubbleBg) is its visible background.
     // ── CENTERED PILL — every widget in one rounded island ────────────────────
     Rectangle {
         id: pill
@@ -272,6 +279,20 @@ PanelWindow {
             }
 
             Sep {}
+
+            // ── Quick Settings — one dropdown with all the quick toggles, sliders,
+            //    wallpaper, and power actions ──────────────────────────────────
+            HoverMenuButton {
+                name: "quicksettings"
+                ctrl: root
+                menuWidth: 340
+                icon: "󰒓"
+                iconColor: Colors.lavender
+                iconActiveColor: Colors.sky
+                onClicked: root.openMenu = (root.openMenu === "quicksettings" ? "" : "quicksettings")
+
+                QuickSettings { ctrl: root; Layout.fillWidth: true }
+            }
 
             // ── Volume ───────────────────────────────────────────────────────
             HoverMenuButton {
@@ -439,7 +460,7 @@ PanelWindow {
                 // next to its label without eliding.
                 menuWidth: 360
                 icon: "󰍹"
-                iconColor: Frost.nightOn ? Colors.peach
+                iconColor: Surface.nightOn ? Colors.peach
                     : (root.hdrOn ? Colors.peach : Colors.overlay1)
                 iconActiveColor: Colors.peach
                 // Quick action: click toggles HDR<->SDR; the dropdown has full controls
@@ -447,7 +468,7 @@ PanelWindow {
                 onClicked: root.setHdr(!root.hdrOn)
                 // Re-read DP-1 state when the menu opens so everything is live even if
                 // colour/night shift was changed via keybinds outside the bar.
-                onMenuOpenChanged: if (menuOpen) Frost.refresh()
+                onMenuOpenChanged: if (menuOpen) Surface.refresh()
 
                 DisplayMenu {}
             }

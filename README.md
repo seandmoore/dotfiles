@@ -34,6 +34,7 @@ A single centered bar that groups every widget into one element, left to right:
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history, a **Do-Not-Disturb** toggle, and a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to restore it to the clipboard.
 - **Display** — DP-1 color controls: HDR/SDR and vibrant/accurate-sRGB toggles, a night-shift toggle, an **Auto (sunset → sunrise)** schedule, and a color-temperature slider. These drive the same scripts as the `SUPER+SHIFT+{D,A,N}` binds.
+- **Quick Settings** — one dropdown that gathers all the quick toggles and tools in a single place: theme (Dark/Light), HDR/SDR, vibrant/accurate, night shift + auto schedule, Do-Not-Disturb, volume and brightness sliders (brightness shows only on a laptop), the wallpaper switcher, and power actions (lock/sleep/logout/restart/shutdown).
 - **Controls** — volume (scroll to adjust, click to mute), theme toggle, wallpaper switcher, and power.
 
 Widgets are animated, and the bar follows the active Catppuccin flavor. The config hot-reloads on save.
@@ -47,7 +48,7 @@ Color is managed per monitor in `hypr/hyprland.lua`:
 
 **HDR + vibrant** (the login default) approximates KDE Plasma's *SDR Color Intensity* slider at 100%. At that setting KDE reinterprets sRGB content with full BT.2020 primaries ([`sdrGamutWideness = 1.0`](https://zamundaaa.github.io/wayland/2023/12/18/update-on-hdr-and-colormanagement-in-plasma.html)), which a QD-OLED panel clips to its native P3 gamut. Hyprland's `sdrsaturation` uses different math (a luma-anchored chroma extrapolation on PQ-encoded values in `cm_helpers.glsl`), so no value matches exactly. **`sdrsaturation = 1.35`** is the least-error fit (minimum mean ΔE\_ITP over the sRGB cube against the KDE target, cross-checked in Oklab). Vibrant **SDR** mode (`cm = "wide"`) produces the same result natively, since wide-gamut mode renders sRGB values with the panel's primaries directly.
 
-The Quickshell UI and Kitty use opaque surfaces (no compositor blur), matched to the GTK apps such as Nautilus for legibility. This also keeps them consistent across HDR and SDR, since Hyprland cannot blur a color-managed HDR output. Opacity is controlled by `Frost.glass()` in `quickshell/theme/Frost.qml` (return `a` instead of `1.0` for a translucent look) and Kitty's `background_opacity`.
+The Quickshell UI and Kitty use opaque surfaces (no compositor blur), matched to the GTK apps such as Nautilus for legibility. This also keeps them consistent across HDR and SDR, since Hyprland cannot blur a color-managed HDR output. Opacity is controlled by `Surface.opacity()` in `quickshell/theme/Surface.qml` (return `a` instead of `1.0` for a translucent look) and Kitty's `background_opacity`.
 
 Each `hl.monitor({ … })` block is commented with what each setting does and how it maps to KDE's *maximum SDR brightness* and *SDR color intensity* settings.
 
@@ -237,6 +238,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + G` | GTK theme picker (nwg-look) |
 | `SUPER + W` | Wallpaper switcher |
 | `SUPER + H` | Keybind cheat sheet |
+| `SUPER + Q` | Toggle Quick Settings menu |
 | `SUPER + M` | Exit Hyprland |
 | `SUPER + J/K/L` | Move focus down/up/right |
 | `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right |
