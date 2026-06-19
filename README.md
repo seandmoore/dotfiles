@@ -6,7 +6,7 @@ A Hyprland desktop configuration themed with [Catppuccin](https://github.com/cat
 
 | Component | Description |
 |-----------|-------------|
-| **Hyprland** | Tiling Wayland compositor — Lua config (0.55+) covering animations, borders, keybinds, and per-monitor HDR and wide-gamut color management. |
+| **Hyprland** | Tiling Wayland compositor — Lua config (0.55+) covering animations, borders, keybinds, touchpad gestures, and per-monitor HDR and wide-gamut color management. The same config auto-adapts to a desktop or a laptop (see [Laptop support](#laptop-support)). |
 | **Quickshell** | Status bar with audio visualizer, CPU/RAM graphs, and media controls, plus an app launcher with file search, a Places menu, a notification center with Do-Not-Disturb, clipboard history, a system-update menu (pacman + AUR + Flatpak), volume/brightness OSD, and a keybind cheat sheet. |
 | **Hyprlock** | Lock screen with a blurred background and clock. |
 | **Hypridle** | Idle daemon (dim, lock, display off, suspend). |
@@ -29,6 +29,7 @@ A single centered bar that groups every widget into one element, left to right:
 - **Visualizer** — a waveform driven by [`cava`](https://github.com/karlstav/cava).
 - **Clock** — hover opens the calendar.
 - **System** — CPU and RAM usage graphs (hover for per-core and memory detail) and the MPRIS media player.
+- **Battery** — charge level and an icon that reflects the charging state. Shown only on machines that have a battery (laptops); it hides itself on the desktop.
 - **Updates** — package icon with a count badge; the dropdown lists official-repo, AUR, and Flatpak updates and offers **Update All**, which opens a terminal running `yay`/`paru -Syu` and `flatpak update`.
 - **Notifications** — bell with an unread badge; the dropdown is a notification center with history, a **Do-Not-Disturb** toggle, and a *"Mute for…"* submenu.
 - **Clipboard** — recent text copies; click one to restore it to the clipboard.
@@ -248,6 +249,8 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + V` | Toggle floating |
 | `SUPER + P` | Toggle pseudotile |
 | `SUPER + T` | Toggle split (dwindle) |
+| `` SUPER + ` `` | Toggle scratchpad (special workspace) |
+| `` SUPER + SHIFT + ` `` | Send window to scratchpad |
 | `SUPER + S` | Screenshot a region → clipboard **and** `~/Pictures` |
 | `SUPER + SHIFT + S` | Screenshot every monitor → `~/Pictures` |
 | `SUPER + SHIFT + D` | Toggle HDR ↔ SDR (DP-1) |
@@ -256,6 +259,30 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `XF86AudioRaiseVolume/LowerVolume/Mute` | Volume control |
 | `XF86AudioPlay/Next/Prev` | Media control |
 | `XF86MonBrightnessUp/Down` | Brightness control |
+
+## Touchpad gestures
+
+Defined in `hypr/hyprland.lua` with Hyprland's gesture system. The rule of thumb is **3 fingers navigate, 4 fingers manage the focused window**. They're harmless on the desktop (with no touchpad they simply never fire), and the brightness/volume media keys above also work on a laptop's function row.
+
+| Gesture | Action |
+|---------|--------|
+| 3-finger swipe ←/→ | Switch workspace (with momentum follow) |
+| 3-finger swipe ↑ | Toggle fullscreen on the focused window |
+| 3-finger swipe ↓ | Toggle floating on the focused window |
+| 4-finger swipe ←/→ | Throw the focused window to the adjacent workspace (and follow) |
+| 4-finger swipe ↑ | Show / hide the scratchpad (special workspace) |
+
+Touchpad behavior (tap-to-click, natural scroll, tap-and-drag, disable-while-typing) is configured in the same file's `input.touchpad` block.
+
+## Laptop support
+
+The config serves both a desktop and a laptop from one file — no per-machine branches to maintain. At startup `hyprland.lua` checks for a battery under `/sys/class/power_supply` and adapts:
+
+- **Monitors** — the desktop's `DP-1` (HDR) + `HDMI-A-1` (portrait) blocks only match when those outputs are present, so on a laptop they're inert; the internal panel (`eDP-1`) is driven by the fallback rule (native mode, auto scale). Set an explicit `scale` there if you prefer integer scaling.
+- **Workspaces** — on the desktop, 1–5 are pinned to `DP-1` and 6–10 to `HDMI-A-1`; on a laptop all ten stay persistent but unpinned, so they aren't stranded on absent outputs.
+- **Autostart** — the `focusmonitor DP-1` nudge and the DP-1 HDR/vibrant colour-mode seeds are skipped on a laptop. Night shift (`hyprsunset`) still runs on both.
+- **Bar** — the battery indicator appears only when a battery is present.
+- **Lid & idle** — `hypridle` already dims, locks, blanks, and suspends on a timer, and `before_sleep_cmd = loginctl lock-session` locks before any suspend (including a lid-close suspend handled by logind).
 
 ## Theming
 

@@ -11,6 +11,20 @@ local function read_mode()
 end
 local mode = read_mode()
 
+-- Detect whether we're running on a laptop. A battery under
+-- /sys/class/power_supply (BAT0, BAT1, …) is present on laptops and absent on
+-- the desktop, so this one check lets the same config serve both machines:
+-- on the desktop it keeps the DP-1 + HDMI-A-1 dual-monitor layout below, and on
+-- a laptop it falls back to a single-panel layout (see WORKSPACES / AUTOSTART).
+local function is_laptop()
+    local p = io.popen("ls /sys/class/power_supply 2>/dev/null")
+    if not p then return false end
+    local out = p:read("*a") or ""
+    p:close()
+    return out:find("BAT") ~= nil
+end
+local laptop = is_laptop()
+
 local palette = {
     mocha = { active = "rgba(cba6f7ff)", inactive = "rgba(45475aff)", shadow = "rgba(11111bcc)" },
     latte = { active = "rgba(8839efff)", inactive = "rgba(bcc0ccff)", shadow = "rgba(dce0e8aa)" },
@@ -106,7 +120,11 @@ hl.monitor({
     cm        = "srgb",
 })
 
--- Fallback rule for any other display plugged in
+-- Fallback rule for any other display — including a laptop's internal panel
+-- (eDP-1). "preferred" picks the panel's native mode and "auto" scale applies a
+-- sensible HiDPI factor, so the same config just works on a laptop with no
+-- machine-specific edits. (Set an explicit `scale` here if you prefer integer
+-- scaling, e.g. scale = 1.5 for a 2K 14" panel.)
 hl.monitor({
     output   = "",
     mode     = "preferred",
@@ -164,14 +182,19 @@ hl.on("hyprland.start", function()
     -- often starts before the monitors are ready, so its conf `wallpaper=` line no-ops
     -- and the desktop comes up blank; this restore (with retry) makes it stick.
     hl.exec_cmd(os.getenv("HOME") .. "/dotfiles/scripts/restore-wallpaper.sh")
-    -- DP-1 is the primary monitor (origin 0,0, workspaces 1-5, where the bar lives).
-    -- Focus it at login so the session starts on the primary, not the secondary.
-    hl.exec_cmd("hyprctl dispatch focusmonitor DP-1")
-    -- Seed DP-1 colour-mode + night-shift state to the login defaults so the bar's
-    -- Display menu and the keybinds agree with the monitor block above (HDR + vibrant,
-    -- night shift off). SUPER+SHIFT+D toggles HDR<->SDR; SUPER+SHIFT+A toggles
-    -- vibrant<->standard; the bar's Display dropdown has the night-shift slider too.
-    hl.exec_cmd("sh -c 'mkdir -p ~/.cache/hypr; echo hdr > ~/.cache/hypr/color-hdr; echo vibrant > ~/.cache/hypr/color-vibrant; echo 0 > ~/.cache/hypr/nightshift-on'")
+    -- Night-shift state seed (shared by desktop and laptop — hyprsunset works on
+    -- any output). The DP-1-only colour-mode seeds below are desktop-specific.
+    hl.exec_cmd("sh -c 'mkdir -p ~/.cache/hypr; echo 0 > ~/.cache/hypr/nightshift-on'")
+    if not laptop then
+        -- DP-1 is the primary monitor (origin 0,0, workspaces 1-5, where the bar
+        -- lives). Focus it at login so the session starts on the primary, not the
+        -- secondary. (The laptop's single panel needs no such nudge.)
+        hl.exec_cmd("hyprctl dispatch focusmonitor DP-1")
+        -- Seed DP-1 colour-mode state to the login defaults so the bar's Display
+        -- menu and the keybinds agree with the monitor block above (HDR + vibrant).
+        -- SUPER+SHIFT+D toggles HDR<->SDR; SUPER+SHIFT+A toggles vibrant<->standard.
+        hl.exec_cmd("sh -c 'echo hdr > ~/.cache/hypr/color-hdr; echo vibrant > ~/.cache/hypr/color-vibrant'")
+    end
     -- Night-shift daemon (hyprsunset), started neutral (6500K = no shift); night-shift.sh
     -- drives it over IPC. No-op if hyprsunset isn't installed yet (sudo pacman -S hyprsunset).
     hl.exec_cmd("hyprsunset -t 6500")
@@ -313,19 +336,42 @@ hl.config({
         sensitivity  = 0,
 
         touchpad = {
-            natural_scroll = true,
-            tap_to_click   = true,
-            drag_lock      = true,
+            natural_scroll       = true,
+            tap_to_click         = true,
+            drag_lock            = true,
+            -- Laptop niceties (no-ops when there's no touchpad attached):
+            disable_while_typing = true,   -- ignore the pad while the keyboard is active
+            tap_and_drag         = true,   -- tap-then-slide drags without a physical click
+            scroll_factor        = 1.0,    -- bump down (e.g. 0.6) if two-finger scroll feels fast
         },
     },
 })
 
--- Workspace swipe gesture (3-finger horizontal)
-hl.gesture({
-    fingers   = 3,
-    direction = "horizontal",
-    action    = "workspace",
-})
+-----------------------------
+---- TOUCHPAD GESTURES ------
+-----------------------------
+-- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Gestures/
+-- A small, intuitive set that works the same on the laptop trackpad and any
+-- external touchpad. Rule of thumb: 3 fingers NAVIGATE, 4 fingers MANAGE the
+-- focused window. These are harmless on the desktop (no touchpad = never fire).
+
+-- 3-finger horizontal → glide between workspaces, with the native momentum
+-- follow. The gold-standard touchpad gesture; a light swipe = move around.
+hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+
+-- 3-finger up/down → fullscreen the focused window / toggle it floating.
+-- (3- and 4-finger swipes are distinct from 2-finger scrolling, so no conflict.)
+hl.gesture({ fingers = 3, direction = "up",   action = function() hl.dispatch(hl.dsp.window.fullscreen())          end })
+hl.gesture({ fingers = 3, direction = "down", action = function() hl.dispatch(hl.dsp.window.float({ action = "toggle" })) end })
+
+-- 4-finger horizontal → throw the focused window to the adjacent workspace and
+-- follow it there (e+1 / e-1 = next / previous existing workspace).
+hl.gesture({ fingers = 4, direction = "right", action = function() hl.dispatch(hl.dsp.window.move({ workspace = "e+1" })) end })
+hl.gesture({ fingers = 4, direction = "left",  action = function() hl.dispatch(hl.dsp.window.move({ workspace = "e-1" })) end })
+
+-- 4-finger up → show / hide the scratchpad (special workspace "magic"). The
+-- native "special" action animates the slide-in. Pair with SUPER+` below.
+hl.gesture({ fingers = 4, direction = "up", action = "special", workspace_name = "magic" })
 
 
 ---------------------
@@ -353,6 +399,11 @@ hl.bind(mainMod .. " + F", hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + T", hl.dsp.layout("togglesplit"))  -- dwindle only
+
+-- Scratchpad (special workspace "magic") — same target as the 4-finger-up gesture.
+-- SUPER+`        toggles it in/out of view; SUPER+SHIFT+` stashes the focused window there.
+hl.bind(mainMod .. " + grave",         hl.dsp.workspace.toggle_special("magic"))
+hl.bind(mainMod .. " + SHIFT + grave", hl.dsp.window.move({ workspace = "special:magic" }))
 
 -- Move focus — vim keys
 hl.bind(mainMod .. " + L", hl.dsp.focus({ direction = "right" }))
@@ -410,12 +461,21 @@ hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd(os.getenv("HOME") .. "/dotfil
 ---- WORKSPACES ----
 --------------------
 
--- Workspaces 1-5 on main (DP-1), 6-10 on secondary (HDMI-A-1), all persistent
-for i = 1, 5 do
-    hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "DP-1" })
-end
-for i = 6, 10 do
-    hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "HDMI-A-1" })
+if laptop then
+    -- Laptop: a single internal panel. Keep all ten workspaces persistent but
+    -- DON'T pin them to DP-1 / HDMI-A-1 (those outputs don't exist here, which
+    -- would strand the workspaces). They simply live on whatever output is up.
+    for i = 1, 10 do
+        hl.workspace_rule({ workspace = tostring(i), persistent = true })
+    end
+else
+    -- Desktop: 1-5 on main (DP-1), 6-10 on secondary (HDMI-A-1), all persistent.
+    for i = 1, 5 do
+        hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "DP-1" })
+    end
+    for i = 6, 10 do
+        hl.workspace_rule({ workspace = tostring(i), persistent = true, monitor = "HDMI-A-1" })
+    end
 end
 
 

@@ -131,6 +131,18 @@ PanelWindow {
                         ]
                     }
 
+                    BindSection {
+                        title: "Touchpad Gestures"
+                        icon: "󰟸"
+                        sectionColor: Colors.lavender
+                        binds: [
+                            { keys: "3 ←→",             desc: "Switch workspace" },
+                            { keys: "3 ↑ / ↓",          desc: "Fullscreen / float" },
+                            { keys: "4 ←→",             desc: "Throw window ± workspace" },
+                            { keys: "4 ↑",              desc: "Scratchpad toggle" },
+                        ]
+                    }
+
                     Item { Layout.fillHeight: true }
                 }
 
@@ -157,6 +169,8 @@ PanelWindow {
                             { keys: "󰖳 + V",            desc: "Float toggle" },
                             { keys: "󰖳 + P",            desc: "Pseudo tile" },
                             { keys: "󰖳 + T",            desc: "Toggle split" },
+                            { keys: "󰖳 + `",            desc: "Scratchpad toggle" },
+                            { keys: "󰖳 + Shift + `",    desc: "Send to scratchpad" },
                         ]
                     }
 

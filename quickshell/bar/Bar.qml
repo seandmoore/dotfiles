@@ -218,6 +218,10 @@ PanelWindow {
                 menu: SystemMenu {}
             }
 
+            // Battery — self-hides on machines without one (desktop), so it only
+            // shows up on a laptop. Sits alongside the system stats.
+            Battery {}
+
             Sep {}
 
             // ── Updates · Notifications · Clipboard ──────────────────────────
