@@ -1,0 +1,30 @@
+name: verify
+
+# Runs the repo's own scripts/verify.sh (the same script the pre-commit hook
+# uses) on every push to main and every pull request, so config/script
+# regressions are caught automatically — including the Lua and shell checks that
+# can't run in Claude Code web sessions.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # verify.sh calls `luac -p` for Lua. Ubuntu ships it as `luac5.4`, so make
+      # a plain `luac` available. (bash -n and the conf brace checks need nothing
+      # extra.) qmllint is intentionally NOT installed: linting Quickshell QML
+      # needs its QML modules present, so QML stays a local pre-commit check and
+      # verify.sh skips it here.
+      - name: Install Lua (luac)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.4
+          sudo ln -sf "$(command -v luac5.4)" /usr/local/bin/luac
+
+      - name: Verify dotfiles
+        run: scripts/verify.sh
