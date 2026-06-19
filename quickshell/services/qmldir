@@ -1,5 +1,6 @@
 module Services
 singleton AppList AppList.qml
+singleton Battery Battery.qml
 singleton Clipboard Clipboard.qml
 singleton Notifications Notifications.qml
 singleton Places Places.qml

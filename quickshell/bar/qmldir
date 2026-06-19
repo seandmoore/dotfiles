@@ -3,7 +3,8 @@ AppsMenu AppsMenu.qml
 PlacesMenu PlacesMenu.qml
 AudioVisualizer AudioVisualizer.qml
 Bar Bar.qml
-Battery Battery.qml
+BatteryIndicator BatteryIndicator.qml
+BatteryMenu BatteryMenu.qml
 Calendar Calendar.qml
 ClipboardMenu ClipboardMenu.qml
 DisplayMenu DisplayMenu.qml
