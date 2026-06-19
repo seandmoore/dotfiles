@@ -313,6 +313,8 @@ scripts/verify.sh --staged   # check only staged files
 
 `install.sh` wires this in as a Git pre-commit hook (`core.hooksPath` → `.githooks/pre-commit`), so broken configs are caught before they land in a commit. Bypass with `git commit --no-verify` when needed.
 
+The same `verify.sh` runs in CI on every push to `main` and every pull request via [`.github/workflows/verify.yml`](.github/workflows/verify.yml) (it installs `luac`; QML stays a local check, since `qmllint` needs Quickshell's modules). For [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web), a `SessionStart` hook (`.claude/hooks/session-start.sh`) installs Lua so `verify.sh` can lint inside those cloud sessions too.
+
 ## License
 
 Licensed under GPL-3.0. See [LICENSE](LICENSE) for details.
