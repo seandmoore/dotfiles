@@ -17,7 +17,7 @@ PanelWindow {
         right: true
     }
 
-    implicitHeight: openMenu === "" ? barH : 640   // tall enough for the largest dropdown (scaled apps list) so it isn't clipped square at the bottom
+    implicitHeight: openMenu === "" ? barH : 820   // tall enough for the largest dropdown (consolidated Quick Settings, incl. laptop brightness row) so it isn't clipped at the bottom
     exclusiveZone: barH
     margins.top: 0
     color: "transparent"
@@ -69,57 +69,12 @@ PanelWindow {
     function adjustVolume(d) { setVolume(volume + d) }
     function toggleMute() { if (audioNode) audioNode.muted = !audioNode.muted }
 
-    // ── THEME / WALLPAPER / POWER actions ─────────────────────────────────────
-    function setTheme(dark) { if (dark) themeMochaProc.running = true; else themeLatteProc.running = true }
-    function openWallpaperSwitcher() { wallpaperToggleProc.running = true }
-    function randomWallpaper() { wallpaperRandomProc.running = true }
-    function runPower(cmd) { root.openMenu = ""; powerProc.command = cmd; powerProc.running = true }
+    // Theme / display / wallpaper / power actions now live entirely in the
+    // QuickSettings dropdown (and the DisplayMenu it embeds), which are
+    // self-contained — the bar root no longer needs its own copies.
 
-    Process { id: themeMochaProc; command: ["quickshell", "-c", "config", "ipc", "call", "theme", "setMocha"] }
-    Process { id: themeLatteProc; command: ["quickshell", "-c", "config", "ipc", "call", "theme", "setLatte"] }
-    Process { id: wallpaperToggleProc; command: ["quickshell", "-c", "config", "ipc", "call", "wallpaper", "toggle"] }
-    Process {
-        id: wallpaperRandomProc
-        command: ["bash", "-c",
-            "f=$(find \"$HOME/Pictures\" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' " +
-            "-o -iname '*.png' -o -iname '*.webp' \\) | shuf -n1); " +
-            "[ -n \"$f\" ] && exec \"$HOME/dotfiles/scripts/set-wallpaper.sh\" \"$f\""]
-    }
-    Process { id: powerProc }
-
-    // ── HDR / SDR (DP-1 colour management) ────────────────────────────────────
-    // hdrOn mirrors DP-1's live colorManagementPreset so the bar icon + menu reflect
-    // reality. The query runs at startup and again shortly after each switch.
-    // HDR/SDR state lives in the shared Surface singleton (theme/Surface.qml) so the pill,
-    // every dropdown and this HDR indicator all read one source. setHdr applies the
-    // switch and nudges Surface to re-read immediately (Surface also polls on its own).
-    readonly property bool hdrOn: Surface.hdrOn
-    function setHdr(on) {
-        hdrApplyProc.command = ["bash", "-c",
-            "\"$HOME/dotfiles/scripts/hdr-toggle.sh\" " + (on ? "hdr" : "sdr")]
-        hdrApplyProc.running = true
-        root.openMenu = ""
-    }
-    Process {
-        id: hdrApplyProc
-        onRunningChanged: if (!running) Surface.refresh()
-    }
-
-    // Pill background (shared opacity level via Surface.opacity).
-    readonly property color bubbleBg:     Qt.rgba(Colors.base.r,     Colors.base.g,     Colors.base.b,     Surface.opacity(0.45))
-    readonly property color bubbleBorder: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.8)
-    readonly property int   barH:         84   // collapsed bar strip height
-    readonly property int   bubbleH:       66   // centered pill height (9px padding inside barH)
-    readonly property int   bubblePad:     16
-
-    // Thin group separator used between widget clusters inside the pill.
-    component Sep: Rectangle {
-        width: 1
-        Layout.preferredHeight: 23
-        Layout.alignment: Qt.AlignVCenter
-        color: Colors.surface1
-        opacity: 0.6
-    }
+    readonly property int barH:    84   // collapsed bar strip height
+    readonly property int bubbleH: 66   // island height (9px padding inside barH)
 
     // ── BAR SURFACE — the rounded pill is the bar's background panel ───────────
     // The Hyprland layer_rule (namespace "quickshell") blurs wherever this layer has
@@ -285,305 +240,20 @@ PanelWindow {
             HoverMenuButton {
                 name: "quicksettings"
                 ctrl: root
-                menuWidth: 340
+                // 360 fits the embedded Display submode subs ("max saturation (1.35)").
+                menuWidth: 360
                 icon: "󰒓"
                 iconColor: Colors.lavender
                 iconActiveColor: Colors.sky
                 onClicked: root.openMenu = (root.openMenu === "quicksettings" ? "" : "quicksettings")
-
-                QuickSettings { ctrl: root; Layout.fillWidth: true }
-            }
-
-            // ── Volume ───────────────────────────────────────────────────────
-            HoverMenuButton {
-                name: "volume"
-                ctrl: root
-                menuWidth: 310
-                icon: root.volumeIcon
-                iconColor: root.muted ? Colors.red : Colors.blue
-                iconActiveColor: root.muted ? Colors.red : Colors.sky
-                onClicked: root.toggleMute()
+                // Scroll on the cog adjusts volume without opening the panel — the one
+                // gesture the old standalone Volume button had.
                 onScrolled: (dy) => root.adjustVolume(dy > 0 ? 0.05 : -0.05)
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 12
-
-                    Text {
-                        text: root.volumeIcon
-                        font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 22
-                        color: root.muted ? Colors.red : Colors.blue
-                        MouseArea {
-                            anchors.fill: parent
-                            anchors.margins: -4
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.toggleMute()
-                        }
-                    }
-
-                    Item {
-                        Layout.fillWidth: true
-                        height: 16
-
-                        Rectangle {
-                            id: volTrack
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width
-                            height: 6
-                            radius: 3
-                            color: Colors.surface1
-
-                            Rectangle {
-                                width: parent.width * root.volume
-                                height: parent.height
-                                radius: 3
-                                color: root.muted ? Colors.overlay1 : Colors.blue
-                                Behavior on width { NumberAnimation { duration: 80 } }
-                            }
-                        }
-
-                        Rectangle {
-                            width: 14; height: 14; radius: 7
-                            color: Colors.text
-                            border.color: Colors.surface2
-                            border.width: 1
-                            anchors.verticalCenter: parent.verticalCenter
-                            x: (volTrack.width - width) * root.volume
-                            Behavior on x { NumberAnimation { duration: 80 } }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onPressed: (mouse) => root.setVolume(mouse.x / width)
-                            onPositionChanged: (mouse) => { if (pressed) root.setVolume(mouse.x / width) }
-                        }
-                    }
-
-                    Text {
-                        text: Math.round(root.volume * 100) + "%"
-                        color: Colors.subtext1
-                        font.family: "JetBrainsMono Nerd Font Propo"
-                        font.pixelSize: 15
-                        Layout.minimumWidth: 38
-                        horizontalAlignment: Text.AlignRight
-                    }
-                }
-
-                Text {
-                    Layout.fillWidth: true
-                    text: root.audioSink
-                        ? (root.audioSink.description || root.audioSink.nickname || root.audioSink.name || "Output")
-                        : "No output device"
-                    color: Colors.overlay1
-                    font.family: "JetBrainsMono Nerd Font Propo"
-                    font.pixelSize: 13
-                    elide: Text.ElideRight
-                }
-            }
-
-            // ── Theme ────────────────────────────────────────────────────────
-            HoverMenuButton {
-                name: "theme"
-                ctrl: root
-                menuWidth: 220
-                icon: Colors.darkMode ? "󰖔" : "󰖨"
-                iconColor: Colors.darkMode ? Colors.lavender : Colors.yellow
-                iconActiveColor: Colors.darkMode ? Colors.lavender : Colors.yellow
-                onClicked: root.setTheme(!Colors.darkMode)
-
-                Repeater {
-                    model: [
-                        { label: "Dark",  sub: "Mocha", icon: "󰖔", dark: true  },
-                        { label: "Light", sub: "Latte", icon: "󰖨", dark: false },
-                    ]
-                    delegate: Rectangle {
-                        id: themeItem
-                        required property var modelData
-                        readonly property bool active: Colors.darkMode === modelData.dark
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        radius: 8
-                        color: active
-                            ? Qt.rgba(Colors.mauve.r, Colors.mauve.g, Colors.mauve.b, 0.22)
-                            : (thMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8) : "transparent")
-                        Behavior on color { ColorAnimation { duration: 100 } }
-
-                        RowLayout {
-                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-                            spacing: 10
-                            Text {
-                                text: themeItem.modelData.icon
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 18
-                                color: themeItem.modelData.dark ? Colors.lavender : Colors.yellow
-                            }
-                            Text {
-                                text: themeItem.modelData.label
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 16
-                                color: Colors.text
-                                Layout.fillWidth: true
-                            }
-                            Text {
-                                text: themeItem.modelData.sub
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 13
-                                color: Colors.overlay1
-                            }
-                            Text {
-                                visible: themeItem.active
-                                text: "󰄬"
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 15
-                                color: Colors.mauve
-                            }
-                        }
-
-                        MouseArea {
-                            id: thMa
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: { root.setTheme(themeItem.modelData.dark); root.openMenu = "" }
-                        }
-                    }
-                }
-            }
-
-            // ── Display (DP-1): night shift + HDR/SDR colour modes ───────────
-            HoverMenuButton {
-                name: "display"
-                ctrl: root
-                // 360 fits the longest option sub ("max saturation (1.35)")
-                // next to its label without eliding.
-                menuWidth: 360
-                icon: "󰍹"
-                iconColor: Surface.nightOn ? Colors.peach
-                    : (root.hdrOn ? Colors.peach : Colors.overlay1)
-                iconActiveColor: Colors.peach
-                // Quick action: click toggles HDR<->SDR; the dropdown has full controls
-                // (night shift toggle + temperature slider, HDR/SDR vibrant/standard).
-                onClicked: root.setHdr(!root.hdrOn)
-                // Re-read DP-1 state when the menu opens so everything is live even if
-                // colour/night shift was changed via keybinds outside the bar.
+                // Re-read DP-1 state on open so the embedded Display controls are live
+                // even if colour/night shift was changed via keybinds outside the bar.
                 onMenuOpenChanged: if (menuOpen) Surface.refresh()
 
-                DisplayMenu {}
-            }
-
-            // ── Wallpaper ────────────────────────────────────────────────────
-            HoverMenuButton {
-                name: "wallpaper"
-                ctrl: root
-                menuWidth: 240
-                icon: "󰋩"
-                iconColor: Colors.sky
-                iconActiveColor: Colors.sky
-                onClicked: root.openWallpaperSwitcher()
-
-                Repeater {
-                    model: [
-                        { icon: "󰋩", label: "Browse all", act: "browse" },
-                        { icon: "󰒝", label: "Random",     act: "random" },
-                    ]
-                    delegate: Rectangle {
-                        id: wpItem
-                        required property var modelData
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        radius: 8
-                        color: wpMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.8) : "transparent"
-                        Behavior on color { ColorAnimation { duration: 100 } }
-
-                        RowLayout {
-                            anchors { fill: parent; leftMargin: 10; rightMargin: 10 }
-                            spacing: 10
-                            Text {
-                                text: wpItem.modelData.icon
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 18
-                                color: Colors.sky
-                            }
-                            Text {
-                                text: wpItem.modelData.label
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 16
-                                color: Colors.text
-                                Layout.fillWidth: true
-                            }
-                        }
-
-                        MouseArea {
-                            id: wpMa
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                root.openMenu = ""
-                                if (wpItem.modelData.act === "browse") root.openWallpaperSwitcher()
-                                else root.randomWallpaper()
-                            }
-                        }
-                    }
-                }
-            }
-
-            // ── Power ────────────────────────────────────────────────────────
-            HoverMenuButton {
-                name: "power"
-                ctrl: root
-                menuWidth: 200
-                icon: "⏻"
-                iconColor: Colors.mauve
-                iconActiveColor: Colors.red
-
-                Repeater {
-                    model: [
-                        // Lock routes through hypridle's lock_cmd (pidof-guards hyprlock).
-                        { icon: "󰌾", label: "Lock",     color: Colors.teal,   cmd: ["loginctl", "lock-session"] },
-                        { icon: "󰒲", label: "Sleep",    color: Colors.blue,   cmd: ["systemctl", "suspend"]  },
-                        { icon: "󰍃", label: "Logout",   color: Colors.yellow, cmd: ["uwsm", "stop"]          },
-                        { icon: "󰜉", label: "Restart",  color: Colors.green,  cmd: ["systemctl", "reboot"]   },
-                        { icon: "⏻",  label: "Shutdown", color: Colors.red,    cmd: ["systemctl", "poweroff"] },
-                    ]
-                    delegate: Rectangle {
-                        id: pwItem
-                        required property var modelData
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 45
-                        radius: 8
-                        color: pwMa.containsMouse ? Qt.rgba(Colors.surface0.r, Colors.surface0.g, Colors.surface0.b, 0.9) : "transparent"
-                        Behavior on color { ColorAnimation { duration: 100 } }
-
-                        RowLayout {
-                            anchors { fill: parent; leftMargin: 12; rightMargin: 12 }
-                            spacing: 10
-                            Text {
-                                text: pwItem.modelData.icon
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 18
-                                color: pwItem.modelData.color
-                            }
-                            Text {
-                                text: pwItem.modelData.label
-                                font.family: "JetBrainsMono Nerd Font Propo"
-                                font.pixelSize: 16
-                                color: Colors.text
-                                Layout.fillWidth: true
-                            }
-                        }
-
-                        MouseArea {
-                            id: pwMa
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.runPower(pwItem.modelData.cmd)
-                        }
-                    }
-                }
+                QuickSettings { ctrl: root; Layout.fillWidth: true }
             }
         }
     }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import "../theme"
 
 // Generic bar widget with a dropdown that opens on hover (and optionally click),
@@ -67,14 +68,25 @@ Item {
         anchors.left:            panel.hAlign === Qt.AlignLeft     ? parent.left            : undefined
         anchors.right:           panel.hAlign === Qt.AlignRight    ? parent.right           : undefined
 
+        // Soft drop shadow for elevation (shared look with HoverMenuButton).
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.45)
+            shadowBlur: 0.9
+            shadowVerticalOffset: 7
+            autoPaddingEnabled: true
+        }
+
         visible: opacity > 0.01
         opacity: panel.menuOpen ? 1 : 0
-        scale:   panel.menuOpen ? 1 : 0.92
+        scale:   panel.menuOpen ? 1 : 0.90
         transformOrigin: panel.hAlign === Qt.AlignLeft  ? Item.TopLeft
                        : panel.hAlign === Qt.AlignRight ? Item.TopRight
                        : Item.Top
+        // Springy pop on open — slightly bouncier than a plain ease.
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+        Behavior on scale   { NumberAnimation { duration: 210; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
 
         // Keep open while the cursor is over the dropdown (covers the gap below
         // the bar so moving from trigger to menu doesn't dismiss it).

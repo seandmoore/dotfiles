@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import "../theme"
 
@@ -106,12 +107,23 @@ Item {
         anchors.topMargin: 14
         anchors.right: parent.right
 
+        // Soft drop shadow for elevation (shared look with HoverPanel).
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Qt.rgba(0, 0, 0, 0.45)
+            shadowBlur: 0.9
+            shadowVerticalOffset: 7
+            autoPaddingEnabled: true
+        }
+
         visible: btn.menuOpen
         opacity: btn.menuOpen ? 1 : 0
-        scale: btn.menuOpen ? 1 : 0.92
+        scale: btn.menuOpen ? 1 : 0.90
         transformOrigin: Item.TopRight
+        // Springy pop on open — slightly bouncier than a plain ease.
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+        Behavior on scale   { NumberAnimation { duration: 210; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
 
         // Keep the menu open while the cursor is over it (covers the hand-off
         // across the small gap below the icon).
