@@ -3,13 +3,13 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Shared transparency helper for every Quickshell surface, plus DP-1's live colour
-// state (HDR/SDR, vibrant/standard, night shift) for the bar's Display menu/indicator.
-// The desktop uses a flat clear-transparent look (no blur), so glass() returns the
-// alpha unchanged. Polls DP-1 + the ~/.cache/hypr state files every 2s so the bar
-// stays in sync even when colour is changed via keybinds outside the bar.
+// Shared panel-background opacity for every Quickshell surface, plus DP-1's live
+// colour state (HDR/SDR, vibrant/standard, night shift) for the bar's Display
+// menu/indicator. The panels are drawn opaque (no compositor blur), so opacity()
+// returns its alpha unchanged. Polls DP-1 + the ~/.cache/hypr state files every 2s
+// so the bar stays in sync even when colour is changed via keybinds outside the bar.
 QtObject {
-    id: frost
+    id: surface
 
     // colorManagementPreset: "hdr" => HDR; "wide" => vibrant SDR; else accurate SDR.
     property bool hdrOn: true
@@ -22,7 +22,9 @@ QtObject {
     // Auto sunset→sunrise scheduling on? (night-shift.sh auto)
     property bool nightAuto: false
 
-    function glass(a) { return 1.0 }
+    // Background alpha for a panel. Forced to 1.0 (opaque) everywhere; return `a`
+    // instead for a translucent look.
+    function opacity(a) { return 1.0 }
 
     function refresh() { pollProc.running = true }
 
@@ -50,11 +52,11 @@ QtObject {
             onRead: line => {
                 const p = line.trim().split("|")
                 if (p.length < 5) return
-                frost.hdrOn = (p[0] === "hdr")
-                frost.vibrant = (p[1] === "vibrant")
-                frost.nightOn = (p[2] === "1")
-                const t = parseInt(p[3]); if (!isNaN(t)) frost.nightTemp = t
-                frost.nightAuto = (p[4] === "1")
+                surface.hdrOn = (p[0] === "hdr")
+                surface.vibrant = (p[1] === "vibrant")
+                surface.nightOn = (p[2] === "1")
+                const t = parseInt(p[3]); if (!isNaN(t)) surface.nightTemp = t
+                surface.nightAuto = (p[4] === "1")
             }
         }
     }

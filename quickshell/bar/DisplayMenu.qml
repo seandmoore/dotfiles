@@ -4,7 +4,7 @@ import Quickshell.Io
 import "../theme"
 
 // DP-1 colour controls: night shift (toggle + temperature slider) and HDR/SDR
-// submenus, each with vibrant/standard. Reads live state from the Frost singleton
+// submenus, each with vibrant/standard. Reads live state from the Surface singleton
 // and drives scripts/{display-color,night-shift}.sh. Used as the dropdown content of
 // the bar's Display HoverMenuButton.
 ColumnLayout {
@@ -13,8 +13,8 @@ ColumnLayout {
     spacing: 12
 
     // ── command runners ────────────────────────────────────────────────────────
-    Process { id: modeProc;  onRunningChanged: if (!running) Frost.refresh() }
-    Process { id: nightProc; onRunningChanged: if (!running) Frost.refresh() }
+    Process { id: modeProc;  onRunningChanged: if (!running) Surface.refresh() }
+    Process { id: nightProc; onRunningChanged: if (!running) Surface.refresh() }
 
     function setMode(hdr, vib) {
         modeProc.command = ["bash", "-c",
@@ -140,14 +140,14 @@ ColumnLayout {
             visible: sect.expanded
             label: "Vibrant"
             sub: sect.keyword === "hdr" ? "max saturation (1.35)" : "wide gamut"
-            active: sect.isActiveGroup && Frost.vibrant
+            active: sect.isActiveGroup && Surface.vibrant
             onChosen: dm.setMode(sect.keyword, "vibrant")
         }
         OptionRow {
             visible: sect.expanded
             label: "Standard"
             sub: sect.keyword === "hdr" ? "true sRGB" : "accurate sRGB"
-            active: sect.isActiveGroup && !Frost.vibrant
+            active: sect.isActiveGroup && !Surface.vibrant
             onChosen: dm.setMode(sect.keyword, "standard")
         }
     }
@@ -166,22 +166,22 @@ ColumnLayout {
         Text {
             text: "󰖔"
             font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 17
-            color: Frost.nightOn ? Colors.peach : Colors.overlay1
+            color: Surface.nightOn ? Colors.peach : Colors.overlay1
         }
         Text {
-            text: Frost.nightOn ? (Frost.nightTemp + "K") : "Off"
+            text: Surface.nightOn ? (Surface.nightTemp + "K") : "Off"
             font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 15
             color: Colors.text; Layout.fillWidth: true
         }
         // toggle switch
         Rectangle {
             width: 42; height: 22; radius: 11
-            color: Frost.nightOn ? Colors.peach : Colors.surface1
+            color: Surface.nightOn ? Colors.peach : Colors.surface1
             Behavior on color { ColorAnimation { duration: 150 } }
             Rectangle {
                 width: 16; height: 16; radius: 8; color: Colors.base
                 anchors.verticalCenter: parent.verticalCenter
-                x: Frost.nightOn ? parent.width - width - 3 : 3
+                x: Surface.nightOn ? parent.width - width - 3 : 3
                 Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
             }
             MouseArea {
@@ -200,7 +200,7 @@ ColumnLayout {
         Text {
             text: "󰃡"
             font.family: "JetBrainsMono Nerd Font Propo"; font.pixelSize: 17
-            color: Frost.nightAuto ? Colors.peach : Colors.overlay1
+            color: Surface.nightAuto ? Colors.peach : Colors.overlay1
         }
         Text {
             text: "Auto"
@@ -216,19 +216,19 @@ ColumnLayout {
         Rectangle {
             width: 42; height: 22; radius: 11
             Layout.alignment: Qt.AlignVCenter
-            color: Frost.nightAuto ? Colors.peach : Colors.surface1
+            color: Surface.nightAuto ? Colors.peach : Colors.surface1
             Behavior on color { ColorAnimation { duration: 150 } }
             Rectangle {
                 width: 16; height: 16; radius: 8; color: Colors.base
                 anchors.verticalCenter: parent.verticalCenter
-                x: Frost.nightAuto ? parent.width - width - 3 : 3
+                x: Surface.nightAuto ? parent.width - width - 3 : 3
                 Behavior on x { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
             }
             MouseArea {
                 anchors.fill: parent; cursorShape: Qt.PointingHandCursor
                 // explicit on/off (not a relative toggle) so the action always
                 // matches the switch you see, even if the poll lags a tick.
-                onClicked: dm.night(Frost.nightAuto ? "auto off" : "auto on")
+                onClicked: dm.night(Surface.nightAuto ? "auto off" : "auto on")
             }
         }
     }
@@ -241,8 +241,8 @@ ColumnLayout {
         readonly property int tMin: 2500
         readonly property int tMax: 6500
         property bool dragging: false
-        property int dragTemp: Frost.nightTemp
-        readonly property int shownTemp: dragging ? dragTemp : Frost.nightTemp
+        property int dragTemp: Surface.nightTemp
+        readonly property int shownTemp: dragging ? dragTemp : Surface.nightTemp
         readonly property real frac: (shownTemp - tMin) / (tMax - tMin)
         function tempAt(x, w) {
             var f = Math.max(0, Math.min(1, x / w))
@@ -296,12 +296,12 @@ ColumnLayout {
 
     ModeSection {
         title: "HDR"; subtitle: "HDR10"; icon: "󰃠"; keyword: "hdr"
-        isActiveGroup: Frost.hdrOn
-        expanded: Frost.hdrOn
+        isActiveGroup: Surface.hdrOn
+        expanded: Surface.hdrOn
     }
     ModeSection {
         title: "SDR"; subtitle: "sRGB"; icon: "󰃞"; keyword: "sdr"
-        isActiveGroup: !Frost.hdrOn
-        expanded: !Frost.hdrOn
+        isActiveGroup: !Surface.hdrOn
+        expanded: !Surface.hdrOn
     }
 }

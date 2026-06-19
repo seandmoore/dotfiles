@@ -57,7 +57,7 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         opacity: root.windowOpacity
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Frost.glass(0.50))
+        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.50))
         border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
         border.width: 1
         radius: 28

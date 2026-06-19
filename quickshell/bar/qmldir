@@ -16,6 +16,7 @@ SystemMenu SystemMenu.qml
 WorkspacesMenu WorkspacesMenu.qml
 Clock Clock.qml
 MediaPlayer MediaPlayer.qml
+QuickSettings QuickSettings.qml
 SystemStats SystemStats.qml
 ThemeTransition ThemeTransition.qml
 Workspaces Workspaces.qml
