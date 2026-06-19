@@ -44,6 +44,14 @@ PanelWindow {
     Timer { id: menuOpenTimer;  interval: 160; onTriggered: if (root.hoveredMenu !== "") root.openMenu = root.hoveredMenu }
     Timer { id: menuCloseTimer; interval: 320; onTriggered: if (root.hoveredMenu === "") root.openMenu = "" }
 
+    // IPC: toggle the Quick Settings dropdown from a keybind (SUPER+Q), the way
+    // the launcher and cheat sheet open from theirs.
+    //   qs -c config ipc call quicksettings toggle
+    IpcHandler {
+        target: "quicksettings"
+        function toggle() { root.openMenu = (root.openMenu === "quicksettings" ? "" : "quicksettings") }
+    }
+
     // ── AUDIO (Pipewire) ──────────────────────────────────────────────────────
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
 

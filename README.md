@@ -238,6 +238,7 @@ All packages are available in the Arch official repositories unless noted as AUR
 | `SUPER + G` | GTK theme picker (nwg-look) |
 | `SUPER + W` | Wallpaper switcher |
 | `SUPER + H` | Keybind cheat sheet |
+| `SUPER + Q` | Toggle Quick Settings menu |
 | `SUPER + M` | Exit Hyprland |
 | `SUPER + J/K/L` | Move focus down/up/right |
 | `SUPER + SHIFT + H/J/K/L` | Move window left/down/up/right |

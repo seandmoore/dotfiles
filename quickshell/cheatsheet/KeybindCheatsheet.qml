@@ -106,6 +106,7 @@ PanelWindow {
                             { keys: "󰖳 + B",            desc: "Browser (Firefox)" },
                             { keys: "󰖳 + W",            desc: "Wallpaper switcher" },
                             { keys: "󰖳 + G",            desc: "Theme picker" },
+                            { keys: "󰖳 + Q",            desc: "Quick Settings menu" },
                         ]
                     }
 
