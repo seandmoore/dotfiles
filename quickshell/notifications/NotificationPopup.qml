@@ -102,7 +102,7 @@ PanelWindow {
     implicitHeight: contentCol.implicitHeight + 24
     color: "transparent"
 
-    Rectangle {
+    GlassSurface {
         id: card
         anchors.fill: parent
 
@@ -114,12 +114,14 @@ PanelWindow {
         Behavior on opacity { NumberAnimation { duration: 200; easing.type: Easing.OutQuad } }
         Component.onCompleted: { slideX = 0; opacity = 1 }
 
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.55))
-        border.color: root.isCritical
-            ? Qt.rgba(Colors.red.r, Colors.red.g, Colors.red.b, 0.6)
-            : Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
         radius: 14
+        screen: root.screen
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: root.isCritical
+            ? Qt.rgba(Colors.red.r, Colors.red.g, Colors.red.b, 0.7)
+            : Colors.glassBorder
 
         // Urgency accent stripe down the left edge
         Rectangle {

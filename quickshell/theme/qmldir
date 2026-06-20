@@ -1,3 +1,5 @@
 module Theme
 singleton Colors Colors.qml
 singleton Surface Surface.qml
+singleton Wall Wall.qml
+GlassSurface GlassSurface.qml

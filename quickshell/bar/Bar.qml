@@ -73,27 +73,39 @@ PanelWindow {
     // QuickSettings dropdown (and the DisplayMenu it embeds), which are
     // self-contained — the bar root no longer needs its own copies.
 
-    readonly property int barH:    84   // collapsed bar strip height
-    readonly property int bubbleH: 66   // island height (9px padding inside barH)
+    readonly property int barH:      84   // collapsed bar strip height
+    readonly property int bubbleH:   66   // pill height (9px padding inside barH)
+    readonly property int bubblePad: 16   // horizontal padding inside the pill
 
-    // ── BAR SURFACE — the rounded pill is the bar's background panel ───────────
-    // The Hyprland layer_rule (namespace "quickshell") blurs wherever this layer has
-    // alpha, and ignore_alpha skips the transparent area, so any blur follows the
-    // pill's rounded shape and wraps around the bar instead of sitting in a sharp
-    // full-width rectangle. The pill's fill (bubbleBg) is its visible background.
-    // ── CENTERED PILL — every widget in one rounded island ────────────────────
-    Rectangle {
+    // Thin group separator between widget clusters inside the pill.
+    component Sep: Rectangle {
+        width: 1
+        Layout.preferredHeight: 23
+        Layout.alignment: Qt.AlignVCenter
+        color: Colors.surface1
+        opacity: 0.5
+    }
+
+    // ── CENTERED GLASS PILL — every widget in one frosted island ──────────────
+    // The pill is a GlassSurface: a blurred crop of the wallpaper (Wall.source),
+    // tinted and masked to the rounded shape. Because the bar window is anchored at
+    // the monitor's top-left, the pill's own x/y ARE its monitor-local origin, so
+    // the frost lines up with the real wallpaper hyprpaper paints behind it.
+    GlassSurface {
         id: pill
         anchors.horizontalCenter: parent.horizontalCenter
         y: (barH - bubbleH) / 2
         height: root.bubbleH
         width: pillRow.implicitWidth + root.bubblePad * 2
         radius: root.bubbleH / 2            // fully rounded pill ends
-        color: root.bubbleBg
-        border.color: root.bubbleBorder
-        border.width: 1
 
-        Behavior on color   { ColorAnimation  { duration: 250 } }
+        screen: root.screen
+        originX: x
+        originY: y
+        tint: Colors.base
+        tintAlpha: Colors.barFrost
+        borderColor: Colors.glassBorder
+
         Behavior on opacity { NumberAnimation { duration: 400; easing.type: Easing.OutQuad } }
         Behavior on scale   { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
         Behavior on width   { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }

@@ -27,4 +27,3 @@ QsTile QsTile.qml
 QsSection QsSection.qml
 QsRow QsRow.qml
 QsCard QsCard.qml
-BarIsland BarIsland.qml

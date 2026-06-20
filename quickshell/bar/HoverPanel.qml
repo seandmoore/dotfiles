@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import "../theme"
 
 // Generic bar widget with a dropdown that opens on hover (and optionally click),
@@ -52,31 +51,24 @@ Item {
         }
     }
 
-    // ── Dropdown ─────────────────────────────────────────────────────────────
-    Rectangle {
+    // ── Dropdown (frosted glass) ───────────────────────────────────────────────
+    GlassSurface {
         id: dropdown
         width: panel.menuWidth
         height: bodyLoader.item ? bodyLoader.item.implicitHeight + 40 : 0
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
+
+        screen: panel.ctrl ? panel.ctrl.screen : null
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
 
         anchors.top: parent.bottom
         anchors.topMargin: 18
         anchors.horizontalCenter: panel.hAlign === Qt.AlignHCenter ? parent.horizontalCenter : undefined
         anchors.left:            panel.hAlign === Qt.AlignLeft     ? parent.left            : undefined
         anchors.right:           panel.hAlign === Qt.AlignRight    ? parent.right           : undefined
-
-        // Soft drop shadow for elevation (shared look with HoverMenuButton).
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.45)
-            shadowBlur: 0.9
-            shadowVerticalOffset: 7
-            autoPaddingEnabled: true
-        }
 
         visible: opacity > 0.01
         opacity: panel.menuOpen ? 1 : 0

@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import "../theme"
 
@@ -94,28 +93,21 @@ Item {
     // Dropdown — child of the button so it tracks the icon's position, right-
     // aligned to the icon so it always stays on-screen. No clipping ancestors,
     // so it still receives mouse events despite overflowing the button bounds.
-    Rectangle {
+    GlassSurface {
         id: panel
         width: btn.menuWidth
         height: body.implicitHeight + 40
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
+
+        screen: btn.ctrl ? btn.ctrl.screen : null
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
 
         anchors.top: parent.bottom
         anchors.topMargin: 14
         anchors.right: parent.right
-
-        // Soft drop shadow for elevation (shared look with HoverPanel).
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: Qt.rgba(0, 0, 0, 0.45)
-            shadowBlur: 0.9
-            shadowVerticalOffset: 7
-            autoPaddingEnabled: true
-        }
 
         visible: btn.menuOpen
         opacity: btn.menuOpen ? 1 : 0
