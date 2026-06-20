@@ -72,4 +72,16 @@ QtObject {
     }
     readonly property color border:      surface1
     readonly property color borderFocus: mauve
+
+    // ── Glass tokens ───────────────────────────────────────────────────────────
+    // Tint alpha washed over the blurred wallpaper in GlassSurface. The bar pill is
+    // a touch clearer than dropdown/overlay panels; Latte needs slightly more cover
+    // (light frost over a light wallpaper washes out faster).
+    readonly property real  barFrost:   darkMode ? 0.40 : 0.55
+    readonly property real  panelFrost: darkMode ? 0.52 : 0.64
+    // Hairline edge for glass surfaces.
+    readonly property color glassBorder: Qt.rgba(_p.surface2.r, _p.surface2.g, _p.surface2.b, darkMode ? 0.55 : 0.70)
+    // Translucent surface fill for cards/rows that sit ON a glass panel (kept
+    // see-through so the frost shows behind them).
+    function fill(alpha) { return Qt.rgba(_p.surface0.r, _p.surface0.g, _p.surface0.b, alpha) }
 }

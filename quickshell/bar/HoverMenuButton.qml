@@ -93,14 +93,17 @@ Item {
     // Dropdown — child of the button so it tracks the icon's position, right-
     // aligned to the icon so it always stays on-screen. No clipping ancestors,
     // so it still receives mouse events despite overflowing the button bounds.
-    Rectangle {
+    GlassSurface {
         id: panel
         width: btn.menuWidth
         height: body.implicitHeight + 40
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
+
+        screen: btn.ctrl ? btn.ctrl.screen : null
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
 
         anchors.top: parent.bottom
         anchors.topMargin: 14
@@ -108,10 +111,11 @@ Item {
 
         visible: btn.menuOpen
         opacity: btn.menuOpen ? 1 : 0
-        scale: btn.menuOpen ? 1 : 0.92
+        scale: btn.menuOpen ? 1 : 0.90
         transformOrigin: Item.TopRight
+        // Springy pop on open — slightly bouncier than a plain ease.
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+        Behavior on scale   { NumberAnimation { duration: 210; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
 
         // Keep the menu open while the cursor is over it (covers the hand-off
         // across the small gap below the icon).

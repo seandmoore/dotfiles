@@ -58,16 +58,18 @@ PanelWindow {
         }
     }
 
-    // Main panel
-    Rectangle {
+    // Main panel (frosted glass)
+    GlassSurface {
         id: panel
         anchors.centerIn: parent
         width: Math.min(parent.width * 0.72, 860)
         height: Math.min(parent.height * 0.72, 620)
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.45)
-        border.width: 1
         radius: 20
+        screen: root.screen
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
         opacity: root.visible ? 1 : 0
         scale: root.visible ? 1 : 0.93
         Behavior on opacity { NumberAnimation { duration: 220; easing.type: Easing.OutQuad } }

@@ -20,3 +20,10 @@ QuickSettings QuickSettings.qml
 SystemStats SystemStats.qml
 ThemeTransition ThemeTransition.qml
 Workspaces Workspaces.qml
+QsRipple QsRipple.qml
+QsToggle QsToggle.qml
+QsSlider QsSlider.qml
+QsTile QsTile.qml
+QsSection QsSection.qml
+QsRow QsRow.qml
+QsCard QsCard.qml

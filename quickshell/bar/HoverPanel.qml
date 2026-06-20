@@ -51,15 +51,18 @@ Item {
         }
     }
 
-    // ── Dropdown ─────────────────────────────────────────────────────────────
-    Rectangle {
+    // ── Dropdown (frosted glass) ───────────────────────────────────────────────
+    GlassSurface {
         id: dropdown
         width: panel.menuWidth
         height: bodyLoader.item ? bodyLoader.item.implicitHeight + 40 : 0
         radius: 18
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
+
+        screen: panel.ctrl ? panel.ctrl.screen : null
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
 
         anchors.top: parent.bottom
         anchors.topMargin: 18
@@ -69,12 +72,13 @@ Item {
 
         visible: opacity > 0.01
         opacity: panel.menuOpen ? 1 : 0
-        scale:   panel.menuOpen ? 1 : 0.92
+        scale:   panel.menuOpen ? 1 : 0.90
         transformOrigin: panel.hAlign === Qt.AlignLeft  ? Item.TopLeft
                        : panel.hAlign === Qt.AlignRight ? Item.TopRight
                        : Item.Top
+        // Springy pop on open — slightly bouncier than a plain ease.
         Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
-        Behavior on scale   { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
+        Behavior on scale   { NumberAnimation { duration: 210; easing.type: Easing.OutBack; easing.overshoot: 1.4 } }
 
         // Keep open while the cursor is over the dropdown (covers the gap below
         // the bar so moving from trigger to menu doesn't dismiss it).

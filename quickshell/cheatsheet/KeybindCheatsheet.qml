@@ -33,16 +33,19 @@ PanelWindow {
         MouseArea { anchors.fill: parent; onClicked: root.visible = false }
     }
 
-    // Panel
-    Rectangle {
+    // Panel (frosted glass)
+    GlassSurface {
         id: panel
         anchors.centerIn: parent
         width:  Math.min(parent.width  * 0.84, 980)
         height: Math.min(parent.height * 0.84, 700)
-        color:  Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.48))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.45)
-        border.width: 1
         radius: 20
+        screen: root.screen
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
+        shadow: false        // sits on a dark scrim; clip would crop the shadow anyway
         clip: true
         opacity: root.visible ? 1 : 0
         scale:   root.visible ? 1 : 0.93

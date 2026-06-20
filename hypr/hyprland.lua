@@ -507,15 +507,15 @@ hl.window_rule({ match = { class = "blueman-manager"     }, float = true })
 hl.window_rule({ match = { title = "^Open File"          }, float = true })
 hl.window_rule({ match = { title = "^Save As"            }, float = true })
 
--- Kitty: clear transparent (NOT blurred), to match the quickshell panels. The
--- see-through comes from kitty's own background_opacity (kitty/kitty.conf, 0.48).
--- no_blur stops Hyprland's global window blur from blurring it — quickshell has no
--- blur either, so the terminal and the bar/menus read the same. opacity keeps text
--- crisp (no whole-window dimming) with only a faint unfocused fade.
+-- Kitty: frosted to match the quickshell glass panels. The see-through comes from
+-- kitty's own background_opacity (kitty/kitty.conf, 0.6); Hyprland's window blur then
+-- frosts the wallpaper behind it. (Blur can't render on the HDR output, so on DP-1 in
+-- HDR this is translucent-only — the same limitation the bar's compositor blur had,
+-- which is why the bar self-blurs instead.) opacity keeps text crisp (no whole-window
+-- dimming) with only a faint unfocused fade.
 hl.window_rule({
     match   = { class = "kitty" },
     opacity = "1.0 0.97",
-    no_blur = true,
 })
 
 -- No blur on the quickshell layer: the bar/menus use a clear transparent look so the

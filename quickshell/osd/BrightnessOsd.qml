@@ -51,14 +51,16 @@ PanelWindow {
         onTriggered: fadeOut.restart()
     }
 
-    // Pill background
-    Rectangle {
+    // Pill background (frosted glass)
+    GlassSurface {
         anchors.fill: parent
         opacity: root.windowOpacity
-        color: Qt.rgba(Colors.base.r, Colors.base.g, Colors.base.b, Surface.opacity(0.50))
-        border.color: Qt.rgba(Colors.surface2.r, Colors.surface2.g, Colors.surface2.b, 0.5)
-        border.width: 1
         radius: 28
+        screen: root.screen
+        autoAlign: true
+        tint: Colors.base
+        tintAlpha: Colors.panelFrost
+        borderColor: Colors.glassBorder
 
         RowLayout {
             anchors {
