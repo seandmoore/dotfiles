@@ -71,10 +71,16 @@ Item {
             blur: glass.blurAmount
             blurMax: 48
             blurMultiplier: 1.0
+            // Keep the blur inside the surface bounds so it can't bleed past the
+            // rounded mask (autoPadding would expand the effect and haze the edge).
+            autoPaddingEnabled: false
             maskEnabled: true
             maskSource: maskRect
-            maskThresholdMin: 0.5
-            maskSpreadAtMin: 1.0
+            // Crisp edge: cut right at the mask rect's own ~1px antialiased rim. A
+            // wide spread here is what produced the fuzzy see-through halo at the
+            // corners — this rides the mask's AA instead for a clean rounded edge.
+            maskThresholdMin: 0.45
+            maskSpreadAtMin: 0.05
         }
 
         Image {
@@ -111,8 +117,10 @@ Item {
         anchors.fill: parent
         radius: glass.radius
         color: "white"
+        antialiasing: true
         visible: false
         layer.enabled: true
+        layer.smooth: true
     }
 
     // ── Colour tint over the frost ──────────────────────────────────────────────
@@ -151,13 +159,20 @@ Item {
     }
 
     // ── Origin tracking for nested / animated surfaces ──────────────────────────
+    // Map through the PARENT at this surface's layout x/y rather than mapping the
+    // surface itself: a dropdown animates its own `scale` on open, and mapping the
+    // scaled item makes the wallpaper crop swim/jump each frame. The parent isn't
+    // scaled and x/y are the (stable) anchored position, so the frost stays put while
+    // the panel pops.
     function _recompute() {
         if (!autoAlign) return
-        const p = glass.mapToItem(null, 0, 0)   // null → window scene root
+        const par = glass.parent
+        const p = par ? par.mapToItem(null, glass.x, glass.y) : glass.mapToItem(null, 0, 0)
         glass.originX = p.x
         glass.originY = p.y
     }
     onAutoAlignChanged: _recompute()
+    onVisibleChanged: if (visible) _recompute()   // settle origin before the first painted frame
     Component.onCompleted: _recompute()
     FrameAnimation {
         running: glass.autoAlign && glass.visible
